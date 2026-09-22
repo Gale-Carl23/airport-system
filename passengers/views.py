@@ -10,12 +10,14 @@ from .models import (
     Flight,
     Inspection,
     Passenger,
+    Assessment,
 )
 from .forms import (
     BaggageForm,
     FlightForm,
     InspectionForm,
     PassengerForm,
+    AssessmentForm,
 )
 
 
@@ -247,5 +249,48 @@ def inspection_update(request, inspection_id):
         {
             "form": form,
             "inspection": inspection,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_assessment",
+    raise_exception=True,
+)
+def assessment_list(request):
+    assessments = Assessment.objects.select_related(
+        "inspection",
+        "inspection__baggage",
+        "inspection__baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/assessment_list.html",
+        {
+            "assessments": assessments,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_assessment",
+    raise_exception=True,
+)
+def assessment_create(request):
+    if request.method == "POST":
+        form = AssessmentForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("assessment_list")
+    else:
+        form = AssessmentForm()
+
+    return render(
+        request,
+        "passengers/assessment_form.html",
+        {
+            "form": form,
         },
     )

@@ -172,3 +172,66 @@ class Assessment(models.Model):
 
     def __str__(self):
         return f"Assessment - {self.inspection.baggage.baggage_tag}"
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    METHOD_CHOICES = [
+        ("cash", "Cash"),
+        ("card", "Card"),
+        ("other", "Other"),
+    ]
+
+    assessment = models.OneToOneField(
+        Assessment,
+        on_delete=models.PROTECT,
+        related_name="payment",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    amount_due = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    amount_paid = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=METHOD_CHOICES,
+        blank=True,
+    )
+
+    payment_reference = models.CharField(
+        max_length=50,
+        blank=True,
+    )
+
+    paid_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    remarks = models.TextField(
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return f"Payment - {self.assessment.inspection.baggage.baggage_tag}"

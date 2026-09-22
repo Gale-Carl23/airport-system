@@ -42,4 +42,15 @@ urlpatterns = [
     views.inspection_update,
     name="inspection_update",
     ),
+    path(
+    "assessments/",
+    views.assessment_list,
+    name="assessment_list",
+    ),
+
+    path(
+        "assessments/add/",
+        views.assessment_create,
+        name="assessment_create",
+    ),
 ]

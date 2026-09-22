@@ -4,7 +4,8 @@ from .models import (
     Passenger,
     Flight, 
     Baggage,
-    Inspection
+    Inspection,
+    Assessment,
     )
 
 
@@ -104,3 +105,45 @@ class InspectionForm(forms.ModelForm):
 
         return cleaned_data
 
+class AssessmentForm(forms.ModelForm):
+    class Meta:
+        model = Assessment
+
+        fields = [
+            "inspection",
+            "status",
+            "declared_value",
+            "assessed_value",
+            "duty_amount",
+            "tax_amount",
+            "remarks",
+            "assessed_at",
+        ]
+
+        widgets = {
+            "assessed_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}
+            ),
+        }
+
+        def clean(self):
+            cleaned_data = super().clean()
+
+            inspection = cleaned_data.get("inspection")
+            status = cleaned_data.get("status")
+            assessed_at = cleaned_data.get("assessed_at")
+
+            if inspection:
+                if inspection.result != "for_assessment":
+                    self.add_error(
+                        "inspection",
+                        "An assessment can only be created for an inspection with the result 'For Assessment'.",
+                    )
+
+            if status == "completed":
+                if not assessed_at:
+                    self.add_error(
+                        "assessed_at",
+                        "A completed assessment must have an assessment date and time.",
+                    )
+            return cleaned_data

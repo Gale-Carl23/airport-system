@@ -1,11 +1,12 @@
 from django.contrib import admin
 
 from .models import (
-    Flight,
-    Passenger,
+    Assessment,
     Baggage,
-    Inspection
-    )
+    Flight,
+    Inspection,
+    Passenger,
+)
 
 
 @admin.register(Passenger)
@@ -83,4 +84,28 @@ class InspectionAdmin(admin.ModelAdmin):
         "baggage__passenger__reference_number",
         "baggage__passenger__first_name",
         "baggage__passenger__last_name",
+    )
+
+@admin.register(Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "inspection",
+        "status",
+        "declared_value",
+        "assessed_value",
+        "duty_amount",
+        "tax_amount",
+        "assessed_at",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+    )
+
+    search_fields = (
+        "inspection__baggage__baggage_tag",
+        "inspection__baggage__passenger__reference_number",
+        "inspection__baggage__passenger__first_name",
+        "inspection__baggage__passenger__last_name",
     )
