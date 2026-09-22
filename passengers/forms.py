@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Passenger, Flight
+from .models import Passenger, Flight, Baggage
 
 
 class PassengerForm(forms.ModelForm):
@@ -39,3 +39,16 @@ class FlightForm(forms.ModelForm):
                 attrs={"type": "datetime-local"}
             ),
         }
+
+class BaggageForm(forms.ModelForm):
+    class Meta:
+        model = Baggage
+
+        fields = [
+            "passenger",
+            "baggage_tag",
+            "description",
+            "weight",
+            "declared",
+        ]
+

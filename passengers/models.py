@@ -34,3 +34,36 @@ class Flight(models.Model):
 
     def __str__(self):
         return f"{self.flight_number} - {self.airline}"
+
+
+class Baggage(models.Model):
+    passenger = models.ForeignKey(
+        Passenger,
+        on_delete=models.PROTECT,
+        related_name="baggage",
+    )
+
+    baggage_tag = models.CharField(
+        max_length=30,
+        unique=True,
+    )
+
+    description = models.CharField(
+        max_length=255,
+    )
+
+    weight = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+    )
+
+    declared = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return self.baggage_tag

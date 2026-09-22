@@ -3,8 +3,8 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
 
 
-from .models import Passenger, Flight
-from .forms import PassengerForm, FlightForm
+from .models import Passenger, Flight, Baggage
+from .forms import PassengerForm, FlightForm, BaggageForm
 
 
 @login_required
@@ -122,6 +122,39 @@ def flight_create(request):
     return render(
         request,
         "passengers/flight_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+def baggage_list(request):
+    baggage = Baggage.objects.select_related(
+        "passenger"
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/baggage_list.html",
+        {
+            "baggage": baggage,
+        },
+    )
+
+@login_required
+def baggage_create(request):
+    if request.method == "POST":
+        form = BaggageForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("baggage_list")
+    else:
+        form = BaggageForm()
+
+    return render(
+        request,
+        "passengers/baggage_form.html",
         {
             "form": form,
         },

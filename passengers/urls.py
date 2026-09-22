@@ -16,4 +16,14 @@ urlpatterns = [
     ),
     path("flights/", views.flight_list, name="flight_list"),
     path("flights/add/", views.flight_create, name="flight_create"),
+    path(
+    "baggage/",
+    views.baggage_list,
+    name="baggage_list",
+    ),
+    path(
+        "baggage/add/",
+        views.baggage_create,
+        name="baggage_create",
+    ),
 ]

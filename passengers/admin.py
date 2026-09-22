@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Flight, Passenger
+from .models import Flight, Passenger, Baggage
 
 
 @admin.register(Passenger)
@@ -38,4 +38,22 @@ class FlightAdmin(admin.ModelAdmin):
         "flight_number",
         "airline",
         "origin",
+    )
+
+@admin.register(Baggage)
+class BaggageAdmin(admin.ModelAdmin):
+    list_display = (
+        "baggage_tag",
+        "passenger",
+        "description",
+        "weight",
+        "declared",
+        "created_at",
+    )
+
+    search_fields = (
+        "baggage_tag",
+        "passenger__reference_number",
+        "passenger__first_name",
+        "passenger__last_name",
     )

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Baggage | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Baggage</h2>
+
+    <a href="{% url 'baggage_create' %}">
+        Register Baggage
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Baggage Tag</th>
+                <th>Passenger</th>
+                <th>Description</th>
+                <th>Weight</th>
+                <th>Declared</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in baggage %}
+
+                <tr>
+                    <td>
+                        {{ item.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ item.passenger }}
+                    </td>
+
+                    <td>
+                        {{ item.description }}
+                    </td>
+
+                    <td>
+                        {{ item.weight }} kg
+                    </td>
+
+                    <td>
+                        {% if item.declared %}
+                            Yes
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="5">
+                        No baggage records found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <a href="{% url 'home' %}">
+        Back to Dashboard
+    </a>
+
+</body>
+
+</html>
