@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Inspection | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    {% if inspection %}
+        <h2>Edit Baggage Inspection</h2>
+    {% else %}
+        <h2>Create Baggage Inspection</h2>
+    {% endif %}
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        {% if inspection %}
+            <button type="submit">
+                Save Changes
+            </button>
+        {% else %}
+            <button type="submit">
+                Save Inspection
+            </button>
+        {% endif %}
+
+    </form>
+
+    <br>
+
+    <a href="{% url 'inspection_list' %}">
+        Back to Inspections
+    </a>
+
+</body>
+
+</html>

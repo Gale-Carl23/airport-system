@@ -16,4 +16,52 @@ urlpatterns = [
     ),
     path("flights/", views.flight_list, name="flight_list"),
     path("flights/add/", views.flight_create, name="flight_create"),
+    path(
+    "baggage/",
+    views.baggage_list,
+    name="baggage_list",
+    ),
+    path(
+        "baggage/add/",
+        views.baggage_create,
+        name="baggage_create",
+    ),
+    path(
+    "inspections/",
+    views.inspection_list,
+    name="inspection_list",
+    ),
+
+    path(
+        "inspections/add/",
+        views.inspection_create,
+        name="inspection_create",
+    ),
+    path(
+    "inspections/<int:inspection_id>/edit/",
+    views.inspection_update,
+    name="inspection_update",
+    ),
+    path(
+    "assessments/",
+    views.assessment_list,
+    name="assessment_list",
+    ),
+
+    path(
+        "assessments/add/",
+        views.assessment_create,
+        name="assessment_create",
+    ),
+    path(
+    "payments/",
+    views.payment_list,
+    name="payment_list",
+    ),
+
+    path(
+        "payments/add/",
+        views.payment_create,
+        name="payment_create",
+    ),
 ]

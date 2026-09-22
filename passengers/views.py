@@ -1,10 +1,26 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required,
+)
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
 
-
-from .models import Passenger, Flight
-from .forms import PassengerForm, FlightForm
+from .models import (
+    Baggage,
+    Flight,
+    Inspection,
+    Passenger,
+    Assessment,
+    Payment,
+)
+from .forms import (
+    BaggageForm,
+    FlightForm,
+    InspectionForm,
+    PassengerForm,
+    AssessmentForm,
+    PaymentForm,
+)
 
 
 @login_required
@@ -122,6 +138,205 @@ def flight_create(request):
     return render(
         request,
         "passengers/flight_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+def baggage_list(request):
+    baggage = Baggage.objects.select_related(
+        "passenger"
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/baggage_list.html",
+        {
+            "baggage": baggage,
+        },
+    )
+
+@login_required
+def baggage_create(request):
+    if request.method == "POST":
+        form = BaggageForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("baggage_list")
+    else:
+        form = BaggageForm()
+
+    return render(
+        request,
+        "passengers/baggage_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_inspection",
+    raise_exception=True,
+)
+def inspection_list(request):
+    inspections = Inspection.objects.select_related(
+        "baggage",
+        "baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/inspection_list.html",
+        {
+            "inspections": inspections,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_inspection",
+    raise_exception=True,
+)
+def inspection_create(request):
+    if request.method == "POST":
+        form = InspectionForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("inspection_list")
+    else:
+        form = InspectionForm()
+
+    return render(
+        request,
+        "passengers/inspection_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.change_inspection",
+    raise_exception=True,
+)
+def inspection_update(request, inspection_id):
+    inspection = get_object_or_404(
+        Inspection,
+        id=inspection_id,
+    )
+
+    if request.method == "POST":
+        form = InspectionForm(
+            request.POST,
+            instance=inspection,
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect(
+                "inspection_list"
+            )
+    else:
+        form = InspectionForm(
+            instance=inspection
+        )
+
+    return render(
+        request,
+        "passengers/inspection_form.html",
+        {
+            "form": form,
+            "inspection": inspection,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_assessment",
+    raise_exception=True,
+)
+def assessment_list(request):
+    assessments = Assessment.objects.select_related(
+        "inspection",
+        "inspection__baggage",
+        "inspection__baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/assessment_list.html",
+        {
+            "assessments": assessments,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_assessment",
+    raise_exception=True,
+)
+def assessment_create(request):
+    if request.method == "POST":
+        form = AssessmentForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("assessment_list")
+    else:
+        form = AssessmentForm()
+
+    return render(
+        request,
+        "passengers/assessment_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_payment",
+    raise_exception=True,
+)
+def payment_list(request):
+    payments = Payment.objects.select_related(
+        "assessment",
+        "assessment__inspection",
+        "assessment__inspection__baggage",
+        "assessment__inspection__baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/payment_list.html",
+        {
+            "payments": payments,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_payment",
+    raise_exception=True,
+)
+def payment_create(request):
+    if request.method == "POST":
+        form = PaymentForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("payment_list")
+
+    else:
+        form = PaymentForm()
+
+    return render(
+        request,
+        "passengers/payment_form.html",
         {
             "form": form,
         },

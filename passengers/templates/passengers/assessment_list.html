@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Assessments | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Assessments</h2>
+
+    <a href="{% url 'assessment_create' %}">
+        Create Assessment
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Baggage Tag</th>
+                <th>Passenger</th>
+                <th>Status</th>
+                <th>Declared Value</th>
+                <th>Assessed Value</th>
+                <th>Duty</th>
+                <th>Tax</th>
+                <th>Assessed At</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for assessment in assessments %}
+
+                <tr>
+
+                    <td>
+                        {{ assessment.inspection.baggage.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ assessment.inspection.baggage.passenger }}
+                    </td>
+
+                    <td>
+                        {{ assessment.get_status_display }}
+                    </td>
+
+                    <td>
+                        ₱{{ assessment.declared_value }}
+                    </td>
+
+                    <td>
+                        ₱{{ assessment.assessed_value }}
+                    </td>
+
+                    <td>
+                        ₱{{ assessment.duty_amount }}
+                    </td>
+
+                    <td>
+                        ₱{{ assessment.tax_amount }}
+                    </td>
+
+                    <td>
+                        {{ assessment.assessed_at|default:"-" }}
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="8">
+                        No assessments found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <a href="{% url 'home' %}">
+        Back to Dashboard
+    </a>
+
+</body>
+
+</html>

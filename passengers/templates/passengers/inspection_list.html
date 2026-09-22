@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inspections | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Baggage Inspections</h2>
+
+    <a href="{% url 'inspection_create' %}">
+        Create Inspection
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Baggage Tag</th>
+                <th>Passenger</th>
+                <th>Status</th>
+                <th>Result</th>
+                <th>Findings</th>
+                <th>Inspected At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for inspection in inspections %}
+
+                <tr>
+
+                    <td>
+                        {{ inspection.baggage.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ inspection.baggage.passenger }}
+                    </td>
+
+                    <td>
+                        {{ inspection.get_status_display }}
+                    </td>
+
+                    <td>
+                        {{ inspection.get_result_display }}
+                    </td>
+
+                    <td>
+                        {{ inspection.findings|default:"-" }}
+                    </td>
+
+                    <td>
+                        {{ inspection.inspected_at|default:"-" }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'inspection_update' inspection.id %}">
+                            Edit
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="7">
+                        No inspections found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <a href="{% url 'home' %}">
+        Back to Dashboard
+    </a>
+
+</body>
+
+</html>

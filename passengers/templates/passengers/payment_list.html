@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments | BOC-NAIA System</title>
+</head>
+<body>
+
+    <h1>Payments</h1>
+
+    <p>
+        <a href="{% url 'payment_create' %}">
+            Add Payment
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'home' %}">
+            Back to Dashboard
+        </a>
+    </p>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Passenger</th>
+                <th>Baggage</th>
+                <th>Status</th>
+                <th>Amount Due</th>
+                <th>Amount Paid</th>
+                <th>Method</th>
+                <th>Reference</th>
+                <th>Paid At</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for payment in payments %}
+                <tr>
+                    <td>
+                        {{ payment.assessment.inspection.baggage.passenger }}
+                    </td>
+
+                    <td>
+                        {{ payment.assessment.inspection.baggage.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ payment.get_status_display }}
+                    </td>
+
+                    <td>
+                        {{ payment.amount_due }}
+                    </td>
+
+                    <td>
+                        {{ payment.amount_paid }}
+                    </td>
+
+                    <td>
+                        {{ payment.get_payment_method_display }}
+                    </td>
+
+                    <td>
+                        {{ payment.payment_reference }}
+                    </td>
+
+                    <td>
+                        {{ payment.paid_at|default:"-" }}
+                    </td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="8">
+                        No payments found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
