@@ -53,4 +53,15 @@ urlpatterns = [
         views.assessment_create,
         name="assessment_create",
     ),
+    path(
+    "payments/",
+    views.payment_list,
+    name="payment_list",
+    ),
+
+    path(
+        "payments/add/",
+        views.payment_create,
+        name="payment_create",
+    ),
 ]

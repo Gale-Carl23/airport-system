@@ -11,6 +11,7 @@ from .models import (
     Inspection,
     Passenger,
     Assessment,
+    Payment,
 )
 from .forms import (
     BaggageForm,
@@ -18,6 +19,7 @@ from .forms import (
     InspectionForm,
     PassengerForm,
     AssessmentForm,
+    PaymentForm,
 )
 
 
@@ -290,6 +292,51 @@ def assessment_create(request):
     return render(
         request,
         "passengers/assessment_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_payment",
+    raise_exception=True,
+)
+def payment_list(request):
+    payments = Payment.objects.select_related(
+        "assessment",
+        "assessment__inspection",
+        "assessment__inspection__baggage",
+        "assessment__inspection__baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/payment_list.html",
+        {
+            "payments": payments,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_payment",
+    raise_exception=True,
+)
+def payment_create(request):
+    if request.method == "POST":
+        form = PaymentForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("payment_list")
+
+    else:
+        form = PaymentForm()
+
+    return render(
+        request,
+        "passengers/payment_form.html",
         {
             "form": form,
         },

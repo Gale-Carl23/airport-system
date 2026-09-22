@@ -6,6 +6,7 @@ from .models import (
     Flight,
     Inspection,
     Passenger,
+    Payment,
 )
 
 
@@ -108,4 +109,30 @@ class AssessmentAdmin(admin.ModelAdmin):
         "inspection__baggage__passenger__reference_number",
         "inspection__baggage__passenger__first_name",
         "inspection__baggage__passenger__last_name",
+    )
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        "assessment",
+        "status",
+        "amount_due",
+        "amount_paid",
+        "payment_method",
+        "payment_reference",
+        "paid_at",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "payment_method",
+    )
+
+    search_fields = (
+        "payment_reference",
+        "assessment__inspection__baggage__baggage_tag",
+        "assessment__inspection__baggage__passenger__reference_number",
+        "assessment__inspection__baggage__passenger__first_name",
+        "assessment__inspection__baggage__passenger__last_name",
     )

@@ -6,6 +6,7 @@ from .models import (
     Baggage,
     Inspection,
     Assessment,
+    Payment,
     )
 
 
@@ -147,3 +148,69 @@ class AssessmentForm(forms.ModelForm):
                         "A completed assessment must have an assessment date and time.",
                     )
             return cleaned_data
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = [
+            "assessment",
+            "status",
+            "amount_due",
+            "amount_paid",
+            "payment_method",
+            "payment_reference",
+            "paid_at",
+            "remarks",
+        ]
+
+        widgets = {
+            "paid_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        assessment = cleaned_data.get("assessment")
+        status = cleaned_data.get("status")
+        amount_due = cleaned_data.get("amount_due")
+        amount_paid = cleaned_data.get("amount_paid")
+        paid_at = cleaned_data.get("paid_at")
+
+        # Payment can only be created for a completed assessment.
+        if assessment:
+            if assessment.status != "completed":
+                self.add_error(
+                    "assessment",
+                    "A payment can only be created for a completed assessment.",
+                )
+
+        # Amounts cannot be negative.
+        if amount_due is not None and amount_due < 0:
+            self.add_error(
+                "amount_due",
+                "Amount due cannot be negative.",
+            )
+
+        if amount_paid is not None and amount_paid < 0:
+            self.add_error(
+                "amount_paid",
+                "Amount paid cannot be negative.",
+            )
+
+        # A paid payment must have a payment date.
+        if status == "paid":
+            if not paid_at:
+                self.add_error(
+                    "paid_at",
+                    "A paid payment must have a payment date and time.",
+                )
+
+            if amount_paid is None or amount_paid <= 0:
+                self.add_error(
+                    "amount_paid",
+                    "A paid payment must have an amount greater than zero.",
+                )
+
+        return cleaned_data
