@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Passenger Details | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Passenger Details</h2>
+
+    <hr>
+
+    <p>
+        <strong>Reference Number:</strong>
+        {{ passenger.reference_number }}
+    </p>
+
+    <p>
+        <strong>First Name:</strong>
+        {{ passenger.first_name }}
+    </p>
+
+    <p>
+        <strong>Last Name:</strong>
+        {{ passenger.last_name }}
+    </p>
+
+    <p>
+        <strong>Passport Number:</strong>
+        {{ passenger.passport_number }}
+    </p>
+
+    <p>
+        <strong>Nationality:</strong>
+        {{ passenger.nationality }}
+    </p>
+
+    <p>
+    <strong>Flight:</strong>
+    {{ passenger.flight }}
+    </p>
+
+    <p>
+        <strong>Arrival:</strong>
+        {{ passenger.arrival_datetime }}
+    </p>
+
+    <p>
+        <strong>Record Created:</strong>
+        {{ passenger.created_at }}
+    </p>
+
+    <a href="{% url 'passenger_update' passenger.id %}">
+    Edit Passenger
+    </a>
+
+    <br>
+    <br>
+
+    <hr>
+
+    <a href="{% url 'passenger_list' %}">
+        Back to Passenger List
+    </a>
+
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Passenger Management | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Passenger Management</h2>
+
+    <a href="{% url 'passenger_create' %}">
+    Add Passenger
+    </a>
+
+    <br>
+    <br>
+
+    <form method="get">
+
+    <input
+        type="text"
+        name="q"
+        placeholder="Search passenger..."
+        value="{{ search_query }}"
+    >
+
+    <button type="submit">
+        Search
+    </button>
+
+    {% if search_query %}
+        <a href="{% url 'passenger_list' %}">
+            Clear
+        </a>
+    {% endif %}
+
+    </form>
+
+    <br>
+
+    <p>
+        Logged in as: {{ user.username }}
+    </p>
+
+    <hr>
+
+    {% if passengers %}
+
+        <table border="1" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>Reference Number</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Passport Number</th>
+                    <th>Nationality</th>
+                    <th>Arrival</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for passenger in passengers %}
+
+                    <tr>
+                        <td>{{ passenger.reference_number }}</td>
+                        <td>{{ passenger.first_name }}</td>
+                        <td>{{ passenger.last_name }}</td>
+                        <td>{{ passenger.passport_number }}</td>
+                        <td>{{ passenger.nationality }}</td>
+                        <td>{{ passenger.arrival_datetime }}</td>
+                        <td>
+                            <a href="{% url 'passenger_detail' passenger.id %}">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <p>No passengers have been registered yet.</p>
+
+    {% endif %}
+
+    <br>
+
+    <a href="{% url 'home' %}">Back to Dashboard</a>
+
+</body>
+</html>

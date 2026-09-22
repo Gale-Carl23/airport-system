@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Flights | BOC-NAIA</title>
+</head>
+
+<body>
+
+    <h1>BOC-NAIA Operations System</h1>
+
+    <h2>Flights</h2>
+
+    <a href="{% url 'flight_create' %}">
+        Add Flight
+    </a>
+
+    <br>
+    <br>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Flight Number</th>
+                <th>Airline</th>
+                <th>Origin</th>
+                <th>Arrival</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.flight_number }}</td>
+                    <td>{{ flight.airline }}</td>
+                    <td>{{ flight.origin }}</td>
+                    <td>{{ flight.arrival_datetime }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">
+                        No flights found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+
+    <a href="{% url 'home' %}">
+        Back to Dashboard
+    </a>
+
+</body>
+</html>
