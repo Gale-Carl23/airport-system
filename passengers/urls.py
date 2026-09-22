@@ -26,4 +26,20 @@ urlpatterns = [
         views.baggage_create,
         name="baggage_create",
     ),
+    path(
+    "inspections/",
+    views.inspection_list,
+    name="inspection_list",
+    ),
+
+    path(
+        "inspections/add/",
+        views.inspection_create,
+        name="inspection_create",
+    ),
+    path(
+    "inspections/<int:inspection_id>/edit/",
+    views.inspection_update,
+    name="inspection_update",
+    ),
 ]

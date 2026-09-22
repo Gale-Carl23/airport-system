@@ -67,3 +67,108 @@ class Baggage(models.Model):
 
     def __str__(self):
         return self.baggage_tag
+
+class Inspection(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+    ]
+
+    RESULT_CHOICES = [
+        ("not_set", "Not Set"),
+        ("cleared", "Cleared"),
+        ("for_assessment", "For Assessment"),
+        ("held", "Held"),
+        ("seized", "Seized"),
+    ]
+
+    baggage = models.OneToOneField(
+        Baggage,
+        on_delete=models.PROTECT,
+        related_name="inspection",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    result = models.CharField(
+        max_length=30,
+        choices=RESULT_CHOICES,
+        default="not_set",
+    )
+
+    findings = models.TextField(
+        blank=True,
+    )
+
+    inspected_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return f"Inspection - {self.baggage.baggage_tag}"
+
+class Assessment(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("completed", "Completed"),
+    ]
+
+    inspection = models.OneToOneField(
+        Inspection,
+        on_delete=models.PROTECT,
+        related_name="assessment",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    declared_value = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    assessed_value = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    duty_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    tax_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    remarks = models.TextField(
+        blank=True,
+    )
+
+    assessed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return f"Assessment - {self.inspection.baggage.baggage_tag}"

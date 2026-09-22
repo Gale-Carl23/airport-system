@@ -1,10 +1,22 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required,
+)
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
 
-
-from .models import Passenger, Flight, Baggage
-from .forms import PassengerForm, FlightForm, BaggageForm
+from .models import (
+    Baggage,
+    Flight,
+    Inspection,
+    Passenger,
+)
+from .forms import (
+    BaggageForm,
+    FlightForm,
+    InspectionForm,
+    PassengerForm,
+)
 
 
 @login_required
@@ -157,5 +169,83 @@ def baggage_create(request):
         "passengers/baggage_form.html",
         {
             "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_inspection",
+    raise_exception=True,
+)
+def inspection_list(request):
+    inspections = Inspection.objects.select_related(
+        "baggage",
+        "baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/inspection_list.html",
+        {
+            "inspections": inspections,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_inspection",
+    raise_exception=True,
+)
+def inspection_create(request):
+    if request.method == "POST":
+        form = InspectionForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("inspection_list")
+    else:
+        form = InspectionForm()
+
+    return render(
+        request,
+        "passengers/inspection_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.change_inspection",
+    raise_exception=True,
+)
+def inspection_update(request, inspection_id):
+    inspection = get_object_or_404(
+        Inspection,
+        id=inspection_id,
+    )
+
+    if request.method == "POST":
+        form = InspectionForm(
+            request.POST,
+            instance=inspection,
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect(
+                "inspection_list"
+            )
+    else:
+        form = InspectionForm(
+            instance=inspection
+        )
+
+    return render(
+        request,
+        "passengers/inspection_form.html",
+        {
+            "form": form,
+            "inspection": inspection,
         },
     )
