@@ -303,6 +303,110 @@ def baggage_create(request):
         {"form": form},
     )
 
+login_required
+@permission_required(
+    "passengers.change_baggage",
+    raise_exception=True,
+)
+def baggage_update(request, baggage_id):
+    baggage = get_object_or_404(
+        Baggage,
+        id=baggage_id,
+    )
+
+    if request.method == "POST":
+        old_values = {
+            "passenger": baggage.passenger,
+            "baggage_tag": baggage.baggage_tag,
+            "description": baggage.description,
+            "weight": baggage.weight,
+            "declared": baggage.declared,
+        }
+
+        form = BaggageForm(
+            request.POST,
+            instance=baggage,
+        )
+
+        if form.is_valid():
+            updated_baggage = form.save()
+
+            changes = []
+
+            if old_values["passenger"] != updated_baggage.passenger:
+                changes.append(
+                    f"Passenger: "
+                    f"{old_values['passenger'].reference_number} → "
+                    f"{updated_baggage.passenger.reference_number}"
+                )
+
+            if old_values["baggage_tag"] != updated_baggage.baggage_tag:
+                changes.append(
+                    f"Baggage Tag: "
+                    f"{old_values['baggage_tag']} → "
+                    f"{updated_baggage.baggage_tag}"
+                )
+
+            if old_values["description"] != updated_baggage.description:
+                changes.append(
+                    f"Description: "
+                    f"{old_values['description']} → "
+                    f"{updated_baggage.description}"
+                )
+
+            if old_values["weight"] != updated_baggage.weight:
+                changes.append(
+                    f"Weight: "
+                    f"{old_values['weight']} → "
+                    f"{updated_baggage.weight}"
+                )
+
+            if old_values["declared"] != updated_baggage.declared:
+                old_declared = (
+                    "Declared"
+                    if old_values["declared"]
+                    else "Not Declared"
+                )
+
+                new_declared = (
+                    "Declared"
+                    if updated_baggage.declared
+                    else "Not Declared"
+                )
+
+                changes.append(
+                    f"Declared: {old_declared} → {new_declared}"
+                )
+
+            if changes:
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="update",
+                    model_name="Baggage",
+                    object_id=updated_baggage.id,
+                    description=(
+                        f"Updated baggage "
+                        f"{updated_baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
+                )
+
+            return redirect("baggage_list")
+
+    else:
+        form = BaggageForm(
+            instance=baggage,
+        )
+
+    return render(
+        request,
+        "passengers/baggage_form.html",
+        {
+            "form": form,
+            "baggage": baggage,
+        },
+    )
+
 @login_required
 @permission_required(
     "passengers.view_inspection",

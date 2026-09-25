@@ -61,6 +61,11 @@
                             No
                         {% endif %}
                     </td>
+                    <td>
+                        <a href="{% url 'baggage_update' item.id %}">
+                            Edit
+                        </a>
+                    </td>
                 </tr>
 
             {% empty %}

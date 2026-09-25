@@ -27,6 +27,11 @@ urlpatterns = [
         name="baggage_create",
     ),
     path(
+    "baggage/<int:baggage_id>/edit/",
+    views.baggage_update,
+    name="baggage_update",
+    ),
+    path(
     "inspections/",
     views.inspection_list,
     name="inspection_list",
