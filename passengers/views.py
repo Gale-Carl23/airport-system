@@ -473,7 +473,7 @@ def case_list(request):
     "baggage__passenger",
     "created_by",
     "resolved_by",
-    ).order_by("-created_at").order_by("-created_at")
+    ).order_by("-created_at")
 
     return render(
         request,
