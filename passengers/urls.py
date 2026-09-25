@@ -69,4 +69,21 @@ urlpatterns = [
     views.payment_update,
     name="payment_update",
     ),
+    path(
+    "clearances/",
+    views.clearance_list,
+    name="clearance_list",
+    ),
+
+    path(
+    "clearances/add/",
+    views.clearance_create,
+    name="clearance_create",
+    ),
+
+    path(
+        "clearances/<int:clearance_id>/edit/",
+        views.clearance_update,
+        name="clearance_update",
+    ),
 ]
