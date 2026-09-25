@@ -213,4 +213,10 @@ class PaymentForm(forms.ModelForm):
                     "A paid payment must have an amount greater than zero.",
                 )
 
+            elif amount_due is not None and amount_paid < amount_due:
+                self.add_error(
+                    "amount_paid",
+                    "The amount paid cannot be less than the amount due.",
+                )
+
         return cleaned_data
