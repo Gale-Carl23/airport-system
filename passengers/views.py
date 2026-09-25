@@ -14,6 +14,7 @@ from .models import (
     Payment,
     Clearance,
     Case,
+    AuditLog,
 )
 from .forms import (
     BaggageForm,
@@ -64,13 +65,25 @@ def passenger_detail(request, passenger_id):
     )
 
 @login_required
+@permission_required(
+    "passengers.add_passenger",
+    raise_exception=True,
+)
 def passenger_create(request):
 
     if request.method == "POST":
         form = PassengerForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            passenger = form.save()
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Passenger",
+                object_id=passenger.id,
+                description=f"Created passenger {passenger.reference_number}.",
+                )
 
             return redirect("passenger_list")
 
