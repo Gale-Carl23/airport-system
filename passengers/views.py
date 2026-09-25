@@ -97,6 +97,10 @@ def passenger_create(request):
     )
 
 @login_required
+@permission_required(
+    "passengers.change_passenger",
+    raise_exception=True,
+)
 def passenger_update(request, passenger_id):
     passenger = get_object_or_404(
         Passenger,
@@ -110,15 +114,103 @@ def passenger_update(request, passenger_id):
         )
 
         if form.is_valid():
-            form.save()
+            old_values = {
+                "reference_number": passenger.reference_number,
+                "first_name": passenger.first_name,
+                "last_name": passenger.last_name,
+                "passport_number": passenger.passport_number,
+                "nationality": passenger.nationality,
+                "flight": passenger.flight,
+                "arrival_datetime": passenger.arrival_datetime,
+            }
+
+            updated_passenger = form.save()
+
+            changes = []
+
+            if old_values["reference_number"] != updated_passenger.reference_number:
+                changes.append(
+                    f"Reference Number: "
+                    f"{old_values['reference_number']} → "
+                    f"{updated_passenger.reference_number}"
+                )
+
+            if old_values["first_name"] != updated_passenger.first_name:
+                changes.append(
+                    f"First Name: "
+                    f"{old_values['first_name']} → "
+                    f"{updated_passenger.first_name}"
+                )
+
+            if old_values["last_name"] != updated_passenger.last_name:
+                changes.append(
+                    f"Last Name: "
+                    f"{old_values['last_name']} → "
+                    f"{updated_passenger.last_name}"
+                )
+
+            if old_values["passport_number"] != updated_passenger.passport_number:
+                changes.append(
+                    f"Passport Number: "
+                    f"{old_values['passport_number']} → "
+                    f"{updated_passenger.passport_number}"
+                )
+
+            if old_values["nationality"] != updated_passenger.nationality:
+                changes.append(
+                    f"Nationality: "
+                    f"{old_values['nationality']} → "
+                    f"{updated_passenger.nationality}"
+                )
+
+            if old_values["flight"] != updated_passenger.flight:
+                old_flight = (
+                    str(old_values["flight"])
+                    if old_values["flight"]
+                    else "None"
+                )
+
+                new_flight = (
+                    str(updated_passenger.flight)
+                    if updated_passenger.flight
+                    else "None"
+                )
+
+                changes.append(
+                    f"Flight: {old_flight} → {new_flight}"
+                )
+
+            if old_values["arrival_datetime"] != updated_passenger.arrival_datetime:
+                changes.append(
+                    f"Arrival Date/Time: "
+                    f"{old_values['arrival_datetime']} → "
+                    f"{updated_passenger.arrival_datetime}"
+                )
+
+            if changes:
+                description = (
+                f"Updated passenger "
+                f"{updated_passenger.reference_number}: "
+                + "; ".join(changes)
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="update",
+                    model_name="Passenger",
+                    object_id=updated_passenger.id,
+                    description=description,
+                )
 
             return redirect(
                 "passenger_detail",
-                passenger_id=passenger.id,
+                passenger_id=updated_passenger.id,
             )
 
     else:
-        form = PassengerForm(instance=passenger)
+        form = PassengerForm(
+            instance=passenger,
+        )
 
     return render(
         request,
@@ -161,6 +253,10 @@ def flight_create(request):
     )
 
 @login_required
+@permission_required(
+    "passengers.view_baggage",
+    raise_exception=True,
+)
 def baggage_list(request):
     baggage = Baggage.objects.select_related(
         "passenger"
@@ -175,22 +271,37 @@ def baggage_list(request):
     )
 
 @login_required
+@permission_required(
+    "passengers.add_baggage",
+    raise_exception=True,
+)
 def baggage_create(request):
     if request.method == "POST":
         form = BaggageForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            baggage = form.save()
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Baggage",
+                object_id=baggage.id,
+                description=(
+                    f"Created baggage {baggage.baggage_tag} "
+                    f"for passenger {baggage.passenger.reference_number}."
+                ),
+            )
+
             return redirect("baggage_list")
+
     else:
         form = BaggageForm()
 
     return render(
         request,
         "passengers/baggage_form.html",
-        {
-            "form": form,
-        },
+        {"form": form},
     )
 
 @login_required
