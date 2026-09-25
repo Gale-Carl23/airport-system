@@ -7,6 +7,7 @@ from .models import (
     Inspection,
     Assessment,
     Payment,
+    Clearance,
     )
 
 

@@ -12,6 +12,7 @@ from .models import (
     Passenger,
     Assessment,
     Payment,
+    Clearance,
 )
 from .forms import (
     BaggageForm,
@@ -20,6 +21,7 @@ from .forms import (
     PassengerForm,
     AssessmentForm,
     PaymentForm,
+    ClearanceForm,
 )
 
 
@@ -377,5 +379,83 @@ def payment_update(request, payment_id):
         {
             "form": form,
             "payment": payment,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_clearance",
+    raise_exception=True,
+)
+def clearance_list(request):
+    clearances = Clearance.objects.select_related(
+        "baggage",
+        "baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/clearance_list.html",
+        {
+            "clearances": clearances,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_clearance",
+    raise_exception=True,
+)
+def clearance_create(request):
+    if request.method == "POST":
+        form = ClearanceForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("clearance_list")
+
+    else:
+        form = ClearanceForm()
+
+    return render(
+        request,
+        "passengers/clearance_form.html",
+        {
+            "form": form,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.change_clearance",
+    raise_exception=True,
+)
+def clearance_update(request, clearance_id):
+    clearance = get_object_or_404(
+        Clearance,
+        id=clearance_id,
+    )
+
+    if request.method == "POST":
+        form = ClearanceForm(
+            request.POST,
+            instance=clearance,
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect("clearance_list")
+
+    else:
+        form = ClearanceForm(
+            instance=clearance,
+        )
+
+    return render(
+        request,
+        "passengers/clearance_form.html",
+        {
+            "form": form,
+            "clearance": clearance,
         },
     )
