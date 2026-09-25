@@ -8,6 +8,7 @@ from .models import (
     Passenger,
     Payment,
     Clearance,
+    Case,
 )
 
 
@@ -154,6 +155,30 @@ class ClearanceAdmin(admin.ModelAdmin):
 
     search_fields = (
         "clearance_reference",
+        "baggage__baggage_tag",
+        "baggage__passenger__reference_number",
+        "baggage__passenger__first_name",
+        "baggage__passenger__last_name",
+    )
+
+@admin.register(Case)
+class CaseAdmin(admin.ModelAdmin):
+    list_display = (
+        "case_reference",
+        "baggage",
+        "case_type",
+        "status",
+        "resolved_at",
+        "created_at",
+    )
+
+    list_filter = (
+        "case_type",
+        "status",
+    )
+
+    search_fields = (
+        "case_reference",
         "baggage__baggage_tag",
         "baggage__passenger__reference_number",
         "baggage__passenger__first_name",
