@@ -235,3 +235,44 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment - {self.assessment.inspection.baggage.baggage_tag}"
+
+class Clearance(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("cleared", "Cleared"),
+        ("held", "Held"),
+        ("referred", "Referred"),
+    ]
+
+    baggage = models.OneToOneField(
+        Baggage,
+        on_delete=models.PROTECT,
+        related_name="clearance",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    clearance_reference = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+
+    cleared_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    remarks = models.TextField(
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return self.clearance_reference
