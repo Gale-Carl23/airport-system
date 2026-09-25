@@ -349,3 +349,36 @@ class Case(models.Model):
 
     def __str__(self):
         return self.case_reference
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = [
+        ("create", "Create"),
+        ("update", "Update"),
+        ("delete", "Delete"),
+        ("status_change", "Status Change"),
+        ("payment", "Payment"),
+        ("clearance", "Clearance"),
+        ("case_resolution", "Case Resolution"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="audit_logs",
+    )
+
+    action = models.CharField(
+        max_length=30,
+        choices=ACTION_CHOICES,
+    )
+
+    model_name = models.CharField(max_length=100)
+
+    object_id = models.PositiveIntegerField()
+
+    description = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.model_name}"
