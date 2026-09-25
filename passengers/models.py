@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Passenger(models.Model):
@@ -317,7 +318,23 @@ class Case(models.Model):
 
     description = models.TextField()
 
+    created_by = models.ForeignKey(
+    User,
+    on_delete=models.PROTECT,
+    related_name="created_cases",
+    null=True,
+    blank=True,
+    )
+
     resolution = models.TextField(
+        blank=True,
+    )
+
+    resolved_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="resolved_cases",
+        null=True,
         blank=True,
     )
 

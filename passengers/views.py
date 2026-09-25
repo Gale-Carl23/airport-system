@@ -469,9 +469,11 @@ def clearance_update(request, clearance_id):
 )
 def case_list(request):
     cases = Case.objects.select_related(
-        "baggage",
-        "baggage__passenger",
-    ).order_by("-created_at")
+    "baggage",
+    "baggage__passenger",
+    "created_by",
+    "resolved_by",
+    ).order_by("-created_at").order_by("-created_at")
 
     return render(
         request,
@@ -491,7 +493,12 @@ def case_create(request):
         form = CaseForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            case = form.save(commit=False)
+
+            case.created_by = request.user
+
+            case.save()
+
             return redirect("case_list")
 
     else:
@@ -516,6 +523,8 @@ def case_update(request, case_id):
         id=case_id,
     )
 
+    old_status = case.status
+
     if request.method == "POST":
         form = CaseForm(
             request.POST,
@@ -523,7 +532,16 @@ def case_update(request, case_id):
         )
 
         if form.is_valid():
-            form.save()
+            updated_case = form.save(commit=False)
+
+            if (
+                old_status != "resolved"
+                and updated_case.status in ["resolved", "closed"]
+            ):
+                updated_case.resolved_by = request.user
+
+            updated_case.save()
+
             return redirect("case_list")
 
     else:

@@ -32,7 +32,9 @@
                 <th>Baggage</th>
                 <th>Type</th>
                 <th>Status</th>
+                <th>Created By</th>
                 <th>Created</th>
+                <th>Resolved by</th>
                 <th>Resolved At</th>
                 <th>Action</th>
             </tr>
@@ -65,7 +67,15 @@
                     </td>
 
                     <td>
+                        {{ case.created_by|default:"-" }}
+                    </td>
+
+                    <td>
                         {{ case.created_at }}
+                    </td>
+
+                    <td>
+                        {{ case.resolved_by|default:"-" }}
                     </td>
 
                     <td>
@@ -83,7 +93,7 @@
             {% empty %}
 
                 <tr>
-                    <td colspan="8">
+                    <td colspan="10">
                         No cases found.
                     </td>
                 </tr>

@@ -168,6 +168,8 @@ class CaseAdmin(admin.ModelAdmin):
         "baggage",
         "case_type",
         "status",
+        "created_by",
+        "resolved_by",
         "resolved_at",
         "created_at",
     )
@@ -183,4 +185,6 @@ class CaseAdmin(admin.ModelAdmin):
         "baggage__passenger__reference_number",
         "baggage__passenger__first_name",
         "baggage__passenger__last_name",
+        "created_by__username",
+        "resolved_by__username",
     )

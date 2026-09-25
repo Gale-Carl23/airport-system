@@ -7,11 +7,7 @@
 </head>
 <body>
 
-    {% if payment %}
-        <h1>Edit Payment</h1>
-    {% else %}
-        <h1>Add Payment</h1>
-    {% endif %}
+    <h1>Payments</h1>
 
     <p>
         <a href="{% url 'payment_create' %}">
