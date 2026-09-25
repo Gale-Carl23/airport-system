@@ -108,22 +108,22 @@ def passenger_update(request, passenger_id):
     )
 
     if request.method == "POST":
+        old_values = {
+            "reference_number": passenger.reference_number,
+            "first_name": passenger.first_name,
+            "last_name": passenger.last_name,
+            "passport_number": passenger.passport_number,
+            "nationality": passenger.nationality,
+            "flight": passenger.flight,
+            "arrival_datetime": passenger.arrival_datetime,
+        }
+
         form = PassengerForm(
             request.POST,
             instance=passenger,
         )
 
         if form.is_valid():
-            old_values = {
-                "reference_number": passenger.reference_number,
-                "first_name": passenger.first_name,
-                "last_name": passenger.last_name,
-                "passport_number": passenger.passport_number,
-                "nationality": passenger.nationality,
-                "flight": passenger.flight,
-                "arrival_datetime": passenger.arrival_datetime,
-            }
-
             updated_passenger = form.save()
 
             changes = []
@@ -188,18 +188,16 @@ def passenger_update(request, passenger_id):
                 )
 
             if changes:
-                description = (
-                f"Updated passenger "
-                f"{updated_passenger.reference_number}: "
-                + "; ".join(changes)
-                )
-
                 AuditLog.objects.create(
                     user=request.user,
                     action="update",
                     model_name="Passenger",
                     object_id=updated_passenger.id,
-                    description=description,
+                    description=(
+                        f"Updated passenger "
+                        f"{updated_passenger.reference_number}: "
+                        + "; ".join(changes)
+                    ),
                 )
 
             return redirect(
@@ -369,17 +367,17 @@ def inspection_update(request, inspection_id):
     )
 
     if request.method == "POST":
+        old_status = inspection.status
+        old_result = inspection.result
+        old_findings = inspection.findings
+        old_inspected_at = inspection.inspected_at
+
         form = InspectionForm(
             request.POST,
             instance=inspection,
         )
 
         if form.is_valid():
-            old_status = inspection.status
-            old_result = inspection.result
-            old_findings = inspection.findings
-            old_inspected_at = inspection.inspected_at
-
             updated_inspection = form.save()
 
             changes = []
@@ -417,18 +415,16 @@ def inspection_update(request, inspection_id):
                 else:
                     action = "update"
 
-                description = (
-                    f"Updated inspection for baggage "
-                    f"{updated_inspection.baggage.baggage_tag}: "
-                    + "; ".join(changes)
-                )
-
                 AuditLog.objects.create(
                     user=request.user,
                     action=action,
                     model_name="Inspection",
                     object_id=updated_inspection.id,
-                    description=description,
+                    description=(
+                        f"Updated inspection for baggage "
+                        f"{updated_inspection.baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
                 )
 
             return redirect("inspection_list")
