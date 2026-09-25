@@ -9,6 +9,7 @@ from .models import (
     Payment,
     Clearance,
     Case,
+    AuditLog,
 )
 
 
@@ -188,4 +189,36 @@ class CaseAdmin(admin.ModelAdmin):
         "baggage__passenger__last_name",
         "created_by__username",
         "resolved_by__username",
+    )
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "action",
+        "model_name",
+        "object_id",
+        "description",
+        "created_at",
+    )
+
+    list_filter = (
+        "action",
+        "model_name",
+        "created_at",
+    )
+
+    search_fields = (
+        "user__username",
+        "model_name",
+        "description",
+    )
+
+    readonly_fields = (
+        "user",
+        "action",
+        "model_name",
+        "object_id",
+        "description",
+        "created_at",
     )
