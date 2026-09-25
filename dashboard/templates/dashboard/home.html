@@ -1,24 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>BOC-NAIA System</title>
 </head>
 
 <body>
 
-    <h1>BOC-NAIA System</h1>
+    <h1>BOC-NAIA Operations System</h1>
 
-    <p>Welcome to the BOC-NAIA Operations System.</p>
+    <p>
+        Welcome,
+        <strong>{{ user.username }}</strong>.
+    </p>
 
-    <p>You are logged in as: {{ user.username }}</p>
+    <hr>
 
-    <form method="post" action="{% url 'logout' %}">
+    <h2>Operations</h2>
+
+    {% if perms.passengers.view_passenger %}
+        <p>
+            <a href="{% url 'passenger_list' %}">
+                Passenger Management
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_flight %}
+        <p>
+            <a href="{% url 'flight_list' %}">
+                Flight Management
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_baggage %}
+        <p>
+            <a href="{% url 'baggage_list' %}">
+                Baggage Management
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_inspection %}
+        <p>
+            <a href="{% url 'inspection_list' %}">
+                Inspection
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_assessment %}
+        <p>
+            <a href="{% url 'assessment_list' %}">
+                Assessment
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_payment %}
+        <p>
+            <a href="{% url 'payment_list' %}">
+                Payments
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_clearance %}
+        <p>
+            <a href="{% url 'clearance_list' %}">
+                Clearance
+            </a>
+        </p>
+    {% endif %}
+
+
+    {% if perms.passengers.view_case %}
+        <p>
+            <a href="{% url 'case_list' %}">
+                Case Management
+            </a>
+        </p>
+    {% endif %}
+
+
+    <hr>
+
+    <form
+        method="post"
+        action="{% url 'logout' %}"
+    >
+
         {% csrf_token %}
-        <button type="submit">Logout</button>
+
+        <button type="submit">
+            Logout
+        </button>
+
     </form>
 
 </body>
+
 </html>
