@@ -287,7 +287,8 @@ def baggage_create(request):
                 object_id=baggage.id,
                 description=(
                     f"Created baggage {baggage.baggage_tag} "
-                    f"for passenger {baggage.passenger.reference_number}."
+                    f"for passenger "
+                    f"{baggage.passenger.reference_number}."
                 ),
             )
 
