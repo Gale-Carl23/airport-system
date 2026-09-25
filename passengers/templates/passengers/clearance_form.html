@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Clearance | BOC-NAIA System</title>
+</head>
+
+<body>
+
+    {% if clearance %}
+        <h1>Edit Clearance</h1>
+    {% else %}
+        <h1>Add Clearance</h1>
+    {% endif %}
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        {% if clearance %}
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+        {% else %}
+
+            <button type="submit">
+                Save Clearance
+            </button>
+
+        {% endif %}
+
+    </form>
+
+    <p>
+        <a href="{% url 'clearance_list' %}">
+            Cancel
+        </a>
+    </p>
+
+</body>
+</html>

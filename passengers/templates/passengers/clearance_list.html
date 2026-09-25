@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Clearances | BOC-NAIA System</title>
+</head>
+
+<body>
+
+    <h1>Clearances</h1>
+
+    <p>
+        <a href="{% url 'clearance_create' %}">
+            Add Clearance
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'home' %}">
+            Back to Dashboard
+        </a>
+    </p>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Passenger</th>
+                <th>Baggage</th>
+                <th>Status</th>
+                <th>Cleared At</th>
+                <th>Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for clearance in clearances %}
+
+                <tr>
+
+                    <td>
+                        {{ clearance.clearance_reference }}
+                    </td>
+
+                    <td>
+                        {{ clearance.baggage.passenger }}
+                    </td>
+
+                    <td>
+                        {{ clearance.baggage.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ clearance.get_status_display }}
+                    </td>
+
+                    <td>
+                        {{ clearance.cleared_at|default:"-" }}
+                    </td>
+
+                    <td>
+                        {{ clearance.remarks|default:"-" }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'clearance_update' clearance.id %}">
+                            Edit
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="7">
+                        No clearance records found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</body>
+</html>
