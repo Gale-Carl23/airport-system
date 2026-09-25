@@ -347,9 +347,13 @@ class CaseForm(forms.ModelForm):
         if not baggage:
             return cleaned_data
 
-        # A case should have an inspection.
+        # --------------------------------------------------
+        # 1. Baggage must have an inspection
+        # --------------------------------------------------
+
         try:
             inspection = baggage.inspection
+
         except Inspection.DoesNotExist:
             self.add_error(
                 "baggage",
@@ -357,15 +361,22 @@ class CaseForm(forms.ModelForm):
             )
             return cleaned_data
 
-        # A case should normally originate from a held or seized inspection.
+        # --------------------------------------------------
+        # 2. Case must originate from Held or Seized
+        # --------------------------------------------------
+
         if inspection.result not in ["held", "seized"]:
             self.add_error(
                 "baggage",
                 "A case can only be created for baggage with a Held or Seized inspection result.",
             )
 
-        # Resolved and closed cases require a resolution.
+        # --------------------------------------------------
+        # 3. Validate resolution information
+        # --------------------------------------------------
+
         if status in ["resolved", "closed"]:
+
             if not resolution:
                 self.add_error(
                     "resolution",
@@ -378,12 +389,52 @@ class CaseForm(forms.ModelForm):
                     "A resolved or closed case must have a resolution date and time.",
                 )
 
-        # Open and under-review cases should not have a resolution date.
+        # --------------------------------------------------
+        # 4. Open / Under Review cases cannot be resolved
+        # --------------------------------------------------
+
         if status in ["open", "under_review"]:
+
             if resolved_at:
                 self.add_error(
                     "resolved_at",
                     "An open or under-review case cannot have a resolution date.",
+                )
+
+        # --------------------------------------------------
+        # 5. Validate status transitions
+        # --------------------------------------------------
+
+        if self.instance.pk:
+
+            old_status = self.instance.status
+
+            allowed_transitions = {
+                "open": ["under_review"],
+                "under_review": ["resolved"],
+                "resolved": ["closed"],
+                "closed": [],
+            }
+
+            if status != old_status:
+
+                allowed_next_statuses = allowed_transitions.get(
+                    old_status,
+                    [],
+                )
+
+                if status not in allowed_next_statuses:
+
+                    self.add_error(
+                        "status",
+                        f"A case with status '{self.instance.get_status_display()}' "
+                        f"cannot be changed directly to '{dict(Case.STATUS_CHOICES).get(status)}'.",
+                    )
+        else:
+            if status != "open":
+                self.add_error(
+                    "status",
+                    "A new case must start with the status 'Open'.",
                 )
 
         return cleaned_data
