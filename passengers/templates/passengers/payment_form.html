@@ -7,16 +7,26 @@
 </head>
 <body>
 
-    <h1>Add Payment</h1>
+    {% if payment %}
+        <h1>Edit Payment</h1>
+    {% else %}
+        <h1>Add Payment</h1>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}
 
         {{ form.as_p }}
 
-        <button type="submit">
-            Save Payment
-        </button>
+        {% if payment %}
+            <button type="submit">
+                Save Changes
+            </button>
+        {% else %}
+            <button type="submit">
+                Save Payment
+            </button>
+        {% endif %}
     </form>
 
     <p>

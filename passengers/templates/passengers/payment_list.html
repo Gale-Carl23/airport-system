@@ -7,7 +7,11 @@
 </head>
 <body>
 
-    <h1>Payments</h1>
+    {% if payment %}
+        <h1>Edit Payment</h1>
+    {% else %}
+        <h1>Add Payment</h1>
+    {% endif %}
 
     <p>
         <a href="{% url 'payment_create' %}">
@@ -32,6 +36,7 @@
                 <th>Method</th>
                 <th>Reference</th>
                 <th>Paid At</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -68,6 +73,12 @@
 
                     <td>
                         {{ payment.paid_at|default:"-" }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'payment_update' payment.id %}">
+                            Edit
+                        </a>
                     </td>
                 </tr>
 
