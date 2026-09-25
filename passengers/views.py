@@ -341,3 +341,41 @@ def payment_create(request):
             "form": form,
         },
     )
+
+
+@login_required
+@permission_required(
+    "passengers.change_payment",
+    raise_exception=True,
+)
+def payment_update(request, payment_id):
+    payment = get_object_or_404(
+        Payment,
+        id=payment_id,
+    )
+
+    if request.method == "POST":
+        form = PaymentForm(
+            request.POST,
+            instance=payment,
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect(
+                "payment_list"
+            )
+
+    else:
+        form = PaymentForm(
+            instance=payment
+        )
+
+    return render(
+        request,
+        "passengers/payment_form.html",
+        {
+            "form": form,
+            "payment": payment,
+        },
+    )

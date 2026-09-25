@@ -64,4 +64,9 @@ urlpatterns = [
         views.payment_create,
         name="payment_create",
     ),
+    path(
+    "payments/<int:payment_id>/edit/",
+    views.payment_update,
+    name="payment_update",
+    ),
 ]
