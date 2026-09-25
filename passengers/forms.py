@@ -250,9 +250,13 @@ class ClearanceForm(forms.ModelForm):
         if not baggage:
             return cleaned_data
 
-        # Get the inspection belonging to this baggage.
+        # ---------------------------------------------
+        # 1. Baggage must have an inspection
+        # ---------------------------------------------
+
         try:
             inspection = baggage.inspection
+
         except Inspection.DoesNotExist:
             self.add_error(
                 "baggage",
@@ -260,25 +264,48 @@ class ClearanceForm(forms.ModelForm):
             )
             return cleaned_data
 
-        # A baggage cannot be cleared while inspection is incomplete.
+        # ---------------------------------------------
+        # 2. Inspection must be completed
+        # ---------------------------------------------
+
         if inspection.status != "completed":
             self.add_error(
                 "baggage",
                 "The inspection must be completed before clearance.",
             )
 
-        # Held or seized inspection results cannot be cleared.
+        # ---------------------------------------------
+        # 3. Held or seized baggage cannot be cleared
+        # ---------------------------------------------
+
         if inspection.result in ["held", "seized"]:
             self.add_error(
                 "baggage",
-                "This baggage cannot be cleared because the inspection result requires further action.",
+                "This baggage requires further action and cannot be cleared.",
             )
 
-        # If assessment is required, it must be completed.
+        # ---------------------------------------------
+        # 4. Inspection result must be clearable
+        # ---------------------------------------------
+
+        if inspection.result not in [
+            "cleared",
+            "for_assessment",
+        ]:
+            self.add_error(
+                "baggage",
+                "This inspection result does not allow clearance.",
+            )
+
+        # ---------------------------------------------
+        # 5. Assessment and payment
+        # ---------------------------------------------
+
         if inspection.result == "for_assessment":
 
             try:
                 assessment = inspection.assessment
+
             except Assessment.DoesNotExist:
                 self.add_error(
                     "baggage",
@@ -292,9 +319,9 @@ class ClearanceForm(forms.ModelForm):
                     "The assessment must be completed before clearance.",
                 )
 
-            # Payment must exist and be paid.
             try:
                 payment = assessment.payment
+
             except Payment.DoesNotExist:
                 self.add_error(
                     "baggage",
@@ -308,7 +335,10 @@ class ClearanceForm(forms.ModelForm):
                     "The payment must be completed before clearance.",
                 )
 
-        # A cleared record must have a date/time.
+        # ---------------------------------------------
+        # 6. Cleared status requires date/time
+        # ---------------------------------------------
+
         if status == "cleared" and not cleared_at:
             self.add_error(
                 "cleared_at",

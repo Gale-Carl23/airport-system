@@ -30,6 +30,7 @@ class PassengerAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "passport_number",
+        "flight__flight_number",
     )
 
 
