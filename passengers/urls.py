@@ -86,4 +86,21 @@ urlpatterns = [
         views.clearance_update,
         name="clearance_update",
     ),
+    path(
+    "cases/",
+    views.case_list,
+    name="case_list",
+    ),
+
+    path(
+        "cases/add/",
+        views.case_create,
+        name="case_create",
+    ),
+
+    path(
+        "cases/<int:case_id>/edit/",
+        views.case_update,
+        name="case_update",
+    ),
 ]

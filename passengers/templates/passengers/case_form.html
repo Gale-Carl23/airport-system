@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Case | BOC-NAIA System</title>
+</head>
+
+<body>
+
+    {% if case %}
+        <h1>Edit Case</h1>
+    {% else %}
+        <h1>Create Case</h1>
+    {% endif %}
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        {% if case %}
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+        {% else %}
+
+            <button type="submit">
+                Create Case
+            </button>
+
+        {% endif %}
+
+    </form>
+
+    <p>
+        <a href="{% url 'case_list' %}">
+            Cancel
+        </a>
+    </p>
+
+</body>
+</html>

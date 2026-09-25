@@ -8,6 +8,7 @@ from .models import (
     Assessment,
     Payment,
     Clearance,
+    Case,
     )
 
 
@@ -313,5 +314,76 @@ class ClearanceForm(forms.ModelForm):
                 "cleared_at",
                 "A cleared baggage record must have a clearance date and time.",
             )
+
+        return cleaned_data
+
+class CaseForm(forms.ModelForm):
+    class Meta:
+        model = Case
+        fields = [
+            "baggage",
+            "case_reference",
+            "case_type",
+            "status",
+            "description",
+            "resolution",
+            "resolved_at",
+        ]
+
+        widgets = {
+            "resolved_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        baggage = cleaned_data.get("baggage")
+        status = cleaned_data.get("status")
+        resolution = cleaned_data.get("resolution")
+        resolved_at = cleaned_data.get("resolved_at")
+
+        if not baggage:
+            return cleaned_data
+
+        # A case should have an inspection.
+        try:
+            inspection = baggage.inspection
+        except Inspection.DoesNotExist:
+            self.add_error(
+                "baggage",
+                "This baggage does not have an inspection.",
+            )
+            return cleaned_data
+
+        # A case should normally originate from a held or seized inspection.
+        if inspection.result not in ["held", "seized"]:
+            self.add_error(
+                "baggage",
+                "A case can only be created for baggage with a Held or Seized inspection result.",
+            )
+
+        # Resolved and closed cases require a resolution.
+        if status in ["resolved", "closed"]:
+            if not resolution:
+                self.add_error(
+                    "resolution",
+                    "A resolved or closed case must have a resolution.",
+                )
+
+            if not resolved_at:
+                self.add_error(
+                    "resolved_at",
+                    "A resolved or closed case must have a resolution date and time.",
+                )
+
+        # Open and under-review cases should not have a resolution date.
+        if status in ["open", "under_review"]:
+            if resolved_at:
+                self.add_error(
+                    "resolved_at",
+                    "An open or under-review case cannot have a resolution date.",
+                )
 
         return cleaned_data

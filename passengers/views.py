@@ -13,6 +13,7 @@ from .models import (
     Assessment,
     Payment,
     Clearance,
+    Case,
 )
 from .forms import (
     BaggageForm,
@@ -22,6 +23,7 @@ from .forms import (
     AssessmentForm,
     PaymentForm,
     ClearanceForm,
+    CaseForm,
 )
 
 
@@ -457,5 +459,78 @@ def clearance_update(request, clearance_id):
         {
             "form": form,
             "clearance": clearance,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_case",
+    raise_exception=True,
+)
+def case_list(request):
+    cases = Case.objects.select_related(
+        "baggage",
+        "baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/case_list.html",
+        {
+            "cases": cases,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_case",
+    raise_exception=True,
+)
+def case_list(request):
+    cases = Case.objects.select_related(
+        "baggage",
+        "baggage__passenger",
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/case_list.html",
+        {
+            "cases": cases,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.change_case",
+    raise_exception=True,
+)
+def case_update(request, case_id):
+    case = get_object_or_404(
+        Case,
+        id=case_id,
+    )
+
+    if request.method == "POST":
+        form = CaseForm(
+            request.POST,
+            instance=case,
+        )
+
+        if form.is_valid():
+            form.save()
+            return redirect("case_list")
+
+    else:
+        form = CaseForm(
+            instance=case,
+        )
+
+    return render(
+        request,
+        "passengers/case_form.html",
+        {
+            "form": form,
+            "case": case,
         },
     )

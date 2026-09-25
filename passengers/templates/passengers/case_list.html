@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cases | BOC-NAIA System</title>
+</head>
+
+<body>
+
+    <h1>Cases</h1>
+
+    <p>
+        <a href="{% url 'case_create' %}">
+            Create Case
+        </a>
+    </p>
+
+    <p>
+        <a href="{% url 'home' %}">
+            Back to Dashboard
+        </a>
+    </p>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Case Reference</th>
+                <th>Passenger</th>
+                <th>Baggage</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Resolved At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for case in cases %}
+
+                <tr>
+
+                    <td>
+                        {{ case.case_reference }}
+                    </td>
+
+                    <td>
+                        {{ case.baggage.passenger }}
+                    </td>
+
+                    <td>
+                        {{ case.baggage.baggage_tag }}
+                    </td>
+
+                    <td>
+                        {{ case.get_case_type_display }}
+                    </td>
+
+                    <td>
+                        {{ case.get_status_display }}
+                    </td>
+
+                    <td>
+                        {{ case.created_at }}
+                    </td>
+
+                    <td>
+                        {{ case.resolved_at|default:"-" }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'case_update' case.id %}">
+                            Edit
+                        </a>
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="8">
+                        No cases found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</body>
+</html>
