@@ -7,6 +7,7 @@ from .models import (
     Inspection,
     Passenger,
     Payment,
+    Clearance,
 )
 
 
@@ -135,4 +136,26 @@ class PaymentAdmin(admin.ModelAdmin):
         "assessment__inspection__baggage__passenger__reference_number",
         "assessment__inspection__baggage__passenger__first_name",
         "assessment__inspection__baggage__passenger__last_name",
+    )
+
+@admin.register(Clearance)
+class ClearanceAdmin(admin.ModelAdmin):
+    list_display = (
+        "clearance_reference",
+        "baggage",
+        "status",
+        "cleared_at",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+    )
+
+    search_fields = (
+        "clearance_reference",
+        "baggage__baggage_tag",
+        "baggage__passenger__reference_number",
+        "baggage__passenger__first_name",
+        "baggage__passenger__last_name",
     )

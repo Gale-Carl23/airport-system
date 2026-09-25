@@ -220,3 +220,97 @@ class PaymentForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+class ClearanceForm(forms.ModelForm):
+    class Meta:
+        model = Clearance
+        fields = [
+            "baggage",
+            "status",
+            "clearance_reference",
+            "cleared_at",
+            "remarks",
+        ]
+
+        widgets = {
+            "cleared_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        baggage = cleaned_data.get("baggage")
+        status = cleaned_data.get("status")
+        cleared_at = cleaned_data.get("cleared_at")
+
+        if not baggage:
+            return cleaned_data
+
+        # Get the inspection belonging to this baggage.
+        try:
+            inspection = baggage.inspection
+        except Inspection.DoesNotExist:
+            self.add_error(
+                "baggage",
+                "This baggage does not have an inspection.",
+            )
+            return cleaned_data
+
+        # A baggage cannot be cleared while inspection is incomplete.
+        if inspection.status != "completed":
+            self.add_error(
+                "baggage",
+                "The inspection must be completed before clearance.",
+            )
+
+        # Held or seized inspection results cannot be cleared.
+        if inspection.result in ["held", "seized"]:
+            self.add_error(
+                "baggage",
+                "This baggage cannot be cleared because the inspection result requires further action.",
+            )
+
+        # If assessment is required, it must be completed.
+        if inspection.result == "for_assessment":
+
+            try:
+                assessment = inspection.assessment
+            except Assessment.DoesNotExist:
+                self.add_error(
+                    "baggage",
+                    "This baggage requires an assessment before clearance.",
+                )
+                return cleaned_data
+
+            if assessment.status != "completed":
+                self.add_error(
+                    "baggage",
+                    "The assessment must be completed before clearance.",
+                )
+
+            # Payment must exist and be paid.
+            try:
+                payment = assessment.payment
+            except Payment.DoesNotExist:
+                self.add_error(
+                    "baggage",
+                    "Payment is required before clearance.",
+                )
+                return cleaned_data
+
+            if payment.status != "paid":
+                self.add_error(
+                    "baggage",
+                    "The payment must be completed before clearance.",
+                )
+
+        # A cleared record must have a date/time.
+        if status == "cleared" and not cleared_at:
+            self.add_error(
+                "cleared_at",
+                "A cleared baggage record must have a clearance date and time.",
+            )
+
+        return cleaned_data
