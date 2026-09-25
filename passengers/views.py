@@ -483,20 +483,25 @@ def case_list(request):
 
 @login_required
 @permission_required(
-    "passengers.view_case",
+    "passengers.add_case",
     raise_exception=True,
 )
-def case_list(request):
-    cases = Case.objects.select_related(
-        "baggage",
-        "baggage__passenger",
-    ).order_by("-created_at")
+def case_create(request):
+    if request.method == "POST":
+        form = CaseForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("case_list")
+
+    else:
+        form = CaseForm()
 
     return render(
         request,
-        "passengers/case_list.html",
+        "passengers/case_form.html",
         {
-            "cases": cases,
+            "form": form,
         },
     )
 
