@@ -276,3 +276,59 @@ class Clearance(models.Model):
 
     def __str__(self):
         return self.clearance_reference
+
+class Case(models.Model):
+    STATUS_CHOICES = [
+        ("open", "Open"),
+        ("under_review", "Under Review"),
+        ("resolved", "Resolved"),
+        ("closed", "Closed"),
+    ]
+
+    TYPE_CHOICES = [
+        ("held", "Held"),
+        ("seizure", "Seizure"),
+        ("restricted_item", "Restricted Item"),
+        ("prohibited_item", "Prohibited Item"),
+        ("other", "Other"),
+    ]
+
+    baggage = models.ForeignKey(
+        Baggage,
+        on_delete=models.PROTECT,
+        related_name="cases",
+    )
+
+    case_reference = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+
+    case_type = models.CharField(
+        max_length=30,
+        choices=TYPE_CHOICES,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="open",
+    )
+
+    description = models.TextField()
+
+    resolution = models.TextField(
+        blank=True,
+    )
+
+    resolved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return self.case_reference
