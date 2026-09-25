@@ -333,17 +333,28 @@ def inspection_create(request):
         form = InspectionForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            inspection = form.save()
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Inspection",
+                object_id=inspection.id,
+                description=(
+                    f"Created inspection for baggage "
+                    f"{inspection.baggage.baggage_tag}."
+                ),
+            )
+
             return redirect("inspection_list")
+
     else:
         form = InspectionForm()
 
     return render(
         request,
         "passengers/inspection_form.html",
-        {
-            "form": form,
-        },
+        {"form": form},
     )
 
 @login_required
@@ -364,13 +375,67 @@ def inspection_update(request, inspection_id):
         )
 
         if form.is_valid():
-            form.save()
-            return redirect(
-                "inspection_list"
-            )
+            old_status = inspection.status
+            old_result = inspection.result
+            old_findings = inspection.findings
+            old_inspected_at = inspection.inspected_at
+
+            updated_inspection = form.save()
+
+            changes = []
+
+            if old_status != updated_inspection.status:
+                changes.append(
+                    f"Status: "
+                    f"{dict(Inspection.STATUS_CHOICES).get(old_status)} → "
+                    f"{updated_inspection.get_status_display()}"
+                )
+
+            if old_result != updated_inspection.result:
+                changes.append(
+                    f"Result: "
+                    f"{dict(Inspection.RESULT_CHOICES).get(old_result)} → "
+                    f"{updated_inspection.get_result_display()}"
+                )
+
+            if old_findings != updated_inspection.findings:
+                changes.append(
+                    "Findings were updated."
+                )
+
+            if old_inspected_at != updated_inspection.inspected_at:
+                changes.append(
+                    "Inspection date/time was updated."
+                )
+
+            if changes:
+                if (
+                    old_status != updated_inspection.status
+                    or old_result != updated_inspection.result
+                ):
+                    action = "status_change"
+                else:
+                    action = "update"
+
+                description = (
+                    f"Updated inspection for baggage "
+                    f"{updated_inspection.baggage.baggage_tag}: "
+                    + "; ".join(changes)
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=action,
+                    model_name="Inspection",
+                    object_id=updated_inspection.id,
+                    description=description,
+                )
+
+            return redirect("inspection_list")
+
     else:
         form = InspectionForm(
-            instance=inspection
+            instance=inspection,
         )
 
     return render(
