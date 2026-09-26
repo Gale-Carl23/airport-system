@@ -579,6 +579,20 @@ def assessment_create(request):
 
         if form.is_valid():
             form.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Assessment",
+                object_id=assessment.id,
+                description=(
+                    f"Created assessment for baggage "
+                    f"{assessment.inspection.baggage.baggage_tag}. "
+                    f"Declared value: {assessment.declared_value}, "
+                    f"Assessed value: {assessment.assessed_value}, "
+                    f"Duty: {assessment.duty_amount}, "
+                    f"Tax: {assessment.tax_amount}."
+                ),
+            )
             return redirect("assessment_list")
     else:
         form = AssessmentForm()

@@ -59,6 +59,11 @@ urlpatterns = [
         name="assessment_create",
     ),
     path(
+    "assessments/<int:assessment_id>/edit/",
+    views.assessment_update,
+    name="assessment_update",
+    ),
+    path(
     "payments/",
     views.payment_list,
     name="payment_list",
