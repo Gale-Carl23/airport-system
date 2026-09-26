@@ -1080,6 +1080,18 @@ def case_create(request):
             case.created_by = request.user
 
             case.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Case",
+                object_id=case.id,
+                description=(
+                    f"Created case {case.case_reference} "
+                    f"for baggage {case.baggage.baggage_tag}. "
+                    f"Type: {case.case_type}. "
+                    f"Status: {case.status}."
+                ),
+            )
 
             return redirect("case_list")
 
@@ -1108,6 +1120,13 @@ def case_update(request, case_id):
     old_status = case.status
 
     if request.method == "POST":
+        old_values = {
+            "case_type": case.case_type,
+            "status": case.status,
+            "description": case.description,
+            "resolution": case.resolution,
+            "resolved_at": case.resolved_at,
+        }
         form = CaseForm(
             request.POST,
             instance=case,
@@ -1123,6 +1142,62 @@ def case_update(request, case_id):
                 updated_case.resolved_by = request.user
 
             updated_case.save()
+            changes = []
+
+            if old_values["case_type"] != updated_case.case_type:
+                changes.append(
+                    f"Case Type: "
+                    f"{old_values['case_type']} → "
+                    f"{updated_case.case_type}"
+                )
+
+            if old_values["status"] != updated_case.status:
+                changes.append(
+                    f"Status: "
+                    f"{old_values['status']} → "
+                    f"{updated_case.status}"
+                )
+
+            if old_values["description"] != updated_case.description:
+                changes.append(
+                    f"Description: "
+                    f"{old_values['description']} → "
+                    f"{updated_case.description}"
+                )
+
+            if old_values["resolution"] != updated_case.resolution:
+                changes.append(
+                    f"Resolution: "
+                    f"{old_values['resolution']} → "
+                    f"{updated_case.resolution}"
+                )
+
+            if old_values["resolved_at"] != updated_case.resolved_at:
+                changes.append(
+                    f"Resolved At: "
+                    f"{old_values['resolved_at']} → "
+                    f"{updated_case.resolved_at}"
+                )
+            if changes:
+                if old_values["status"] != updated_case.status:
+                    if updated_case.status in ["resolved", "closed"]:
+                        action = "case_resolution"
+                    else:
+                        action = "status_change"
+                else:
+                    action = "update"
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=action,
+                    model_name="Case",
+                    object_id=updated_case.id,
+                    description=(
+                        f"Updated case {updated_case.case_reference} "
+                        f"for baggage {updated_case.baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
+                )
 
             return redirect("case_list")
 
