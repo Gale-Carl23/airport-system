@@ -578,7 +578,7 @@ def assessment_create(request):
         form = AssessmentForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            assessment = form.save()
             AuditLog.objects.create(
                 user=request.user,
                 action="create",
@@ -753,7 +753,20 @@ def payment_create(request):
         form = PaymentForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            payment = form.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Payment",
+                object_id=payment.id,
+                description=(
+                    f"Created payment for baggage "
+                    f"{payment.assessment.inspection.baggage.baggage_tag}. "
+                    f"Amount due: {payment.amount_due}, "
+                    f"Amount paid: {payment.amount_paid}, "
+                    f"Status: {payment.status}."
+                ),
+            )
             return redirect("payment_list")
 
     else:
@@ -780,16 +793,96 @@ def payment_update(request, payment_id):
     )
 
     if request.method == "POST":
+
+        old_values = {
+            "status": payment.status,
+            "amount_due": payment.amount_due,
+            "amount_paid": payment.amount_paid,
+            "payment_method": payment.payment_method,
+            "payment_reference": payment.payment_reference,
+            "paid_at": payment.paid_at,
+            "remarks": payment.remarks,
+        }
+
         form = PaymentForm(
             request.POST,
             instance=payment,
         )
 
         if form.is_valid():
-            form.save()
-            return redirect(
-                "payment_list"
-            )
+            updated_payment = form.save()
+
+            changes = []
+
+            if old_values["status"] != updated_payment.status:
+                changes.append(
+                    f"Status: "
+                    f"{old_values['status']} → "
+                    f"{updated_payment.status}"
+                )
+
+            if old_values["amount_due"] != updated_payment.amount_due:
+                changes.append(
+                    f"Amount Due: "
+                    f"{old_values['amount_due']} → "
+                    f"{updated_payment.amount_due}"
+                )
+
+            if old_values["amount_paid"] != updated_payment.amount_paid:
+                changes.append(
+                    f"Amount Paid: "
+                    f"{old_values['amount_paid']} → "
+                    f"{updated_payment.amount_paid}"
+                )
+
+            if old_values["payment_method"] != updated_payment.payment_method:
+                changes.append(
+                    f"Payment Method: "
+                    f"{old_values['payment_method']} → "
+                    f"{updated_payment.payment_method}"
+                )
+
+            if old_values["payment_reference"] != updated_payment.payment_reference:
+                changes.append(
+                    f"Payment Reference: "
+                    f"{old_values['payment_reference']} → "
+                    f"{updated_payment.payment_reference}"
+                )
+
+            if old_values["paid_at"] != updated_payment.paid_at:
+                changes.append(
+                    f"Paid At: "
+                    f"{old_values['paid_at']} → "
+                    f"{updated_payment.paid_at}"
+                )
+
+            if old_values["remarks"] != updated_payment.remarks:
+                changes.append(
+                    f"Remarks: "
+                    f"{old_values['remarks']} → "
+                    f"{updated_payment.remarks}"
+                )
+
+            if changes:
+                action = (
+                    "status_change"
+                    if old_values["status"] != updated_payment.status
+                    else "update"
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=action,
+                    model_name="Payment",
+                    object_id=updated_payment.id,
+                    description=(
+                        f"Updated payment for baggage "
+                        f"{updated_payment.assessment.inspection.baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
+                )
+
+            return redirect("payment_list")
 
     else:
         form = PaymentForm(
@@ -834,7 +927,20 @@ def clearance_create(request):
         form = ClearanceForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            clearance = form.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Clearance",
+                object_id=clearance.id,
+                description=(
+                    f"Created clearance "
+                    f"{clearance.clearance_reference} "
+                    f"for baggage "
+                    f"{clearance.baggage.baggage_tag}. "
+                    f"Status: {clearance.status}."
+                ),
+            )
             return redirect("clearance_list")
 
     else:
@@ -860,13 +966,68 @@ def clearance_update(request, clearance_id):
     )
 
     if request.method == "POST":
+        old_values = {
+            "status": clearance.status,
+            "clearance_reference": clearance.clearance_reference,
+            "cleared_at": clearance.cleared_at,
+            "remarks": clearance.remarks,
+        }
         form = ClearanceForm(
             request.POST,
             instance=clearance,
         )
 
         if form.is_valid():
-            form.save()
+            updated_clearance = form.save()
+            changes = []
+
+            if old_values["status"] != updated_clearance.status:
+                changes.append(
+                    f"Status: "
+                    f"{old_values['status']} → "
+                    f"{updated_clearance.status}"
+                )
+
+            if old_values["clearance_reference"] != updated_clearance.clearance_reference:
+                changes.append(
+                    f"Clearance Reference: "
+                    f"{old_values['clearance_reference']} → "
+                    f"{updated_clearance.clearance_reference}"
+                )
+
+            if old_values["cleared_at"] != updated_clearance.cleared_at:
+                changes.append(
+                    f"Cleared At: "
+                    f"{old_values['cleared_at']} → "
+                    f"{updated_clearance.cleared_at}"
+                )
+
+            if old_values["remarks"] != updated_clearance.remarks:
+                changes.append(
+                    f"Remarks: "
+                    f"{old_values['remarks']} → "
+                    f"{updated_clearance.remarks}"
+                )
+            if changes:
+                action = (
+                    "status_change"
+                    if old_values["status"] != updated_clearance.status
+                    else "update"
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=action,
+                    model_name="Clearance",
+                    object_id=updated_clearance.id,
+                    description=(
+                        f"Updated clearance "
+                        f"{updated_clearance.clearance_reference} "
+                        f"for baggage "
+                        f"{updated_clearance.baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
+                )
             return redirect("clearance_list")
 
     else:
