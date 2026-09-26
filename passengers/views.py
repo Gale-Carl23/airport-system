@@ -607,6 +607,123 @@ def assessment_create(request):
 
 @login_required
 @permission_required(
+    "passengers.change_assessment",
+    raise_exception=True,
+)
+def assessment_update(request, assessment_id):
+    assessment = get_object_or_404(
+        Assessment,
+        id=assessment_id,
+    )
+
+    if request.method == "POST":
+
+        old_values = {
+            "status": assessment.status,
+            "declared_value": assessment.declared_value,
+            "assessed_value": assessment.assessed_value,
+            "duty_amount": assessment.duty_amount,
+            "tax_amount": assessment.tax_amount,
+            "remarks": assessment.remarks,
+            "assessed_at": assessment.assessed_at,
+        }
+
+        form = AssessmentForm(
+            request.POST,
+            instance=assessment,
+        )
+
+        if form.is_valid():
+            updated_assessment = form.save()
+
+            changes = []
+
+            if old_values["status"] != updated_assessment.status:
+                changes.append(
+                    f"Status: "
+                    f"{old_values['status']} → "
+                    f"{updated_assessment.status}"
+                )
+
+            if old_values["declared_value"] != updated_assessment.declared_value:
+                changes.append(
+                    f"Declared Value: "
+                    f"{old_values['declared_value']} → "
+                    f"{updated_assessment.declared_value}"
+                )
+
+            if old_values["assessed_value"] != updated_assessment.assessed_value:
+                changes.append(
+                    f"Assessed Value: "
+                    f"{old_values['assessed_value']} → "
+                    f"{updated_assessment.assessed_value}"
+                )
+
+            if old_values["duty_amount"] != updated_assessment.duty_amount:
+                changes.append(
+                    f"Duty Amount: "
+                    f"{old_values['duty_amount']} → "
+                    f"{updated_assessment.duty_amount}"
+                )
+
+            if old_values["tax_amount"] != updated_assessment.tax_amount:
+                changes.append(
+                    f"Tax Amount: "
+                    f"{old_values['tax_amount']} → "
+                    f"{updated_assessment.tax_amount}"
+                )
+
+            if old_values["remarks"] != updated_assessment.remarks:
+                changes.append(
+                    f"Remarks: "
+                    f"{old_values['remarks']} → "
+                    f"{updated_assessment.remarks}"
+                )
+
+            if old_values["assessed_at"] != updated_assessment.assessed_at:
+                changes.append(
+                    f"Assessed At: "
+                    f"{old_values['assessed_at']} → "
+                    f"{updated_assessment.assessed_at}"
+                )
+
+            if changes:
+                action = (
+                    "status_change"
+                    if old_values["status"] != updated_assessment.status
+                    else "update"
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=action,
+                    model_name="Assessment",
+                    object_id=updated_assessment.id,
+                    description=(
+                        f"Updated assessment for baggage "
+                        f"{updated_assessment.inspection.baggage.baggage_tag}: "
+                        + "; ".join(changes)
+                    ),
+                )
+
+            return redirect("assessment_list")
+
+    else:
+        form = AssessmentForm(
+            instance=assessment,
+        )
+
+    return render(
+        request,
+        "passengers/assessment_form.html",
+        {
+            "form": form,
+            "assessment": assessment,
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_payment",
     raise_exception=True,
 )

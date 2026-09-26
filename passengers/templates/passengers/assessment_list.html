@@ -33,6 +33,7 @@
                 <th>Duty</th>
                 <th>Tax</th>
                 <th>Assessed At</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -73,13 +74,18 @@
                     <td>
                         {{ assessment.assessed_at|default:"-" }}
                     </td>
+                    <td>
+                        <a href="{% url 'assessment_update' item.id %}">
+                            Edit
+                        </a>
+                    </td>
 
                 </tr>
 
             {% empty %}
 
                 <tr>
-                    <td colspan="8">
+                    <td colspan="9">
                         No assessments found.
                     </td>
                 </tr>
