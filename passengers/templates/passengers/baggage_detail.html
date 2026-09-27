@@ -215,10 +215,7 @@
                         Inspection requires assessment.
                     </p>
 
-                    <a
-                        href="{% url 'assessment_create' %}"
-                        class="button"
-                    >
+                    <a href="{% url 'assessment_create' %}?inspection={{ inspection.id }}">
                         Create Assessment
                     </a>
 

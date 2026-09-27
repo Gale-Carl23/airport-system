@@ -575,11 +575,28 @@ def assessment_list(request):
     raise_exception=True,
 )
 def assessment_create(request):
+
+    inspection_id = request.GET.get("inspection")
+
+    inspection = None
+
+    if inspection_id:
+        inspection = get_object_or_404(
+            Inspection,
+            id=inspection_id,
+        )
+
     if request.method == "POST":
         form = AssessmentForm(request.POST)
 
         if form.is_valid():
-            assessment = form.save()
+            assessment = form.save(commit=False)
+
+            if inspection:
+                assessment.inspection = inspection
+
+            assessment.save()
+
             AuditLog.objects.create(
                 user=request.user,
                 action="create",
@@ -587,22 +604,25 @@ def assessment_create(request):
                 object_id=assessment.id,
                 description=(
                     f"Created assessment for baggage "
-                    f"{assessment.inspection.baggage.baggage_tag}. "
-                    f"Declared value: {assessment.declared_value}, "
-                    f"Assessed value: {assessment.assessed_value}, "
-                    f"Duty: {assessment.duty_amount}, "
-                    f"Tax: {assessment.tax_amount}."
+                    f"{assessment.inspection.baggage.baggage_tag}"
                 ),
             )
+
             return redirect("assessment_list")
+
     else:
-        form = AssessmentForm()
+        form = AssessmentForm(
+            initial={
+                "inspection": inspection,
+            }
+        )
 
     return render(
         request,
         "passengers/assessment_form.html",
         {
             "form": form,
+            "inspection": inspection,
         },
     )
 
