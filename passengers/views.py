@@ -1136,38 +1136,55 @@ def case_list(request):
     raise_exception=True,
 )
 def case_create(request):
+
+    baggage_id = request.GET.get("baggage")
+
+    baggage = None
+
+    if baggage_id:
+        baggage = get_object_or_404(
+            Baggage,
+            id=baggage_id,
+        )
+
     if request.method == "POST":
         form = CaseForm(request.POST)
 
         if form.is_valid():
             case = form.save(commit=False)
 
+            case.baggage = baggage
             case.created_by = request.user
 
             case.save()
+
             AuditLog.objects.create(
                 user=request.user,
                 action="create",
                 model_name="Case",
                 object_id=case.id,
                 description=(
-                    f"Created case {case.case_reference} "
-                    f"for baggage {case.baggage.baggage_tag}. "
-                    f"Type: {case.case_type}. "
-                    f"Status: {case.status}."
+                    f"Created case "
+                    f"{case.case_reference} for baggage "
+                    f"{case.baggage.baggage_tag}"
                 ),
             )
 
             return redirect("case_list")
 
     else:
-        form = CaseForm()
+        form = CaseForm(
+            initial={
+                "baggage": baggage,
+            }
+        )
 
     return render(
         request,
         "passengers/case_form.html",
         {
             "form": form,
+            "baggage": baggage,
         },
     )
 

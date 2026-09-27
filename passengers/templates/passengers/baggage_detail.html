@@ -365,48 +365,55 @@
 
 
             <!-- CASE -->
+             <h3>Enforcement Case</h3>
 
-            {% if cases %}
+{% if cases %}
 
-                <div class="step danger">
+    {% for case in cases %}
 
-                    <div class="icon">!</div>
+        <p>
+            Case Reference:
+            {{ case.case_reference }}
+        </p>
 
-                    <h3>Enforcement Case</h3>
+        <p>
+            Type:
+            {{ case.get_case_type_display }}
+        </p>
 
-                    {% for case in cases %}
+        <p>
+            Status:
+            {{ case.get_status_display }}
+        </p>
 
-                        <div class="case">
+        <p>
+            Created:
+            {{ case.created_at }}
+        </p>
 
-                            <strong>
-                                {{ case.case_reference }}
-                            </strong>
+        <a href="{% url 'case_update' case.id %}">
+            View / Update Case
+        </a>
 
-                            <p>
-                                Type:
-                                {{ case.get_case_type_display }}
-                            </p>
+    {% endfor %}
 
-                            <p>
-                                Status:
-                                {{ case.get_status_display }}
-                            </p>
+{% elif inspection and inspection.result == "held" or inspection and inspection.result == "seized" %}
 
-                            <a
-                                href="{% url 'case_update' case.id %}"
-                                class="button"
-                            >
-                                View / Update Case
-                            </a>
+    <p>
+        This baggage is held or seized but has no enforcement case yet.
+    </p>
 
-                        </div>
+    <a href="{% url 'case_create' %}?baggage={{ baggage.id }}">
+        Create Case
+    </a>
 
-                    {% endfor %}
+{% else %}
 
-                </div>
+    <p>
+        No enforcement case required.
+    </p>
 
-            {% endif %}
-
+{% endif %}
         </div>
 
     </div>
