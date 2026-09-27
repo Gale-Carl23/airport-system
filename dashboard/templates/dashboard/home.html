@@ -96,6 +96,12 @@
         </p>
     {% endif %}
 
+    {% if perms.passengers.view_auditlog %}
+    <a href="{% url 'audit_log_list' %}">
+        Audit Logs
+    </a>
+    {% endif %}
+
 
     <hr>
 

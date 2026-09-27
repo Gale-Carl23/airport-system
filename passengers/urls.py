@@ -113,4 +113,9 @@ urlpatterns = [
         views.case_update,
         name="case_update",
     ),
+    path(
+    "audit-logs/",
+    views.audit_log_list,
+    name="audit_log_list",
+    ),
 ]

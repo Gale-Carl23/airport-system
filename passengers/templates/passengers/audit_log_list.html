@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log</title>
+</head>
+<body>
+    <h1>Audit Logs</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Action</th>
+            <th>Model</th>
+            <th>Object ID</th>
+            <th>Description</th>
+            <th>Date & Time</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for log in audit_logs %}
+        <tr>
+            <td>{{ log.user.username }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.model_name }}</td>
+            <td>{{ log.object_id }}</td>
+            <td>{{ log.description }}</td>
+            <td>{{ log.created_at }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">
+                No audit logs found.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

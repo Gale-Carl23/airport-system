@@ -1214,3 +1214,23 @@ def case_update(request, case_id):
             "case": case,
         },
     )
+
+@login_required
+@permission_required(
+    "passengers.view_auditlog",
+    raise_exception=True,
+)
+def audit_log_list(request):
+    audit_logs = AuditLog.objects.select_related(
+        "user"
+    ).order_by(
+        "-created_at"
+    )
+
+    return render(
+        request,
+        "passengers/audit_log_list.html",
+        {
+            "audit_logs": audit_logs,
+        },
+    )
