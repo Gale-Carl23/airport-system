@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Baggage {{ baggage.baggage_tag }}</title>
+
+    
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div>
+            <h1>Baggage {{ baggage.baggage_tag }}</h1>
+            <p>Inspection and processing workflow</p>
+        </div>
+
+        <a href="{% url 'baggage_list' %}" class="back">
+            ← Back to Baggage
+        </a>
+    </div>
+
+
+    <!-- BAGGAGE INFORMATION -->
+
+    <div class="card">
+
+        <h2>Baggage Information</h2>
+
+        <div class="info-grid">
+
+            <div class="info-item">
+                <span>Baggage Tag</span>
+                <strong>{{ baggage.baggage_tag }}</strong>
+            </div>
+
+            <div class="info-item">
+                <span>Description</span>
+                <strong>{{ baggage.description }}</strong>
+            </div>
+
+            <div class="info-item">
+                <span>Weight</span>
+                <strong>{{ baggage.weight }} kg</strong>
+            </div>
+
+            <div class="info-item">
+                <span>Declared</span>
+                <strong>
+                    {% if baggage.declared %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="info-item">
+                <span>Passenger</span>
+                <strong>
+                    {{ baggage.passenger.first_name }}
+                    {{ baggage.passenger.last_name }}
+                </strong>
+            </div>
+
+            <div class="info-item">
+                <span>Flight</span>
+                <strong>
+                    {% if baggage.passenger.flight %}
+                        {{ baggage.passenger.flight.flight_number }}
+                    {% else %}
+                        No flight assigned
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+        <a
+            href="{% url 'baggage_update' baggage.id %}"
+            class="button"
+        >
+            Edit Baggage
+        </a>
+
+    </div>
+
+
+    <!-- WORKFLOW -->
+
+    <div class="card">
+
+        <h2>Processing Workflow</h2>
+
+        <div class="timeline">
+
+
+            <!-- INSPECTION -->
+
+            <div class="step
+                {% if inspection and inspection.status == 'completed' %}
+                    completed
+                {% elif inspection %}
+                    active
+                {% endif %}
+            ">
+
+                <div class="icon">1</div>
+
+                <h3>Inspection</h3>
+
+                {% if inspection %}
+
+                    <span class="status
+                        {% if inspection.status == 'completed' %}
+                            success
+                        {% elif inspection.status == 'in_progress' %}
+                            warning
+                        {% else %}
+                            info
+                        {% endif %}
+                    ">
+                        {{ inspection.get_status_display }}
+                    </span>
+
+                    <p>
+                        Result:
+                        {{ inspection.get_result_display }}
+                    </p>
+
+                    {% if inspection.findings %}
+                        <p>
+                            Findings: {{ inspection.findings }}
+                        </p>
+                    {% endif %}
+
+                    <a
+                        href="{% url 'inspection_update' inspection.id %}"
+                        class="button"
+                    >
+                        View / Update Inspection
+                    </a>
+
+                {% else %}
+
+                    <p>No inspection has been created yet.</p>
+
+                    <a
+                        href="{% url 'inspection_create' %}"
+                        class="button"
+                    >
+                        Create Inspection
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ASSESSMENT -->
+
+            <div class="step
+                {% if assessment and assessment.status == 'completed' %}
+                    completed
+                {% elif assessment %}
+                    active
+                {% endif %}
+            ">
+
+                <div class="icon">2</div>
+
+                <h3>Assessment</h3>
+
+                {% if assessment %}
+
+                    <span class="status
+                        {% if assessment.status == 'completed' %}
+                            success
+                        {% else %}
+                            warning
+                        {% endif %}
+                    ">
+                        {{ assessment.get_status_display }}
+                    </span>
+
+                    <p>
+                        Assessed Value:
+                        {{ assessment.assessed_value }}
+                    </p>
+
+                    <p>
+                        Duty:
+                        {{ assessment.duty_amount }}
+                    </p>
+
+                    <p>
+                        Tax:
+                        {{ assessment.tax_amount }}
+                    </p>
+
+                    <a
+                        href="{% url 'assessment_update' assessment.id %}"
+                        class="button"
+                    >
+                        View / Update Assessment
+                    </a>
+
+                {% elif inspection and inspection.result == "for_assessment" %}
+
+                    <p>
+                        Inspection requires assessment.
+                    </p>
+
+                    <a
+                        href="{% url 'assessment_create' %}"
+                        class="button"
+                    >
+                        Create Assessment
+                    </a>
+
+                {% else %}
+
+                    <p>
+                        Assessment is not required at this stage.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- PAYMENT -->
+
+            <div class="step
+                {% if payment and payment.status == 'paid' %}
+                    completed
+                {% elif payment %}
+                    active
+                {% endif %}
+            ">
+
+                <div class="icon">3</div>
+
+                <h3>Payment</h3>
+
+                {% if payment %}
+
+                    <span class="status
+                        {% if payment.status == 'paid' %}
+                            success
+                        {% elif payment.status == 'cancelled' %}
+                            danger
+                        {% else %}
+                            warning
+                        {% endif %}
+                    ">
+                        {{ payment.get_status_display }}
+                    </span>
+
+                    <p>
+                        Amount Due:
+                        {{ payment.amount_due }}
+                    </p>
+
+                    <p>
+                        Amount Paid:
+                        {{ payment.amount_paid }}
+                    </p>
+
+                    <a
+                        href="{% url 'payment_update' payment.id %}"
+                        class="button"
+                    >
+                        View / Update Payment
+                    </a>
+
+                {% elif assessment and assessment.status == "completed" %}
+
+                    <p>
+                        Assessment completed. Payment can now be processed.
+                    </p>
+
+                    <a
+                        href="{% url 'payment_create' %}"
+                        class="button"
+                    >
+                        Create Payment
+                    </a>
+
+                {% else %}
+
+                    <p>
+                        Payment is not available yet.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- CLEARANCE -->
+
+            <div class="step
+                {% if clearance and clearance.status == 'cleared' %}
+                    completed
+                {% elif clearance %}
+                    active
+                {% endif %}
+            ">
+
+                <div class="icon">4</div>
+
+                <h3>Clearance</h3>
+
+                {% if clearance %}
+
+                    <span class="status
+                        {% if clearance.status == 'cleared' %}
+                            success
+                        {% elif clearance.status == 'held' %}
+                            danger
+                        {% else %}
+                            warning
+                        {% endif %}
+                    ">
+                        {{ clearance.get_status_display }}
+                    </span>
+
+                    <p>
+                        Reference:
+                        {{ clearance.clearance_reference }}
+                    </p>
+
+                    <a
+                        href="{% url 'clearance_update' clearance.id %}"
+                        class="button"
+                    >
+                        View / Update Clearance
+                    </a>
+
+                {% else %}
+
+                    <p>
+                        Clearance has not been created.
+                    </p>
+
+                    {% if payment and payment.status == "paid" %}
+                        <a
+                            href="{% url 'clearance_create' %}"
+                            class="button"
+                        >
+                            Create Clearance
+                        </a>
+                    {% elif inspection and inspection.result == "cleared" %}
+                        <a
+                            href="{% url 'clearance_create' %}"
+                            class="button"
+                        >
+                            Create Clearance
+                        </a>
+                    {% else %}
+                        <p>
+                            Clearance is waiting for the required process.
+                        </p>
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- CASE -->
+
+            {% if cases %}
+
+                <div class="step danger">
+
+                    <div class="icon">!</div>
+
+                    <h3>Enforcement Case</h3>
+
+                    {% for case in cases %}
+
+                        <div class="case">
+
+                            <strong>
+                                {{ case.case_reference }}
+                            </strong>
+
+                            <p>
+                                Type:
+                                {{ case.get_case_type_display }}
+                            </p>
+
+                            <p>
+                                Status:
+                                {{ case.get_status_display }}
+                            </p>
+
+                            <a
+                                href="{% url 'case_update' case.id %}"
+                                class="button"
+                            >
+                                View / Update Case
+                            </a>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

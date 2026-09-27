@@ -39,7 +39,9 @@
 
                 <tr>
                     <td>
-                        {{ item.baggage_tag }}
+                        <a href="{% url 'baggage_detail' item.id %}">
+                            {{ item.baggage_tag }}
+                        </a>
                     </td>
 
                     <td>

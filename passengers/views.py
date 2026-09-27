@@ -1303,3 +1303,41 @@ def audit_log_detail(request, log_id):
             "audit_log": audit_log,
         },
     )
+
+@login_required
+def baggage_detail(request, baggage_id):
+    baggage = get_object_or_404(
+        Baggage.objects.select_related(
+            "passenger",
+            "passenger__flight",
+        ),
+        id=baggage_id,
+    )
+
+    inspection = getattr(baggage, "inspection", None)
+
+    assessment = None
+    payment = None
+
+    if inspection:
+        assessment = getattr(inspection, "assessment", None)
+
+    if assessment:
+        payment = getattr(assessment, "payment", None)
+
+    clearance = getattr(baggage, "clearance", None)
+
+    cases = baggage.cases.all().order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/baggage_detail.html",
+        {
+            "baggage": baggage,
+            "inspection": inspection,
+            "assessment": assessment,
+            "payment": payment,
+            "clearance": clearance,
+            "cases": cases,
+        },
+    )
