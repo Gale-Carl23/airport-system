@@ -7,7 +7,60 @@
 </head>
 <body>
     <h1>Audit Logs</h1>
+<form method="get">
 
+    <input
+        type="text"
+        name="search"
+        placeholder="Search user or description..."
+        value="{{ search }}"
+    >
+
+    <select name="action">
+        <option value="">All Actions</option>
+
+        {% for value, label in action_choices %}
+            <option
+                value="{{ value }}"
+                {% if selected_action == value %}
+                    selected
+                {% endif %}
+            >
+                {{ label }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <select name="model">
+        <option value="">All Models</option>
+
+        {% for model in model_choices %}
+            <option
+                value="{{ model }}"
+                {% if selected_model == model %}
+                    selected
+                {% endif %}
+            >
+                {{ model }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <input
+        type="date"
+        name="date"
+        value="{{ selected_date }}"
+    >
+
+    <button type="submit">
+        Filter
+    </button>
+
+    <a href="{% url 'audit_log_list' %}">
+        Clear
+    </a>
+
+</form>
 <table>
     <thead>
         <tr>

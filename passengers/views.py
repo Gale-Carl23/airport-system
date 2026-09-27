@@ -1227,10 +1227,49 @@ def audit_log_list(request):
         "-created_at"
     )
 
+    search = request.GET.get("search", "").strip()
+    action = request.GET.get("action", "")
+    model_name = request.GET.get("model", "")
+    date = request.GET.get("date", "")
+
+    if search:
+        audit_logs = audit_logs.filter(
+            Q(user__username__icontains=search)
+            | Q(description__icontains=search)
+        )
+
+    if action:
+        audit_logs = audit_logs.filter(
+            action=action
+        )
+
+    if model_name:
+        audit_logs = audit_logs.filter(
+            model_name=model_name
+        )
+
+    if date:
+        audit_logs = audit_logs.filter(
+            created_at__date=date
+        )
+
+    context = {
+        "audit_logs": audit_logs,
+        "search": search,
+        "selected_action": action,
+        "selected_model": model_name,
+        "selected_date": date,
+        "action_choices": AuditLog.ACTION_CHOICES,
+        "model_choices": AuditLog.objects.values_list(
+            "model_name",
+            flat=True,
+        ).distinct().order_by(
+            "model_name"
+        ),
+    }
+
     return render(
         request,
         "passengers/audit_log_list.html",
-        {
-            "audit_logs": audit_logs,
-        },
+        context,
     )
