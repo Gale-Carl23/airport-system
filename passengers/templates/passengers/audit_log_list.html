@@ -79,7 +79,11 @@
             <td>{{ log.user.username }}</td>
             <td>{{ log.get_action_display }}</td>
             <td>{{ log.model_name }}</td>
-            <td>{{ log.object_id }}</td>
+            <td>
+                <a href="{% url 'audit_log_detail' log.id %}">
+                    {{ log.object_id }}
+                </a>
+            </td>
             <td>{{ log.description }}</td>
             <td>{{ log.created_at }}</td>
         </tr>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log Detail</title>
+</head>
+<body>
+    <h1>Audit Log Details</h1>
+
+<table>
+    <tr>
+        <th>User</th>
+        <td>{{ audit_log.user.username }}</td>
+    </tr>
+
+    <tr>
+        <th>Action</th>
+        <td>{{ audit_log.get_action_display }}</td>
+    </tr>
+
+    <tr>
+        <th>Model</th>
+        <td>{{ audit_log.model_name }}</td>
+    </tr>
+
+    <tr>
+        <th>Object ID</th>
+        <td>{{ audit_log.object_id }}</td>
+    </tr>
+
+    <tr>
+        <th>Description</th>
+        <td>{{ audit_log.description }}</td>
+    </tr>
+
+    <tr>
+        <th>Date & Time</th>
+        <td>{{ audit_log.created_at }}</td>
+    </tr>
+</table>
+
+<a href="{% url 'audit_log_list' %}">
+    Back to Audit Logs
+</a>
+
+</body>
+</html>

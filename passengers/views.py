@@ -1284,3 +1284,22 @@ def audit_log_list(request):
         "passengers/audit_log_list.html",
         context,
     )
+
+@login_required
+@permission_required(
+    "passengers.view_auditlog",
+    raise_exception=True,
+)
+def audit_log_detail(request, log_id):
+    audit_log = get_object_or_404(
+        AuditLog.objects.select_related("user"),
+        id=log_id,
+    )
+
+    return render(
+        request,
+        "passengers/audit_log_detail.html",
+        {
+            "audit_log": audit_log,
+        },
+    )

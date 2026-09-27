@@ -118,4 +118,9 @@ urlpatterns = [
     views.audit_log_list,
     name="audit_log_list",
     ),
+    path(
+    "audit-logs/<int:log_id>/",
+    views.audit_log_detail,
+    name="audit_log_detail",
+    ),
 ]
