@@ -281,12 +281,9 @@
                         Assessment completed. Payment can now be processed.
                     </p>
 
-                    <a
-                        href="{% url 'payment_create' %}"
-                        class="button"
-                    >
-                        Create Payment
-                    </a>
+                    <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}">
+    Create Payment
+</a>
 
                 {% else %}
 

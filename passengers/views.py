@@ -770,11 +770,28 @@ def payment_list(request):
     raise_exception=True,
 )
 def payment_create(request):
+
+    assessment_id = request.GET.get("assessment")
+
+    assessment = None
+
+    if assessment_id:
+        assessment = get_object_or_404(
+            Assessment,
+            id=assessment_id,
+        )
+
     if request.method == "POST":
         form = PaymentForm(request.POST)
 
         if form.is_valid():
-            payment = form.save()
+            payment = form.save(commit=False)
+
+            if assessment:
+                payment.assessment = assessment
+
+            payment.save()
+
             AuditLog.objects.create(
                 user=request.user,
                 action="create",
@@ -782,22 +799,25 @@ def payment_create(request):
                 object_id=payment.id,
                 description=(
                     f"Created payment for baggage "
-                    f"{payment.assessment.inspection.baggage.baggage_tag}. "
-                    f"Amount due: {payment.amount_due}, "
-                    f"Amount paid: {payment.amount_paid}, "
-                    f"Status: {payment.status}."
+                    f"{payment.assessment.inspection.baggage.baggage_tag}"
                 ),
             )
+
             return redirect("payment_list")
 
     else:
-        form = PaymentForm()
+        form = PaymentForm(
+            initial={
+                "assessment": assessment,
+            }
+        )
 
     return render(
         request,
         "passengers/payment_form.html",
         {
             "form": form,
+            "assessment": assessment,
         },
     )
 
