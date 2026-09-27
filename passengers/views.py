@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import (
     login_required,
     permission_required,
@@ -1223,9 +1224,7 @@ def case_update(request, case_id):
 def audit_log_list(request):
     audit_logs = AuditLog.objects.select_related(
         "user"
-    ).order_by(
-        "-created_at"
-    )
+    ).order_by("-created_at")
 
     search = request.GET.get("search", "").strip()
     action = request.GET.get("action", "")
@@ -1253,8 +1252,20 @@ def audit_log_list(request):
             created_at__date=date
         )
 
+    paginator = Paginator(
+        audit_logs,
+        20,
+    )
+
+    page_number = request.GET.get("page")
+
+    page_obj = paginator.get_page(
+        page_number
+    )
+
     context = {
-        "audit_logs": audit_logs,
+        "audit_logs": page_obj,
+        "page_obj": page_obj,
         "search": search,
         "selected_action": action,
         "selected_model": model_name,

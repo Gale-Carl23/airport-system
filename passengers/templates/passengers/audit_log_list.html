@@ -92,5 +92,33 @@
         {% endfor %}
     </tbody>
 </table>
+<div class="pagination">
+
+    {% if page_obj.has_previous %}
+        <a href="?search={{ search|urlencode }}&action={{ selected_action|urlencode }}&model={{ selected_model|urlencode }}&date={{ selected_date|urlencode }}&page=1">
+            First
+        </a>
+
+        <a href="?search={{ search|urlencode }}&action={{ selected_action|urlencode }}&model={{ selected_model|urlencode }}&date={{ selected_date|urlencode }}&page={{ page_obj.previous_page_number }}">
+            Previous
+        </a>
+    {% endif %}
+
+    <span>
+        Page {{ page_obj.number }}
+        of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?search={{ search|urlencode }}&action={{ selected_action|urlencode }}&model={{ selected_model|urlencode }}&date={{ selected_date|urlencode }}&page={{ page_obj.next_page_number }}">
+            Next
+        </a>
+
+        <a href="?search={{ search|urlencode }}&action={{ selected_action|urlencode }}&model={{ selected_model|urlencode }}&date={{ selected_date|urlencode }}&page={{ page_obj.paginator.num_pages }}">
+            Last
+        </a>
+    {% endif %}
+
+</div>
 </body>
 </html>
