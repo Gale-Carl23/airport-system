@@ -282,8 +282,8 @@
                     </p>
 
                     <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}">
-    Create Payment
-</a>
+                        Create Payment
+                    </a>
 
                 {% else %}
 
@@ -343,10 +343,7 @@
                     </p>
 
                     {% if payment and payment.status == "paid" %}
-                        <a
-                            href="{% url 'clearance_create' %}"
-                            class="button"
-                        >
+                        <a href="{% url 'clearance_create' %}?payment={{ payment.id }}">
                             Create Clearance
                         </a>
                     {% elif inspection and inspection.result == "cleared" %}

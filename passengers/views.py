@@ -964,34 +964,58 @@ def clearance_list(request):
     raise_exception=True,
 )
 def clearance_create(request):
+
+    payment_id = request.GET.get("payment")
+
+    payment = None
+    baggage = None
+
+    if payment_id:
+        payment = get_object_or_404(
+            Payment,
+            id=payment_id,
+        )
+
+        baggage = payment.assessment.inspection.baggage
+
     if request.method == "POST":
         form = ClearanceForm(request.POST)
 
         if form.is_valid():
-            clearance = form.save()
+            clearance = form.save(commit=False)
+
+            if baggage:
+                clearance.baggage = baggage
+
+            clearance.save()
+
             AuditLog.objects.create(
                 user=request.user,
-                action="create",
+                action="clearance",
                 model_name="Clearance",
                 object_id=clearance.id,
                 description=(
-                    f"Created clearance "
-                    f"{clearance.clearance_reference} "
-                    f"for baggage "
-                    f"{clearance.baggage.baggage_tag}. "
-                    f"Status: {clearance.status}."
+                    f"Created clearance for baggage "
+                    f"{clearance.baggage.baggage_tag}"
                 ),
             )
+
             return redirect("clearance_list")
 
     else:
-        form = ClearanceForm()
+        form = ClearanceForm(
+            initial={
+                "baggage": baggage,
+            }
+        )
 
     return render(
         request,
         "passengers/clearance_form.html",
         {
             "form": form,
+            "payment": payment,
+            "baggage": baggage,
         },
     )
 
