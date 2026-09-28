@@ -1422,20 +1422,6 @@ def case_create(request):
 
                 return redirect("case_list")
 
-            AuditLog.objects.create(
-                user=request.user,
-                action="create",
-                model_name="Case",
-                object_id=case.id,
-                description=(
-                    f"Created case "
-                    f"{case.case_reference} for baggage "
-                    f"{case.baggage.baggage_tag}"
-                ),
-            )
-
-            return redirect("case_list")
-
     else:
         form = CaseForm(
             initial={
