@@ -1,0 +1,304 @@
+<h1>Case Detail</h1>
+
+<p>
+    <a href="{% url 'case_list' %}">
+        Back to Cases
+    </a>
+</p>
+
+<hr>
+
+<h2>Case Information</h2>
+
+<p>
+    <strong>Case Reference:</strong>
+    {{ case.case_reference }}
+</p>
+
+<p>
+    <strong>Case Type:</strong>
+    {{ case.get_case_type_display }}
+</p>
+
+<p>
+    <strong>Status:</strong>
+    {{ case.get_status_display }}
+</p>
+
+<p>
+    <strong>Description:</strong>
+    {{ case.description }}
+</p>
+
+<p>
+    <strong>Resolution:</strong>
+    {{ case.resolution|default:"-" }}
+</p>
+
+<hr>
+
+<h2>Case Personnel</h2>
+
+<p>
+    <strong>Created By:</strong>
+    {% if case.created_by %}
+        {{ case.created_by.username }}
+    {% else %}
+        -
+    {% endif %}
+</p>
+
+<p>
+    <strong>Created At:</strong>
+    {{ case.created_at }}
+</p>
+
+<p>
+    <strong>Resolved By:</strong>
+    {% if case.resolved_by %}
+        {{ case.resolved_by.username }}
+    {% else %}
+        -
+    {% endif %}
+</p>
+
+<p>
+    <strong>Resolved At:</strong>
+    {{ case.resolved_at|default:"-" }}
+</p>
+
+<hr>
+
+<h2>Baggage</h2>
+
+<p>
+    <strong>Baggage Tag:</strong>
+    {{ baggage.baggage_tag }}
+</p>
+
+<p>
+    <strong>Description:</strong>
+    {{ baggage.description }}
+</p>
+
+<p>
+    <strong>Weight:</strong>
+    {{ baggage.weight }}
+</p>
+
+<p>
+    <a href="{% url 'baggage_detail' baggage.id %}">
+        View Baggage
+    </a>
+</p>
+
+<hr>
+
+<h2>Passenger</h2>
+
+<p>
+    <strong>Name:</strong>
+    {{ passenger.first_name }}
+    {{ passenger.last_name }}
+</p>
+
+<p>
+    <strong>Reference Number:</strong>
+    {{ passenger.reference_number }}
+</p>
+
+<p>
+    <strong>Passport Number:</strong>
+    {{ passenger.passport_number }}
+</p>
+
+<p>
+    <strong>Nationality:</strong>
+    {{ passenger.nationality }}
+</p>
+
+<hr>
+
+<h2>Inspection</h2>
+
+{% if inspection %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ inspection.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Result:</strong>
+        {{ inspection.get_result_display }}
+    </p>
+
+    <p>
+        <strong>Findings:</strong>
+        {{ inspection.findings|default:"-" }}
+    </p>
+
+    <p>
+        <a href="{% url 'inspection_detail' inspection.id %}">
+            View Inspection
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No inspection record found.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Assessment</h2>
+
+{% if assessment %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ assessment.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Declared Value:</strong>
+        {{ assessment.declared_value }}
+    </p>
+
+    <p>
+        <strong>Assessed Value:</strong>
+        {{ assessment.assessed_value }}
+    </p>
+
+    <p>
+        <strong>Duty:</strong>
+        {{ assessment.duty_amount }}
+    </p>
+
+    <p>
+        <strong>Tax:</strong>
+        {{ assessment.tax_amount }}
+    </p>
+
+    <p>
+        <a href="{% url 'assessment_detail' assessment.id %}">
+            View Assessment
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No assessment record.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Payment</h2>
+
+{% if payment %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ payment.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Amount Due:</strong>
+        {{ payment.amount_due }}
+    </p>
+
+    <p>
+        <strong>Amount Paid:</strong>
+        {{ payment.amount_paid }}
+    </p>
+
+    <p>
+        <strong>Payment Reference:</strong>
+        {{ payment.payment_reference|default:"-" }}
+    </p>
+
+    <p>
+        <a href="{% url 'payment_detail' payment.id %}">
+            View Payment
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No payment record.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Clearance</h2>
+
+{% if clearance %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ clearance.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Reference:</strong>
+        {{ clearance.clearance_reference }}
+    </p>
+
+    <p>
+        <a href="{% url 'clearance_detail' clearance.id %}">
+            View Clearance
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No clearance record.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Case Actions</h2>
+
+{% if case.status == "open" %}
+
+    <p>
+        This case is currently open.
+    </p>
+
+{% elif case.status == "under_review" %}
+
+    <p>
+        This case is currently under review.
+    </p>
+
+{% elif case.status == "resolved" %}
+
+    <p>
+        This case has been resolved.
+    </p>
+
+{% elif case.status == "closed" %}
+
+    <p>
+        This case has been closed.
+    </p>
+
+{% endif %}
+
+<p>
+    <a href="{% url 'case_update' case.id %}">
+        Update Case
+    </a>
+</p>

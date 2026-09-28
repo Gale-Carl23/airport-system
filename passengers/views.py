@@ -1447,6 +1447,51 @@ def case_update(request, case_id):
 
 @login_required
 @permission_required(
+    "passengers.view_case",
+    raise_exception=True,
+)
+def case_detail(request, case_id):
+    case = get_object_or_404(
+        Case.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+            "baggage__passenger__flight",
+            "created_by",
+            "resolved_by",
+        ),
+        id=case_id,
+    )
+
+    baggage = case.baggage
+    passenger = baggage.passenger
+    inspection = getattr(baggage, "inspection", None)
+    clearance = getattr(baggage, "clearance", None)
+
+    assessment = None
+    payment = None
+
+    if inspection:
+        assessment = getattr(inspection, "assessment", None)
+
+    if assessment:
+        payment = getattr(assessment, "payment", None)
+
+    return render(
+        request,
+        "passengers/case_detail.html",
+        {
+            "case": case,
+            "baggage": baggage,
+            "passenger": passenger,
+            "inspection": inspection,
+            "assessment": assessment,
+            "payment": payment,
+            "clearance": clearance,
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_auditlog",
     raise_exception=True,
 )

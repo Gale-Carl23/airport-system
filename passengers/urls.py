@@ -131,7 +131,11 @@ urlpatterns = [
         views.case_create,
         name="case_create",
     ),
-
+    path(
+    "cases/<int:case_id>/",
+    views.case_detail,
+    name="case_detail",
+    ),
     path(
         "cases/<int:case_id>/edit/",
         views.case_update,
