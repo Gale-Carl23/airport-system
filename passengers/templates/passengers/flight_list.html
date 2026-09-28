@@ -27,6 +27,7 @@
                 <th>Airline</th>
                 <th>Origin</th>
                 <th>Arrival</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -37,10 +38,15 @@
                     <td>{{ flight.airline }}</td>
                     <td>{{ flight.origin }}</td>
                     <td>{{ flight.arrival_datetime }}</td>
+                    <td>
+                        <a href="{% url 'flight_detail' flight.id %}">
+                            View Flight
+                        </a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">
+                    <td colspan="5">
                         No flights found.
                     </td>
                 </tr>

@@ -22,6 +22,11 @@ urlpatterns = [
     path("flights/", views.flight_list, name="flight_list"),
     path("flights/add/", views.flight_create, name="flight_create"),
     path(
+    "flights/<int:flight_id>/",
+    views.flight_detail,
+    name="flight_detail",
+    ),
+    path(
     "baggage/",
     views.baggage_list,
     name="baggage_list",

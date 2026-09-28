@@ -286,6 +286,32 @@ def flight_create(request):
 
 @login_required
 @permission_required(
+    "passengers.view_flight",
+    raise_exception=True,
+)
+def flight_detail(request, flight_id):
+    flight = get_object_or_404(
+        Flight.objects.prefetch_related(
+            "passengers",
+            "passengers__baggage",
+            "passengers__baggage__inspection",
+            "passengers__baggage__clearance",
+            "passengers__baggage__cases",
+        ),
+        id=flight_id,
+    )
+
+    return render(
+        request,
+        "passengers/flight_detail.html",
+        {
+            "flight": flight,
+            "passengers": flight.passengers.all(),
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_baggage",
     raise_exception=True,
 )
@@ -1648,3 +1674,4 @@ def baggage_detail(request, baggage_id):
             "cases": cases,
         },
     )
+

@@ -1,0 +1,219 @@
+<h1>Flight Detail</h1>
+
+<p>
+    <a href="{% url 'flight_list' %}">
+        Back to Flights
+    </a>
+</p>
+
+<hr>
+
+<h2>Flight Information</h2>
+
+<p>
+    <strong>Flight Number:</strong>
+    {{ flight.flight_number }}
+</p>
+
+<p>
+    <strong>Airline:</strong>
+    {{ flight.airline }}
+</p>
+
+<p>
+    <strong>Origin:</strong>
+    {{ flight.origin }}
+</p>
+
+<p>
+    <strong>Arrival:</strong>
+    {{ flight.arrival_datetime }}
+</p>
+
+<hr>
+
+<h2>Passengers</h2>
+
+{% if passengers %}
+
+    {% for passenger in passengers %}
+
+        <h3>
+            {{ passenger.first_name }}
+            {{ passenger.last_name }}
+        </h3>
+
+        <p>
+            <strong>Reference Number:</strong>
+            {{ passenger.reference_number }}
+        </p>
+
+        <p>
+            <strong>Passport Number:</strong>
+            {{ passenger.passport_number }}
+        </p>
+
+        <p>
+            <strong>Nationality:</strong>
+            {{ passenger.nationality }}
+        </p>
+
+        <p>
+            <a href="{% url 'passenger_detail' passenger.id %}">
+                View Passenger
+            </a>
+        </p>
+
+        <h4>Baggage</h4>
+
+        {% if passenger.baggage.all %}
+
+            {% for baggage in passenger.baggage.all %}
+
+                <p>
+                    <strong>Baggage Tag:</strong>
+                    {{ baggage.baggage_tag }}
+                </p>
+
+                <p>
+                    <strong>Description:</strong>
+                    {{ baggage.description }}
+                </p>
+
+                <p>
+                    <strong>Weight:</strong>
+                    {{ baggage.weight }}
+                </p>
+
+                <p>
+                    <a href="{% url 'baggage_detail' baggage.id %}">
+                        View Baggage
+                    </a>
+                </p>
+
+                <h5>Inspection</h5>
+
+                {% if baggage.inspection %}
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ baggage.inspection.get_status_display }}
+                    </p>
+
+                    <p>
+                        <strong>Result:</strong>
+                        {{ baggage.inspection.get_result_display }}
+                    </p>
+
+                    <p>
+                        <a href="{% url 'inspection_detail' baggage.inspection.id %}">
+                            View Inspection
+                        </a>
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        No inspection record.
+                    </p>
+
+                {% endif %}
+
+                <h5>Clearance</h5>
+
+                {% if baggage.clearance %}
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ baggage.clearance.get_status_display }}
+                    </p>
+
+                    <p>
+                        <strong>Reference:</strong>
+                        {{ baggage.clearance.clearance_reference }}
+                    </p>
+
+                    <p>
+                        <a href="{% url 'clearance_detail' baggage.clearance.id %}">
+                            View Clearance
+                        </a>
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        No clearance record.
+                    </p>
+
+                {% endif %}
+
+                <h5>Cases</h5>
+
+                {% for case in baggage.cases.all %}
+
+                    <p>
+                        <strong>Case:</strong>
+                        {{ case.case_reference }}
+                    </p>
+
+                    <p>
+                        <strong>Type:</strong>
+                        {{ case.get_case_type_display }}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ case.get_status_display }}
+                    </p>
+
+                    <p>
+                        <a href="{% url 'case_detail' case.id %}">
+                            View Case
+                        </a>
+                    </p>
+
+                {% empty %}
+
+                    <p>
+                        No cases.
+                    </p>
+
+                {% endfor %}
+
+                <hr>
+
+            {% empty %}
+
+                <p>
+                    No baggage records for this passenger.
+                </p>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                No baggage records for this passenger.
+            </p>
+
+        {% endif %}
+
+        <hr>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        No passengers are currently assigned to this flight.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<p>
+    <a href="{% url 'flight_list' %}">
+        Back to Flights
+    </a>
+</p>
