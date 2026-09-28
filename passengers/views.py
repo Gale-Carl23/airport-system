@@ -891,6 +891,40 @@ def payment_create(request):
         },
     )
 
+@login_required
+@permission_required(
+    "passengers.view_payment",
+    raise_exception=True,
+)
+def payment_detail(request, payment_id):
+    payment = get_object_or_404(
+        Payment.objects.select_related(
+            "assessment",
+            "assessment__inspection",
+            "assessment__inspection__baggage",
+            "assessment__inspection__baggage__passenger",
+            "assessment__inspection__baggage__passenger__flight",
+        ),
+        id=payment_id,
+    )
+
+    assessment = payment.assessment
+    inspection = assessment.inspection
+    baggage = inspection.baggage
+    clearance = getattr(baggage, "clearance", None)
+
+    return render(
+        request,
+        "passengers/payment_detail.html",
+        {
+            "payment": payment,
+            "assessment": assessment,
+            "inspection": inspection,
+            "baggage": baggage,
+            "clearance": clearance,
+        },
+    )
+
 
 @login_required
 @permission_required(

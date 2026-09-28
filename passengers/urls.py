@@ -90,6 +90,11 @@ urlpatterns = [
         name="payment_create",
     ),
     path(
+    "payments/<int:payment_id>/",
+    views.payment_detail,
+    name="payment_detail",
+    ),
+    path(
     "payments/<int:payment_id>/edit/",
     views.payment_update,
     name="payment_update",
