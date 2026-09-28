@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inspection Detail</title>
+</head>
+
+<body>
+
+    <h1>Inspection Detail</h1>
+
+    <p>
+        <a href="{% url 'inspection_list' %}">
+            Back to Inspections
+        </a>
+    </p>
+
+
+    <h2>Inspection Information</h2>
+
+    <p>
+        Baggage:
+        <a href="{% url 'baggage_detail' inspection.baggage.id %}">
+            {{ inspection.baggage.baggage_tag }}
+        </a>
+    </p>
+
+    <p>
+        Status:
+        {{ inspection.get_status_display }}
+    </p>
+
+    <p>
+        Result:
+        {{ inspection.get_result_display }}
+    </p>
+
+    <p>
+        Findings:
+        {% if inspection.findings %}
+            {{ inspection.findings }}
+        {% else %}
+            No findings recorded.
+        {% endif %}
+    </p>
+
+    <p>
+        Inspected At:
+        {% if inspection.inspected_at %}
+            {{ inspection.inspected_at }}
+        {% else %}
+            Not yet inspected.
+        {% endif %}
+    </p>
+
+    <p>
+        <a href="{% url 'inspection_update' inspection.id %}">
+            Update Inspection
+        </a>
+    </p>
+
+
+    <hr>
+
+
+    <h2>Passenger</h2>
+
+    <p>
+        Name:
+        {{ inspection.baggage.passenger.first_name }}
+        {{ inspection.baggage.passenger.last_name }}
+    </p>
+
+    <p>
+        Passport:
+        {{ inspection.baggage.passenger.passport_number }}
+    </p>
+
+    <p>
+        Nationality:
+        {{ inspection.baggage.passenger.nationality }}
+    </p>
+
+
+    <hr>
+
+
+    <h2>Flight</h2>
+
+    {% if inspection.baggage.passenger.flight %}
+
+        <p>
+            Flight:
+            {{ inspection.baggage.passenger.flight.flight_number }}
+        </p>
+
+        <p>
+            Airline:
+            {{ inspection.baggage.passenger.flight.airline }}
+        </p>
+
+        <p>
+            Origin:
+            {{ inspection.baggage.passenger.flight.origin }}
+        </p>
+
+        <p>
+            Arrival:
+            {{ inspection.baggage.passenger.flight.arrival_datetime }}
+        </p>
+
+    {% else %}
+
+        <p>
+            No flight assigned.
+        </p>
+
+    {% endif %}
+
+
+    <hr>
+
+
+    <h2>Next Process</h2>
+
+
+    {% if inspection.result == "cleared" %}
+
+        <h3>Clearance</h3>
+
+        {% if clearance %}
+
+            <p>
+                Clearance Reference:
+                {{ clearance.clearance_reference }}
+            </p>
+
+            <p>
+                Status:
+                {{ clearance.get_status_display }}
+            </p>
+
+            <a href="{% url 'clearance_update' clearance.id %}">
+                View / Update Clearance
+            </a>
+
+        {% else %}
+
+            <p>
+                This inspection is cleared and requires clearance processing.
+            </p>
+
+            <a href="{% url 'clearance_create' %}?baggage={{ inspection.baggage.id }}">
+                Create Clearance
+            </a>
+
+        {% endif %}
+
+
+    {% elif inspection.result == "for_assessment" %}
+
+        <h3>Assessment</h3>
+
+        {% if assessment %}
+
+            <p>
+                Status:
+                {{ assessment.get_status_display }}
+            </p>
+
+            <a href="{% url 'assessment_update' assessment.id %}">
+                View / Update Assessment
+            </a>
+
+        {% else %}
+
+            <p>
+                This inspection requires assessment.
+            </p>
+
+            <a href="{% url 'assessment_create' %}?inspection={{ inspection.id }}">
+                Create Assessment
+            </a>
+
+        {% endif %}
+
+
+    {% elif inspection.result == "held" or inspection.result == "seized" %}
+
+        <h3>Enforcement Case</h3>
+
+        {% if cases %}
+
+            {% for case in cases %}
+
+                <p>
+                    Case Reference:
+                    {{ case.case_reference }}
+                </p>
+
+                <p>
+                    Type:
+                    {{ case.get_case_type_display }}
+                </p>
+
+                <p>
+                    Status:
+                    {{ case.get_status_display }}
+                </p>
+
+                <a href="{% url 'case_update' case.id %}">
+                    View / Update Case
+                </a>
+
+                <hr>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                This baggage is held or seized but has no case yet.
+            </p>
+
+            <a href="{% url 'case_create' %}?baggage={{ inspection.baggage.id }}">
+                Create Case
+            </a>
+
+        {% endif %}
+
+
+    {% else %}
+
+        <p>
+            No next process is available yet.
+        </p>
+
+    {% endif %}
+
+
+</body>
+</html>

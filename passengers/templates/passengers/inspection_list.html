@@ -65,7 +65,12 @@
                         {{ inspection.inspected_at|default:"-" }}
                     </td>
 
+                    
+
                     <td>
+                        <a href="{% url 'inspection_detail' inspection.id %}">
+                            View Inspection
+                        </a>
                         <a href="{% url 'inspection_update' inspection.id %}">
                             Edit
                         </a>

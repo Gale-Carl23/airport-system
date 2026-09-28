@@ -551,6 +551,42 @@ def inspection_update(request, inspection_id):
 
 @login_required
 @permission_required(
+    "passengers.view_inspection",
+    raise_exception=True,
+)
+def inspection_detail(request, inspection_id):
+    inspection = get_object_or_404(
+        Inspection.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+            "baggage__passenger__flight",
+        ),
+        id=inspection_id,
+    )
+
+    assessment = getattr(inspection, "assessment", None)
+
+    cases = inspection.baggage.cases.all().order_by("-created_at")
+
+    clearance = getattr(
+        inspection.baggage,
+        "clearance",
+        None,
+    )
+
+    return render(
+        request,
+        "passengers/inspection_detail.html",
+        {
+            "inspection": inspection,
+            "assessment": assessment,
+            "cases": cases,
+            "clearance": clearance,
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_assessment",
     raise_exception=True,
 )

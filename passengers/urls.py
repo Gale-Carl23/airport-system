@@ -48,6 +48,11 @@ urlpatterns = [
         name="inspection_create",
     ),
     path(
+    "inspections/<int:inspection_id>/",
+    views.inspection_detail,
+    name="inspection_detail",
+    ),
+    path(
     "inspections/<int:inspection_id>/edit/",
     views.inspection_update,
     name="inspection_update",
