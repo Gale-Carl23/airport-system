@@ -10,6 +10,11 @@ urlpatterns = [
     name="passenger_detail",
     ),
     path(
+    "<int:passenger_id>/",
+    views.passenger_detail,
+    name="passenger_detail",
+    ),
+    path(
     "<int:passenger_id>/edit/",
     views.passenger_update,
     name="passenger_update",

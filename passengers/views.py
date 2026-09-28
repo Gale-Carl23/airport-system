@@ -221,6 +221,39 @@ def passenger_update(request, passenger_id):
     )
 
 @login_required
+@permission_required(
+    "passengers.view_passenger",
+    raise_exception=True,
+)
+def passenger_detail(request, passenger_id):
+    passenger = get_object_or_404(
+        Passenger.objects.select_related("flight"),
+        id=passenger_id,
+    )
+
+    baggage = (
+        passenger.baggage
+        .select_related()
+        .prefetch_related(
+            "inspection",
+            "inspection__assessment",
+            "inspection__assessment__payment",
+            "clearance",
+            "cases",
+        )
+        .order_by("-created_at")
+    )
+
+    return render(
+        request,
+        "passengers/passenger_detail.html",
+        {
+            "passenger": passenger,
+            "baggage": baggage,
+        },
+    )
+
+@login_required
 def flight_list(request):
     flights = Flight.objects.all().order_by("-arrival_datetime")
 

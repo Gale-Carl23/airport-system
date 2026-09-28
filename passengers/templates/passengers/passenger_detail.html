@@ -1,74 +1,293 @@
-<!DOCTYPE html>
-<html lang="en">
+<h1>Passenger Detail</h1>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<p>
+    <a href="{% url 'passenger_list' %}">
+        Back to Passengers
+    </a>
+</p>
 
-    <title>Passenger Details | BOC-NAIA</title>
-</head>
+<hr>
 
-<body>
+<h2>Passenger Information</h2>
 
-    <h1>BOC-NAIA Operations System</h1>
+<p>
+    <strong>Reference Number:</strong>
+    {{ passenger.reference_number }}
+</p>
 
-    <h2>Passenger Details</h2>
+<p>
+    <strong>First Name:</strong>
+    {{ passenger.first_name }}
+</p>
 
-    <hr>
+<p>
+    <strong>Last Name:</strong>
+    {{ passenger.last_name }}
+</p>
+
+<p>
+    <strong>Passport Number:</strong>
+    {{ passenger.passport_number }}
+</p>
+
+<p>
+    <strong>Nationality:</strong>
+    {{ passenger.nationality }}
+</p>
+
+<hr>
+
+<h2>Flight Information</h2>
+
+{% if passenger.flight %}
 
     <p>
-        <strong>Reference Number:</strong>
-        {{ passenger.reference_number }}
+        <strong>Flight Number:</strong>
+        {{ passenger.flight.flight_number }}
     </p>
 
     <p>
-        <strong>First Name:</strong>
-        {{ passenger.first_name }}
+        <strong>Airline:</strong>
+        {{ passenger.flight.airline }}
     </p>
 
     <p>
-        <strong>Last Name:</strong>
-        {{ passenger.last_name }}
-    </p>
-
-    <p>
-        <strong>Passport Number:</strong>
-        {{ passenger.passport_number }}
-    </p>
-
-    <p>
-        <strong>Nationality:</strong>
-        {{ passenger.nationality }}
-    </p>
-
-    <p>
-    <strong>Flight:</strong>
-    {{ passenger.flight }}
+        <strong>Origin:</strong>
+        {{ passenger.flight.origin }}
     </p>
 
     <p>
         <strong>Arrival:</strong>
-        {{ passenger.arrival_datetime }}
+        {{ passenger.flight.arrival_datetime }}
     </p>
+
+{% else %}
 
     <p>
-        <strong>Record Created:</strong>
-        {{ passenger.created_at }}
+        No flight assigned.
     </p>
 
+{% endif %}
+
+<hr>
+
+<h2>Baggage Records</h2>
+
+{% if baggage %}
+
+    {% for item in baggage %}
+
+        <h3>
+            Baggage {{ item.baggage_tag }}
+        </h3>
+
+        <p>
+            <strong>Description:</strong>
+            {{ item.description }}
+        </p>
+
+        <p>
+            <strong>Weight:</strong>
+            {{ item.weight }}
+        </p>
+
+        <p>
+            <strong>Declared:</strong>
+            {{ item.declared }}
+        </p>
+
+        <p>
+            <a href="{% url 'baggage_detail' item.id %}">
+                View Baggage
+            </a>
+        </p>
+
+        <hr>
+
+        <h4>Inspection</h4>
+
+        {% if item.inspection %}
+
+            <p>
+                <strong>Status:</strong>
+                {{ item.inspection.get_status_display }}
+            </p>
+
+            <p>
+                <strong>Result:</strong>
+                {{ item.inspection.get_result_display }}
+            </p>
+
+            <p>
+                <a href="{% url 'inspection_detail' item.inspection.id %}">
+                    View Inspection
+                </a>
+            </p>
+
+        {% else %}
+
+            <p>
+                No inspection record.
+            </p>
+
+        {% endif %}
+
+        <h4>Assessment</h4>
+        {% if item.inspection %}
+            {% if item.inspection.assessment %}
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ item.inspection.assessment.get_status_display }}
+                </p>
+
+                <p>
+                    <strong>Assessed Value:</strong>
+                    {{ item.inspection.assessment.assessed_value }}
+                </p>
+
+                <p>
+                    <strong>Duty:</strong>
+                    {{ item.inspection.assessment.duty_amount }}
+                </p>
+
+                <p>
+                    <strong>Tax:</strong>
+                    {{ item.inspection.assessment.tax_amount }}
+                </p>
+
+                <p>
+                    <a href="{% url 'assessment_detail' item.inspection.assessment.id %}">
+                        View Assessment
+                    </a>
+                </p>
+
+            {% else %}
+
+                <p>
+                    No assessment record.
+                </p>
+
+            {% endif %}
+            
+        {% else %}
+
+            <p>No inspection record.</p>
+
+        {% endif %}
+
+        <h4>Payment</h4>
+
+        {% if item.inspection.assessment.payment %}
+
+            <p>
+                <strong>Status:</strong>
+                {{ item.inspection.assessment.payment.get_status_display }}
+            </p>
+
+            <p>
+                <strong>Amount Due:</strong>
+                {{ item.inspection.assessment.payment.amount_due }}
+            </p>
+
+            <p>
+                <strong>Amount Paid:</strong>
+                {{ item.inspection.assessment.payment.amount_paid }}
+            </p>
+
+            <p>
+                <a href="{% url 'payment_detail' item.inspection.assessment.payment.id %}">
+                    View Payment
+                </a>
+            </p>
+
+        {% else %}
+
+            <p>
+                No payment record.
+            </p>
+
+        {% endif %}
+
+        <h4>Clearance</h4>
+
+        {% if item.clearance %}
+
+            <p>
+                <strong>Status:</strong>
+                {{ item.clearance.get_status_display }}
+            </p>
+
+            <p>
+                <strong>Reference:</strong>
+                {{ item.clearance.clearance_reference }}
+            </p>
+
+            <p>
+                <a href="{% url 'clearance_detail' item.clearance.id %}">
+                    View Clearance
+                </a>
+            </p>
+
+        {% else %}
+
+            <p>
+                No clearance record.
+            </p>
+
+        {% endif %}
+
+        <h4>Cases</h4>
+
+        {% if item.cases.all %}
+
+            {% for case in item.cases.all %}
+
+                <p>
+                    <strong>Case Reference:</strong>
+                    {{ case.case_reference }}
+                </p>
+
+                <p>
+                    <strong>Type:</strong>
+                    {{ case.get_case_type_display }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ case.get_status_display }}
+                </p>
+
+                <p>
+                    <a href="{% url 'case_detail' case.id %}">
+                        View Case
+                    </a>
+                </p>
+
+            {% empty %}
+
+                <p>
+                    No cases.
+                </p>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        No baggage records found for this passenger.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<p>
     <a href="{% url 'passenger_update' passenger.id %}">
-    Edit Passenger
+        Update Passenger
     </a>
-
-    <br>
-    <br>
-
-    <hr>
-
-    <a href="{% url 'passenger_list' %}">
-        Back to Passenger List
-    </a>
-
-</body>
-
-</html>
+</p>
