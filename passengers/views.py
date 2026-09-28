@@ -1215,6 +1215,50 @@ def clearance_update(request, clearance_id):
 
 @login_required
 @permission_required(
+    "passengers.view_clearance",
+    raise_exception=True,
+)
+def clearance_detail(request, clearance_id):
+    clearance = get_object_or_404(
+        Clearance.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+            "baggage__passenger__flight",
+        ),
+        id=clearance_id,
+    )
+
+    baggage = clearance.baggage
+    passenger = baggage.passenger
+    inspection = getattr(baggage, "inspection", None)
+
+    assessment = None
+    payment = None
+
+    if inspection:
+        assessment = getattr(inspection, "assessment", None)
+
+    if assessment:
+        payment = getattr(assessment, "payment", None)
+
+    cases = baggage.cases.all().order_by("-created_at")
+
+    return render(
+        request,
+        "passengers/clearance_detail.html",
+        {
+            "clearance": clearance,
+            "baggage": baggage,
+            "passenger": passenger,
+            "inspection": inspection,
+            "assessment": assessment,
+            "payment": payment,
+            "cases": cases,
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_case",
     raise_exception=True,
 )

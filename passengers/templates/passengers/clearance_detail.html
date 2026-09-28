@@ -1,0 +1,250 @@
+<h1>Clearance Detail</h1>
+
+<p>
+    <a href="{% url 'clearance_list' %}">
+        Back to Clearances
+    </a>
+</p>
+
+<hr>
+
+<h2>Clearance Information</h2>
+
+<p>
+    <strong>Status:</strong>
+    {{ clearance.get_status_display }}
+</p>
+
+<p>
+    <strong>Clearance Reference:</strong>
+    {{ clearance.clearance_reference }}
+</p>
+
+<p>
+    <strong>Cleared At:</strong>
+    {{ clearance.cleared_at|default:"-" }}
+</p>
+
+<p>
+    <strong>Remarks:</strong>
+    {{ clearance.remarks|default:"-" }}
+</p>
+
+<hr>
+
+<h2>Baggage</h2>
+
+<p>
+    <strong>Baggage Tag:</strong>
+    {{ baggage.baggage_tag }}
+</p>
+
+<p>
+    <strong>Description:</strong>
+    {{ baggage.description }}
+</p>
+
+<p>
+    <strong>Weight:</strong>
+    {{ baggage.weight }}
+</p>
+
+<p>
+    <a href="{% url 'baggage_detail' baggage.id %}">
+        View Baggage
+    </a>
+</p>
+
+<hr>
+
+<h2>Passenger</h2>
+
+<p>
+    <strong>Name:</strong>
+    {{ passenger.first_name }}
+    {{ passenger.last_name }}
+</p>
+
+<p>
+    <strong>Reference Number:</strong>
+    {{ passenger.reference_number }}
+</p>
+
+<p>
+    <strong>Passport Number:</strong>
+    {{ passenger.passport_number }}
+</p>
+
+<p>
+    <strong>Nationality:</strong>
+    {{ passenger.nationality }}
+</p>
+
+<hr>
+
+<h2>Inspection</h2>
+
+{% if inspection %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ inspection.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Result:</strong>
+        {{ inspection.get_result_display }}
+    </p>
+
+    <p>
+        <strong>Findings:</strong>
+        {{ inspection.findings|default:"-" }}
+    </p>
+
+    <p>
+        <a href="{% url 'inspection_detail' inspection.id %}">
+            View Inspection
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No inspection record found.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Assessment</h2>
+
+{% if assessment %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ assessment.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Declared Value:</strong>
+        {{ assessment.declared_value }}
+    </p>
+
+    <p>
+        <strong>Assessed Value:</strong>
+        {{ assessment.assessed_value }}
+    </p>
+
+    <p>
+        <strong>Duty:</strong>
+        {{ assessment.duty_amount }}
+    </p>
+
+    <p>
+        <strong>Tax:</strong>
+        {{ assessment.tax_amount }}
+    </p>
+
+    <p>
+        <a href="{% url 'assessment_detail' assessment.id %}">
+            View Assessment
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No assessment was required for this baggage.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Payment</h2>
+
+{% if payment %}
+
+    <p>
+        <strong>Status:</strong>
+        {{ payment.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Amount Due:</strong>
+        {{ payment.amount_due }}
+    </p>
+
+    <p>
+        <strong>Amount Paid:</strong>
+        {{ payment.amount_paid }}
+    </p>
+
+    <p>
+        <strong>Payment Reference:</strong>
+        {{ payment.payment_reference|default:"-" }}
+    </p>
+
+    <p>
+        <a href="{% url 'payment_detail' payment.id %}">
+            View Payment
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        No payment record was required.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Related Cases</h2>
+
+{% if cases %}
+
+    {% for case in cases %}
+
+        <p>
+            <strong>Case Reference:</strong>
+            {{ case.case_reference }}
+        </p>
+
+        <p>
+            <strong>Type:</strong>
+            {{ case.get_case_type_display }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            {{ case.get_status_display }}
+        </p>
+
+        <p>
+            <a href="{% url 'case_update' case.id %}">
+                View / Update Case
+            </a>
+        </p>
+
+        <hr>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        No related cases.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<p>
+    <a href="{% url 'clearance_update' clearance.id %}">
+        Update Clearance
+    </a>
+</p>

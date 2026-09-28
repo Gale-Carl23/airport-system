@@ -110,7 +110,11 @@ urlpatterns = [
     views.clearance_create,
     name="clearance_create",
     ),
-
+    path(
+    "clearances/<int:clearance_id>/",
+    views.clearance_detail,
+    name="clearance_detail",
+    ),
     path(
         "clearances/<int:clearance_id>/edit/",
         views.clearance_update,
