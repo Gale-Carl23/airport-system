@@ -30,6 +30,7 @@
                 <th>Description</th>
                 <th>Weight</th>
                 <th>Declared</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -64,6 +65,9 @@
                         {% endif %}
                     </td>
                     <td>
+                        <a href="{% url 'baggage_detail' item.id %}">
+                            View Baggage
+                        </a>
                         <a href="{% url 'baggage_update' item.id %}">
                             Edit
                         </a>
