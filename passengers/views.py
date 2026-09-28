@@ -30,6 +30,10 @@ from .forms import (
 
 
 @login_required
+@permission_required(
+    "passengers.view_passenger",
+    raise_exception=True,
+)
 def passenger_list(request):
     search_query = request.GET.get("q", "").strip()
 
@@ -50,19 +54,6 @@ def passenger_list(request):
             "passengers": passengers,
             "search_query": search_query,
         },
-    )
-
-@login_required
-def passenger_detail(request, passenger_id):
-    passenger = get_object_or_404(
-        Passenger,
-        id=passenger_id,
-    )
-
-    return render(
-        request,
-        "passengers/passenger_detail.html",
-        {"passenger": passenger},
     )
 
 @login_required
@@ -254,6 +245,10 @@ def passenger_detail(request, passenger_id):
     )
 
 @login_required
+@permission_required(
+    "passengers.view_flight",
+    raise_exception=True,
+)
 def flight_list(request):
     flights = Flight.objects.all().order_by("-arrival_datetime")
 
@@ -266,12 +261,28 @@ def flight_list(request):
     )
 
 @login_required
+@permission_required(
+    "passengers.add_flight",
+    raise_exception=True,
+)
 def flight_create(request):
     if request.method == "POST":
         form = FlightForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            flight = form.save()
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Flight",
+                object_id=flight.id,
+                description=(
+                    f"Created flight {flight.flight_number} "
+                    f"({flight.airline})."
+                ),
+            )
+
             return redirect("flight_list")
     else:
         form = FlightForm()
@@ -682,7 +693,12 @@ def assessment_create(request):
         )
 
     if request.method == "POST":
-        form = AssessmentForm(request.POST)
+        post_data = request.POST.copy()
+
+        if inspection:
+            post_data["inspection"] = inspection.pk
+
+        form = AssessmentForm(post_data)
 
         if form.is_valid():
             assessment = form.save(commit=False)
@@ -911,7 +927,12 @@ def payment_create(request):
         )
 
     if request.method == "POST":
-        form = PaymentForm(request.POST)
+        post_data = request.POST.copy()
+
+        if assessment:
+            post_data["assessment"] = assessment.pk
+
+        form = PaymentForm(post_data)
 
         if form.is_valid():
             payment = form.save(commit=False)
@@ -1142,7 +1163,12 @@ def clearance_create(request):
         baggage = payment.assessment.inspection.baggage
 
     if request.method == "POST":
-        form = ClearanceForm(request.POST)
+        post_data = request.POST.copy()
+
+        if baggage:
+            post_data["baggage"] = baggage.pk
+
+        form = ClearanceForm(post_data)
 
         if form.is_valid():
             clearance = form.save(commit=False)
@@ -1355,15 +1381,46 @@ def case_create(request):
         )
 
     if request.method == "POST":
-        form = CaseForm(request.POST)
+        post_data = request.POST.copy()
+
+        if baggage:
+            post_data["baggage"] = baggage.pk
+
+        form = CaseForm(post_data)
 
         if form.is_valid():
             case = form.save(commit=False)
 
-            case.baggage = baggage
-            case.created_by = request.user
+            if baggage:
+                case.baggage = baggage
 
-            case.save()
+            # Prevent accidentally creating another active case
+            # for the same baggage through a direct URL request.
+            if case.baggage and Case.objects.filter(
+                baggage=case.baggage,
+                status__in=["open", "under_review"],
+            ).exists():
+                form.add_error(
+                    "baggage",
+                    "This baggage already has an active case.",
+                )
+            else:
+                case.created_by = request.user
+                case.save()
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="create",
+                    model_name="Case",
+                    object_id=case.id,
+                    description=(
+                        f"Created case "
+                        f"{case.case_reference} for baggage "
+                        f"{case.baggage.baggage_tag}"
+                    ),
+                )
+
+                return redirect("case_list")
 
             AuditLog.objects.create(
                 user=request.user,
@@ -1638,6 +1695,10 @@ def audit_log_detail(request, log_id):
     )
 
 @login_required
+@permission_required(
+    "passengers.view_baggage",
+    raise_exception=True,
+)
 def baggage_detail(request, baggage_id):
     baggage = get_object_or_404(
         Baggage.objects.select_related(
@@ -1674,4 +1735,3 @@ def baggage_detail(request, baggage_id):
             "cases": cases,
         },
     )
-
