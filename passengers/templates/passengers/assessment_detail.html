@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment Detail</title>
+</head>
+
+<body>
+
+    <h1>Assessment Detail</h1>
+
+    <p>
+        <a href="{% url 'assessment_list' %}">
+            Back to Assessments
+        </a>
+    </p>
+
+
+    <h2>Assessment Information</h2>
+
+    <p>
+        Status:
+        {{ assessment.get_status_display }}
+    </p>
+
+    <p>
+        Baggage:
+        <a href="{% url 'baggage_detail' assessment.inspection.baggage.id %}">
+            {{ assessment.inspection.baggage.baggage_tag }}
+        </a>
+    </p>
+
+    <p>
+        Declared Value:
+        {{ assessment.declared_value }}
+    </p>
+
+    <p>
+        Assessed Value:
+        {{ assessment.assessed_value }}
+    </p>
+
+    <p>
+        Duty Amount:
+        {{ assessment.duty_amount }}
+    </p>
+
+    <p>
+        Tax Amount:
+        {{ assessment.tax_amount }}
+    </p>
+
+    <p>
+        Remarks:
+        {% if assessment.remarks %}
+            {{ assessment.remarks }}
+        {% else %}
+            No remarks.
+        {% endif %}
+    </p>
+
+    <p>
+        Assessed At:
+        {% if assessment.assessed_at %}
+            {{ assessment.assessed_at }}
+        {% else %}
+            Not yet assessed.
+        {% endif %}
+    </p>
+
+    <p>
+        <a href="{% url 'assessment_update' assessment.id %}">
+            Update Assessment
+        </a>
+    </p>
+
+
+    <hr>
+
+
+    <h2>Related Inspection</h2>
+
+    <p>
+        Status:
+        {{ assessment.inspection.get_status_display }}
+    </p>
+
+    <p>
+        Result:
+        {{ assessment.inspection.get_result_display }}
+    </p>
+
+    <p>
+        Findings:
+        {% if assessment.inspection.findings %}
+            {{ assessment.inspection.findings }}
+        {% else %}
+            No findings.
+        {% endif %}
+    </p>
+
+    <a href="{% url 'inspection_detail' assessment.inspection.id %}">
+        View Inspection
+    </a>
+
+
+    <hr>
+
+
+    <h2>Passenger</h2>
+
+    <p>
+        Name:
+        {{ assessment.inspection.baggage.passenger.first_name }}
+        {{ assessment.inspection.baggage.passenger.last_name }}
+    </p>
+
+    <p>
+        Passport:
+        {{ assessment.inspection.baggage.passenger.passport_number }}
+    </p>
+
+    <p>
+        Nationality:
+        {{ assessment.inspection.baggage.passenger.nationality }}
+    </p>
+
+
+    <hr>
+
+
+    <h2>Payment</h2>
+
+    {% if payment %}
+
+        <p>
+            Status:
+            {{ payment.get_status_display }}
+        </p>
+
+        <p>
+            Amount Due:
+            {{ payment.amount_due }}
+        </p>
+
+        <p>
+            Amount Paid:
+            {{ payment.amount_paid }}
+        </p>
+
+        <p>
+            Payment Method:
+            {{ payment.get_payment_method_display }}
+        </p>
+
+        <a href="{% url 'payment_update' payment.id %}">
+            View / Update Payment
+        </a>
+
+    {% elif assessment.status == "completed" %}
+
+        <p>
+            Assessment is completed. Payment can now be created.
+        </p>
+
+        <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}">
+            Create Payment
+        </a>
+
+    {% else %}
+
+        <p>
+            Payment is not available until the assessment is completed.
+        </p>
+
+    {% endif %}
+
+
+    <hr>
+
+
+    <h2>Clearance</h2>
+
+    {% if clearance %}
+
+        <p>
+            Reference:
+            {{ clearance.clearance_reference }}
+        </p>
+
+        <p>
+            Status:
+            {{ clearance.get_status_display }}
+        </p>
+
+        <a href="{% url 'clearance_update' clearance.id %}">
+            View / Update Clearance
+        </a>
+
+    {% elif payment and payment.status == "paid" %}
+
+        <p>
+            Payment has been completed. Clearance can now be processed.
+        </p>
+
+        <a href="{% url 'clearance_create' %}?payment={{ payment.id }}">
+            Create Clearance
+        </a>
+
+    {% else %}
+
+        <p>
+            Clearance is not available yet.
+        </p>
+
+    {% endif %}
+
+</body>
+</html>

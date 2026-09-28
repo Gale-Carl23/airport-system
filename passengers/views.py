@@ -781,6 +781,40 @@ def assessment_update(request, assessment_id):
 
 @login_required
 @permission_required(
+    "passengers.view_assessment",
+    raise_exception=True,
+)
+def assessment_detail(request, assessment_id):
+    assessment = get_object_or_404(
+        Assessment.objects.select_related(
+            "inspection",
+            "inspection__baggage",
+            "inspection__baggage__passenger",
+            "inspection__baggage__passenger__flight",
+        ),
+        id=assessment_id,
+    )
+
+    payment = getattr(assessment, "payment", None)
+
+    clearance = getattr(
+        assessment.inspection.baggage,
+        "clearance",
+        None,
+    )
+
+    return render(
+        request,
+        "passengers/assessment_detail.html",
+        {
+            "assessment": assessment,
+            "payment": payment,
+            "clearance": clearance,
+        },
+    )
+
+@login_required
+@permission_required(
     "passengers.view_payment",
     raise_exception=True,
 )

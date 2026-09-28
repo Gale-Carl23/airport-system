@@ -75,6 +75,9 @@
                         {{ assessment.assessed_at|default:"-" }}
                     </td>
                     <td>
+                        <a href="{% url 'assessment_detail' assessment.id %}">
+                            View Assessment
+                        </a>
                         <a href="{% url 'assessment_update' assessment.id %}">
                             Edit
                         </a>
