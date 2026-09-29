@@ -6,6 +6,7 @@
     <title>Dashboard</title>
 </head>
 <body>
+    <form method="post" action="{% url 'logout' %}" style="display: inline;"> {% csrf_token %} <button type="submit" class="logout-btn"> Logout </button> </form>
     <h1>BOC-NAIA Operations Dashboard</h1>
 
     <p>
@@ -229,5 +230,7 @@
         <strong>Email:</strong>
         {{ request.user.email|default:"-" }}
     </p>
+
+    
 </body>
 </html>
