@@ -394,8 +394,11 @@ def baggage_update(request, baggage_id):
             "declared": baggage.declared,
         }
 
+        post_data = request.POST.copy()
+        post_data["passenger"] = baggage.passenger_id
+
         form = BaggageForm(
-            request.POST,
+            post_data,
             instance=baggage,
         )
 
@@ -548,8 +551,11 @@ def inspection_update(request, inspection_id):
         old_findings = inspection.findings
         old_inspected_at = inspection.inspected_at
 
+        post_data = request.POST.copy()
+        post_data["baggage"] = inspection.baggage_id
+
         form = InspectionForm(
-            request.POST,
+            post_data,
             instance=inspection,
         )
 
@@ -760,8 +766,11 @@ def assessment_update(request, assessment_id):
             "assessed_at": assessment.assessed_at,
         }
 
+        post_data = request.POST.copy()
+        post_data["inspection"] = assessment.inspection_id
+
         form = AssessmentForm(
-            request.POST,
+            post_data,
             instance=assessment,
         )
 
@@ -1029,8 +1038,11 @@ def payment_update(request, payment_id):
             "remarks": payment.remarks,
         }
 
+        post_data = request.POST.copy()
+        post_data["assessment"] = payment.assessment_id
+
         form = PaymentForm(
-            request.POST,
+            post_data,
             instance=payment,
         )
 
@@ -1226,8 +1238,11 @@ def clearance_update(request, clearance_id):
             "cleared_at": clearance.cleared_at,
             "remarks": clearance.remarks,
         }
+        post_data = request.POST.copy()
+        post_data["baggage"] = clearance.baggage_id
+
         form = ClearanceForm(
-            request.POST,
+            post_data,
             instance=clearance,
         )
 
@@ -1459,8 +1474,11 @@ def case_update(request, case_id):
             "resolution": case.resolution,
             "resolved_at": case.resolved_at,
         }
+        post_data = request.POST.copy()
+        post_data["baggage"] = case.baggage_id
+
         form = CaseForm(
-            request.POST,
+            post_data,
             instance=case,
         )
 
@@ -1721,3 +1739,4 @@ def baggage_detail(request, baggage_id):
             "cases": cases,
         },
     )
+
