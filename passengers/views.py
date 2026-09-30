@@ -1138,7 +1138,7 @@ def payment_list(request):
             "method_choices": Payment.METHOD_CHOICES,
         },
     )
-    
+
 @login_required
 @permission_required(
     "passengers.add_payment",
@@ -1365,13 +1365,59 @@ def clearance_list(request):
     clearances = Clearance.objects.select_related(
         "baggage",
         "baggage__passenger",
-    ).order_by("-created_at")
+        "baggage__passenger__flight",
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        clearances = clearances.filter(
+            Q(clearance_reference__icontains=search)
+            | Q(baggage__baggage_tag__icontains=search)
+            | Q(
+                baggage__passenger__reference_number__icontains=search
+            )
+            | Q(
+                baggage__passenger__first_name__icontains=search
+            )
+            | Q(
+                baggage__passenger__last_name__icontains=search
+            )
+            | Q(remarks__icontains=search)
+        )
+
+    if status:
+        clearances = clearances.filter(status=status)
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+        if parsed_from:
+            clearances = clearances.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+        if parsed_to:
+            clearances = clearances.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    clearances = clearances.order_by("-created_at")
 
     return render(
         request,
         "passengers/clearance_list.html",
         {
             "clearances": clearances,
+            "search": search,
+            "selected_status": status,
+            "date_from": date_from,
+            "date_to": date_to,
+            "status_choices": Clearance.STATUS_CHOICES,
         },
     )
 

@@ -17,11 +17,45 @@
         </a>
     </p>
 
-    <p>
-        <a href="{% url 'dashboard' %}">
-            Back to Dashboard
-        </a>
-    </p>
+    
+
+    <form method="get" class="filter-form">
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search }}"
+            placeholder="Clearance reference, baggage..."
+        >
+
+        <select name="status">
+            <option value="">All Statuses</option>
+
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>
+            From
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </label>
+
+        <label>
+            To
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </label>
+
+        <button type="submit">Filter</button>
+
+        <a href="{% url 'clearance_list' %}">Reset</a>
+
+    </form>
 
     <table border="1">
 
@@ -91,6 +125,12 @@
         </tbody>
 
     </table>
+
+    <p>
+        <a href="{% url 'dashboard' %}">
+            Back to Dashboard
+        </a>
+    </p>
 
 </body>
 </html>
