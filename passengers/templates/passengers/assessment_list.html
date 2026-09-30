@@ -21,6 +21,44 @@
     <br>
     <br>
 
+    <form method="get" class="filter-form">
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search }}"
+            placeholder="Baggage tag, passenger reference..."
+        >
+
+        <select name="status">
+            <option value="">All Statuses</option>
+
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>
+            From
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </label>
+
+        <label>
+            To
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </label>
+
+        <button type="submit">Filter</button>
+
+        <a href="{% url 'assessment_list' %}">Reset</a>
+
+    </form>
+    
     <table border="1">
 
         <thead>

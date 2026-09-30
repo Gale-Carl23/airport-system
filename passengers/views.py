@@ -805,13 +805,53 @@ def assessment_list(request):
         "inspection",
         "inspection__baggage",
         "inspection__baggage__passenger",
-    ).order_by("-created_at")
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        assessments = assessments.filter(
+            Q(
+                inspection__baggage__baggage_tag__icontains=search
+            )
+            | Q(
+                inspection__baggage__passenger__reference_number__icontains=search
+            )
+            | Q(remarks__icontains=search)
+        )
+
+    if status:
+        assessments = assessments.filter(status=status)
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+        if parsed_from:
+            assessments = assessments.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+        if parsed_to:
+            assessments = assessments.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    assessments = assessments.order_by("-created_at")
 
     return render(
         request,
         "passengers/assessment_list.html",
         {
             "assessments": assessments,
+            "search": search,
+            "selected_status": status,
+            "date_from": date_from,
+            "date_to": date_to,
+            "status_choices": Assessment.STATUS_CHOICES,
         },
     )
 
