@@ -16,6 +16,18 @@
     <hr>
 
     <h2>Overview</h2>
+    <form method="get" action="{% url 'global_search' %}">
+        <input
+            type="search"
+            name="q"
+            placeholder="Search passenger, baggage, flight, case..."
+            value="{{ query }}"
+        >
+
+        <button type="submit">
+            Search
+        </button>
+    </form>
 
     <div>
 

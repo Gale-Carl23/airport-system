@@ -1740,3 +1740,106 @@ def baggage_detail(request, baggage_id):
         },
     )
 
+@login_required
+def global_search(request):
+    query = request.GET.get("q", "").strip()
+
+    passengers = Passenger.objects.none()
+    flights = Flight.objects.none()
+    baggage = Baggage.objects.none()
+    inspections = Inspection.objects.none()
+    assessments = Assessment.objects.none()
+    payments = Payment.objects.none()
+    clearances = Clearance.objects.none()
+    cases = Case.objects.none()
+
+    if query:
+        passengers = Passenger.objects.filter(
+            Q(reference_number__icontains=query)
+            | Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(passport_number__icontains=query)
+        ).order_by("-arrival_datetime")[:10]
+
+        flights = Flight.objects.filter(
+            Q(flight_number__icontains=query)
+            | Q(airline__icontains=query)
+            | Q(origin__icontains=query)
+        ).order_by("-arrival_datetime")[:10]
+
+        baggage = Baggage.objects.select_related(
+            "passenger"
+        ).filter(
+            Q(baggage_tag__icontains=query)
+            | Q(description__icontains=query)
+            | Q(passenger__reference_number__icontains=query)
+            | Q(passenger__first_name__icontains=query)
+            | Q(passenger__last_name__icontains=query)
+        ).order_by("-created_at")[:10]
+
+        inspections = Inspection.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+        ).filter(
+            Q(baggage__baggage_tag__icontains=query)
+            | Q(baggage__passenger__reference_number__icontains=query)
+            | Q(findings__icontains=query)
+            | Q(status__icontains=query)
+            | Q(result__icontains=query)
+        ).order_by("-created_at")[:10]
+
+        assessments = Assessment.objects.select_related(
+            "inspection",
+            "inspection__baggage",
+        ).filter(
+            Q(inspection__baggage__baggage_tag__icontains=query)
+            | Q(status__icontains=query)
+            | Q(remarks__icontains=query)
+        ).order_by("-created_at")[:10]
+
+        payments = Payment.objects.select_related(
+            "assessment",
+            "assessment__inspection",
+            "assessment__inspection__baggage",
+        ).filter(
+            Q(assessment__inspection__baggage__baggage_tag__icontains=query)
+            | Q(status__icontains=query)
+            | Q(payment_reference__icontains=query)
+            | Q(payment_method__icontains=query)
+        ).order_by("-created_at")[:10]
+
+        clearances = Clearance.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+        ).filter(
+            Q(clearance_reference__icontains=query)
+            | Q(baggage__baggage_tag__icontains=query)
+            | Q(status__icontains=query)
+        ).order_by("-created_at")[:10]
+
+        cases = Case.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+        ).filter(
+            Q(case_reference__icontains=query)
+            | Q(baggage__baggage_tag__icontains=query)
+            | Q(case_type__icontains=query)
+            | Q(status__icontains=query)
+            | Q(description__icontains=query)
+        ).order_by("-created_at")[:10]
+
+    return render(
+        request,
+        "passengers/global_search.html",
+        {
+            "query": query,
+            "passengers": passengers,
+            "flights": flights,
+            "baggage": baggage,
+            "inspections": inspections,
+            "assessments": assessments,
+            "payments": payments,
+            "clearances": clearances,
+            "cases": cases,
+        },
+    )
