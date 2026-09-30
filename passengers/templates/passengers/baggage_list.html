@@ -73,7 +73,7 @@
         </a>
 
     </form>
-    
+
     <table border="1">
 
         <thead>
@@ -140,6 +140,36 @@
         </tbody>
 
     </table>
+    {% if baggage.has_other_pages %}
+        <div class="pagination">
+
+            {% if baggage.has_previous %}
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    First
+                </a>
+
+                <a href="?page={{ baggage.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ baggage.number }}
+                of {{ baggage.paginator.num_pages }}
+            </span>
+
+            {% if baggage.has_next %}
+                <a href="?page={{ baggage.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Next
+                </a>
+
+                <a href="?page={{ baggage.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
 
     <br>
 

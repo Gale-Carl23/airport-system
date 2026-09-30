@@ -1,147 +1,221 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Assessments | BOC-NAIA</title>
+<title>Assessments | BOC-NAIA</title>
+
 </head>
 
 <body>
 
-    <h1>BOC-NAIA Operations System</h1>
+<h1>BOC-NAIA Operations System</h1>
 
-    <h2>Assessments</h2>
+<h2>Assessments</h2>
 
-    <a href="{% url 'assessment_create' %}">
-        Create Assessment
-    </a>
+<a href="{% url 'assessment_create' %}">
+    Create Assessment
+</a>
 
-    <br>
-    <br>
+<br>
+<br>
 
-    <form method="get" class="filter-form">
+<!-- Filters -->
+<form method="get" class="filter-form">
+
+    <input
+        type="search"
+        name="q"
+        value="{{ search }}"
+        placeholder="Baggage tag, passenger reference..."
+    >
+
+    <select name="status">
+
+        <option value="">
+            All Statuses
+        </option>
+
+        {% for value, label in status_choices %}
+
+            <option
+                value="{{ value }}"
+                {% if selected_status == value %}
+                    selected
+                {% endif %}
+            >
+                {{ label }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+    <label>
+        From
 
         <input
-            type="search"
-            name="q"
-            value="{{ search }}"
-            placeholder="Baggage tag, passenger reference..."
+            type="date"
+            name="date_from"
+            value="{{ date_from }}"
         >
+    </label>
 
-        <select name="status">
-            <option value="">All Statuses</option>
+    <label>
+        To
 
-            {% for value, label in status_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_status == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
+        <input
+            type="date"
+            name="date_to"
+            value="{{ date_to }}"
+        >
+    </label>
 
-        <label>
-            From
-            <input type="date" name="date_from" value="{{ date_from }}">
-        </label>
+    <button type="submit">
+        Filter
+    </button>
 
-        <label>
-            To
-            <input type="date" name="date_to" value="{{ date_to }}">
-        </label>
-
-        <button type="submit">Filter</button>
-
-        <a href="{% url 'assessment_list' %}">Reset</a>
-
-    </form>
-    
-    <table border="1">
-
-        <thead>
-            <tr>
-                <th>Baggage Tag</th>
-                <th>Passenger</th>
-                <th>Status</th>
-                <th>Declared Value</th>
-                <th>Assessed Value</th>
-                <th>Duty</th>
-                <th>Tax</th>
-                <th>Assessed At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {% for assessment in assessments %}
-
-                <tr>
-
-                    <td>
-                        {{ assessment.inspection.baggage.baggage_tag }}
-                    </td>
-
-                    <td>
-                        {{ assessment.inspection.baggage.passenger }}
-                    </td>
-
-                    <td>
-                        {{ assessment.get_status_display }}
-                    </td>
-
-                    <td>
-                        ₱{{ assessment.declared_value }}
-                    </td>
-
-                    <td>
-                        ₱{{ assessment.assessed_value }}
-                    </td>
-
-                    <td>
-                        ₱{{ assessment.duty_amount }}
-                    </td>
-
-                    <td>
-                        ₱{{ assessment.tax_amount }}
-                    </td>
-
-                    <td>
-                        {{ assessment.assessed_at|default:"-" }}
-                    </td>
-                    <td>
-                        <a href="{% url 'assessment_detail' assessment.id %}">
-                            View Assessment
-                        </a>
-                        <a href="{% url 'assessment_update' assessment.id %}">
-                            Edit
-                        </a>
-                    </td>
-
-                </tr>
-
-            {% empty %}
-
-                <tr>
-                    <td colspan="9">
-                        No assessments found.
-                    </td>
-                </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-
-    <br>
-
-    <a href="{% url 'dashboard' %}">
-        Back to Dashboard
+    <a href="{% url 'assessment_list' %}">
+        Reset
     </a>
+
+</form>
+
+<br>
+
+<!-- Assessment Table -->
+<table border="1">
+
+    <thead>
+
+        <tr>
+            <th>Baggage Tag</th>
+            <th>Passenger</th>
+            <th>Status</th>
+            <th>Declared Value</th>
+            <th>Assessed Value</th>
+            <th>Duty</th>
+            <th>Tax</th>
+            <th>Assessed At</th>
+            <th>Action</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for assessment in assessments %}
+
+            <tr>
+
+                <td>
+                    {{ assessment.inspection.baggage.baggage_tag }}
+                </td>
+
+                <td>
+                    {{ assessment.inspection.baggage.passenger }}
+                </td>
+
+                <td>
+                    {{ assessment.get_status_display }}
+                </td>
+
+                <td>
+                    ₱{{ assessment.declared_value }}
+                </td>
+
+                <td>
+                    ₱{{ assessment.assessed_value }}
+                </td>
+
+                <td>
+                    ₱{{ assessment.duty_amount }}
+                </td>
+
+                <td>
+                    ₱{{ assessment.tax_amount }}
+                </td>
+
+                <td>
+                    {{ assessment.assessed_at|default:"-" }}
+                </td>
+
+                <td>
+                    <a href="{% url 'assessment_detail' assessment.id %}">
+                        View Assessment
+                    </a>
+
+                    |
+
+                    <a href="{% url 'assessment_update' assessment.id %}">
+                        Edit
+                    </a>
+                </td>
+
+            </tr>
+
+        {% empty %}
+
+            <tr>
+
+                <td colspan="9">
+                    No assessments found.
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<br>
+
+<!-- Pagination -->
+{% if assessments.has_other_pages %}
+
+    <div class="pagination">
+
+        {% if assessments.has_previous %}
+
+            <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
+                First
+            </a>
+
+            <a href="?page={{ assessments.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
+                Previous
+            </a>
+
+        {% endif %}
+
+        <span>
+            Page {{ assessments.number }}
+            of {{ assessments.paginator.num_pages }}
+        </span>
+
+        {% if assessments.has_next %}
+
+            <a href="?page={{ assessments.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
+                Next
+            </a>
+
+            <a href="?page={{ assessments.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
+                Last
+            </a>
+
+        {% endif %}
+
+    </div>
+
+{% endif %}
+
+<br>
+
+<a href="{% url 'dashboard' %}">
+    Back to Dashboard
+</a>
 
 </body>
 

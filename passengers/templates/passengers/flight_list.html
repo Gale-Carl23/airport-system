@@ -53,7 +53,36 @@
             {% endfor %}
         </tbody>
     </table>
+    {% if flights.has_other_pages %}
+        <div class="pagination">
 
+            {% if flights.has_previous %}
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    First
+                </a>
+
+                <a href="?page={{ flights.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ flights.number }}
+                of {{ flights.paginator.num_pages }}
+            </span>
+
+            {% if flights.has_next %}
+                <a href="?page={{ flights.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Next
+                </a>
+
+                <a href="?page={{ flights.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
     <br>
 
     <a href="{% url 'dashboard' %}">

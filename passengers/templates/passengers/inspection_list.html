@@ -153,6 +153,36 @@
         </tbody>
 
     </table>
+    {% if inspections.has_other_pages %}
+        <div class="pagination">
+
+            {% if inspections.has_previous %}
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    First
+                </a>
+
+                <a href="?page={{ inspections.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ inspections.number }}
+                of {{ inspections.paginator.num_pages }}
+            </span>
+
+            {% if inspections.has_next %}
+                <a href="?page={{ inspections.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Next
+                </a>
+
+                <a href="?page={{ inspections.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
 
     <br>
 

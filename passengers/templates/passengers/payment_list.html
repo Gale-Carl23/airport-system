@@ -137,6 +137,36 @@
             {% endfor %}
         </tbody>
     </table>
+    {% if payments.has_other_pages %}
+        <div class="pagination">
+
+            {% if payments.has_previous %}
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    First
+                </a>
+
+                <a href="?page={{ payments.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ payments.number }}
+                of {{ payments.paginator.num_pages }}
+            </span>
+
+            {% if payments.has_next %}
+                <a href="?page={{ payments.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Next
+                </a>
+
+                <a href="?page={{ payments.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
 
     <p>
         <a href="{% url 'dashboard' %}">

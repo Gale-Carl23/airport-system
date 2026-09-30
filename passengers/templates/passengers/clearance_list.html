@@ -125,7 +125,36 @@
         </tbody>
 
     </table>
+    {% if clearances.has_other_pages %}
+        <div class="pagination">
 
+            {% if clearances.has_previous %}
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    First
+                </a>
+
+                <a href="?page={{ clearances.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ clearances.number }}
+                of {{ clearances.paginator.num_pages }}
+            </span>
+
+            {% if clearances.has_next %}
+                <a href="?page={{ clearances.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Next
+                </a>
+
+                <a href="?page={{ clearances.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
     <p>
         <a href="{% url 'dashboard' %}">
             Back to Dashboard

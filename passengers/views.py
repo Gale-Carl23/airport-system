@@ -79,6 +79,10 @@ def passenger_list(request):
 
     passengers = passengers.order_by("-arrival_datetime")
 
+    paginator = Paginator(passengers, 20)
+    page_number = request.GET.get("page")
+    passengers = paginator.get_page(page_number)
+
     return render(
         request,
         "passengers/passenger_list.html",
@@ -89,11 +93,11 @@ def passenger_list(request):
             "selected_flight": flight_id,
             "date_from": date_from,
             "date_to": date_to,
-            "flights": Flight.objects.order_by(
-                "-arrival_datetime"
-            ),
+            "flights": Flight.objects.order_by("-arrival_datetime"),
         },
     )
+
+    
 
 @login_required
 @permission_required(
@@ -290,7 +294,9 @@ def passenger_detail(request, passenger_id):
 )
 def flight_list(request):
     flights = Flight.objects.all().order_by("-arrival_datetime")
-
+    paginator = Paginator(flights, 20)
+    page_number = request.GET.get("page")
+    flights = paginator.get_page(page_number)
     return render(
         request,
         "passengers/flight_list.html",
@@ -409,6 +415,9 @@ def baggage_list(request):
             )
 
     baggage = baggage.order_by("-created_at")
+    paginator = Paginator(baggage, 20)
+    page_number = request.GET.get("page")
+    baggage = paginator.get_page(page_number)
 
     return render(
         request,
@@ -619,6 +628,9 @@ def inspection_list(request):
 
     inspections = inspections.order_by("-created_at")
 
+    paginator = Paginator(inspections, 20)
+    page_number = request.GET.get("page")
+    inspections = paginator.get_page(page_number)
     return render(
         request,
         "passengers/inspection_list.html",
@@ -801,46 +813,71 @@ def inspection_detail(request, inspection_id):
     raise_exception=True,
 )
 def assessment_list(request):
+
     assessments = Assessment.objects.select_related(
-        "inspection",
-        "inspection__baggage",
-        "inspection__baggage__passenger",
-    ).all()
+        "inspection__baggage__passenger"
+    ).order_by("-created_at")
 
     search = request.GET.get("q", "").strip()
-    status = request.GET.get("status", "").strip()
+    selected_status = request.GET.get("status", "").strip()
     date_from = request.GET.get("date_from", "").strip()
     date_to = request.GET.get("date_to", "").strip()
 
+    # Search
     if search:
         assessments = assessments.filter(
             Q(
                 inspection__baggage__baggage_tag__icontains=search
             )
-            | Q(
+            |
+            Q(
                 inspection__baggage__passenger__reference_number__icontains=search
             )
-            | Q(remarks__icontains=search)
+            |
+            Q(
+                inspection__baggage__passenger__first_name__icontains=search
+            )
+            |
+            Q(
+                inspection__baggage__passenger__last_name__icontains=search
+            )
         )
 
-    if status:
-        assessments = assessments.filter(status=status)
+    # Status filter
+    if selected_status:
+        assessments = assessments.filter(
+            status=selected_status
+        )
 
+    # Date from
     if date_from:
-        parsed_from = parse_date(date_from)
-        if parsed_from:
+        parsed_date_from = parse_date(date_from)
+
+        if parsed_date_from:
             assessments = assessments.filter(
-                created_at__date__gte=parsed_from
+                created_at__date__gte=parsed_date_from
             )
 
+    # Date to
     if date_to:
-        parsed_to = parse_date(date_to)
-        if parsed_to:
+        parsed_date_to = parse_date(date_to)
+
+        if parsed_date_to:
             assessments = assessments.filter(
-                created_at__date__lte=parsed_to
+                created_at__date__lte=parsed_date_to
             )
 
-    assessments = assessments.order_by("-created_at")
+    # Pagination
+    paginator = Paginator(
+        assessments,
+        20
+    )
+
+    page_number = request.GET.get("page")
+
+    assessments = paginator.get_page(
+        page_number
+    )
 
     return render(
         request,
@@ -848,7 +885,7 @@ def assessment_list(request):
         {
             "assessments": assessments,
             "search": search,
-            "selected_status": status,
+            "selected_status": selected_status,
             "date_from": date_from,
             "date_to": date_to,
             "status_choices": Assessment.STATUS_CHOICES,
@@ -1123,7 +1160,9 @@ def payment_list(request):
             )
 
     payments = payments.order_by("-created_at")
-
+    paginator = Paginator(payments, 20)
+    page_number = request.GET.get("page")
+    payments = paginator.get_page(page_number)
     return render(
         request,
         "passengers/payment_list.html",
@@ -1408,6 +1447,9 @@ def clearance_list(request):
 
     clearances = clearances.order_by("-created_at")
 
+    paginator = Paginator(clearances, 20)
+    page_number = request.GET.get("page")
+    passengers = paginator.get_page(page_number)
     return render(
         request,
         "passengers/clearance_list.html",
@@ -1678,7 +1720,9 @@ def case_list(request):
             )
 
     cases = cases.order_by("-created_at")
-
+    paginator = Paginator(cases, 20)
+    page_number = request.GET.get("page")
+    passengers = paginator.get_page(page_number)
     return render(
         request,
         "passengers/case_list.html",
