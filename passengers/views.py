@@ -35,24 +35,63 @@ from .forms import (
     raise_exception=True,
 )
 def passenger_list(request):
-    search_query = request.GET.get("q", "").strip()
+    passengers = Passenger.objects.select_related(
+        "flight",
+    ).all()
 
-    passengers = Passenger.objects.all().order_by("-arrival_datetime")
+    search = request.GET.get("q", "").strip()
+    nationality = request.GET.get("nationality", "").strip()
+    flight_id = request.GET.get("flight", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
 
-    if search_query:
+    if search:
         passengers = passengers.filter(
-            Q(reference_number__icontains=search_query)
-            | Q(first_name__icontains=search_query)
-            | Q(last_name__icontains=search_query)
-            | Q(passport_number__icontains=search_query)
+            Q(reference_number__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(passport_number__icontains=search)
         )
+
+    if nationality:
+        passengers = passengers.filter(
+            nationality__iexact=nationality
+        )
+
+    if flight_id:
+        passengers = passengers.filter(
+            flight_id=flight_id
+        )
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+        if parsed_from:
+            passengers = passengers.filter(
+                arrival_datetime__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+        if parsed_to:
+            passengers = passengers.filter(
+                arrival_datetime__date__lte=parsed_to
+            )
+
+    passengers = passengers.order_by("-arrival_datetime")
 
     return render(
         request,
         "passengers/passenger_list.html",
         {
             "passengers": passengers,
-            "search_query": search_query,
+            "search": search,
+            "selected_nationality": nationality,
+            "selected_flight": flight_id,
+            "date_from": date_from,
+            "date_to": date_to,
+            "flights": Flight.objects.order_by(
+                "-arrival_datetime"
+            ),
         },
     )
 

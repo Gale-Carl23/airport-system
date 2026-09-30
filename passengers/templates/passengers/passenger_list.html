@@ -20,24 +20,60 @@
     <br>
     <br>
 
-    <form method="get">
+    <form method="get" class="filter-form">
 
-    <input
-        type="text"
-        name="q"
-        placeholder="Search passenger..."
-        value="{{ search_query }}"
-    >
+        <input
+            type="search"
+            name="q"
+            value="{{ search }}"
+            placeholder="Name, passport, reference..."
+        >
 
-    <button type="submit">
-        Search
-    </button>
+        <input
+            type="text"
+            name="nationality"
+            value="{{ selected_nationality }}"
+            placeholder="Nationality"
+        >
 
-    {% if search_query %}
+        <select name="flight">
+            <option value="">All Flights</option>
+
+            {% for flight in flights %}
+                <option
+                    value="{{ flight.id }}"
+                    {% if selected_flight == flight.id|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ flight.flight_number }} - {{ flight.airline }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>
+            From
+            <input
+                type="date"
+                name="date_from"
+                value="{{ date_from }}"
+            >
+        </label>
+
+        <label>
+            To
+            <input
+                type="date"
+                name="date_to"
+                value="{{ date_to }}"
+            >
+        </label>
+
+        <button type="submit">Filter</button>
+
         <a href="{% url 'passenger_list' %}">
-            Clear
+            Reset
         </a>
-    {% endif %}
 
     </form>
 
