@@ -21,6 +21,59 @@
     <br>
     <br>
 
+    <form method="get" class="filter-form">
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search }}"
+            placeholder="Baggage tag, passenger, passport..."
+        >
+
+        <select name="declared">
+            <option value="">All Declaration Status</option>
+
+            <option
+                value="yes"
+                {% if selected_declared == "yes" %}selected{% endif %}
+            >
+                Declared
+            </option>
+
+            <option
+                value="no"
+                {% if selected_declared == "no" %}selected{% endif %}
+            >
+                Undeclared
+            </option>
+        </select>
+
+        <label>
+            From
+            <input
+                type="date"
+                name="date_from"
+                value="{{ date_from }}"
+            >
+        </label>
+
+        <label>
+            To
+            <input
+                type="date"
+                name="date_to"
+                value="{{ date_to }}"
+            >
+        </label>
+
+        <button type="submit">Filter</button>
+
+        <a href="{% url 'baggage_list' %}">
+            Reset
+        </a>
+
+    </form>
+    
     <table border="1">
 
         <thead>

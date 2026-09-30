@@ -367,14 +367,58 @@ def flight_detail(request, flight_id):
 )
 def baggage_list(request):
     baggage = Baggage.objects.select_related(
-        "passenger"
-    ).order_by("-created_at")
+        "passenger",
+        "passenger__flight",
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    declared = request.GET.get("declared", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        baggage = baggage.filter(
+            Q(baggage_tag__icontains=search)
+            | Q(description__icontains=search)
+            | Q(passenger__reference_number__icontains=search)
+            | Q(passenger__first_name__icontains=search)
+            | Q(passenger__last_name__icontains=search)
+            | Q(passenger__passport_number__icontains=search)
+        )
+
+    if declared == "yes":
+        baggage = baggage.filter(declared=True)
+
+    elif declared == "no":
+        baggage = baggage.filter(declared=False)
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+
+        if parsed_from:
+            baggage = baggage.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+
+        if parsed_to:
+            baggage = baggage.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    baggage = baggage.order_by("-created_at")
 
     return render(
         request,
         "passengers/baggage_list.html",
         {
             "baggage": baggage,
+            "search": search,
+            "selected_declared": declared,
+            "date_from": date_from,
+            "date_to": date_to,
         },
     )
 
