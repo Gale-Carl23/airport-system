@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import (
 )
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
-
+from django.utils.dateparse import parse_date
 from .models import (
     Baggage,
     Flight,
@@ -490,13 +490,64 @@ def inspection_list(request):
     inspections = Inspection.objects.select_related(
         "baggage",
         "baggage__passenger",
-    ).order_by("-created_at")
+        "baggage__passenger__flight",
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    result = request.GET.get("result", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        inspections = inspections.filter(
+            Q(baggage__baggage_tag__icontains=search)
+            | Q(baggage__passenger__reference_number__icontains=search)
+            | Q(baggage__passenger__first_name__icontains=search)
+            | Q(baggage__passenger__last_name__icontains=search)
+            | Q(findings__icontains=search)
+        )
+
+    if status:
+        inspections = inspections.filter(
+            status=status
+        )
+
+    if result:
+        inspections = inspections.filter(
+            result=result
+        )
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+
+        if parsed_from:
+            inspections = inspections.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+
+        if parsed_to:
+            inspections = inspections.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    inspections = inspections.order_by("-created_at")
 
     return render(
         request,
         "passengers/inspection_list.html",
         {
             "inspections": inspections,
+            "search": search,
+            "selected_status": status,
+            "selected_result": result,
+            "date_from": date_from,
+            "date_to": date_to,
+            "status_choices": Inspection.STATUS_CHOICES,
+            "result_choices": Inspection.RESULT_CHOICES,
         },
     )
 
