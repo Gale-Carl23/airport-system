@@ -1,8 +1,10 @@
+import csv
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import (
     login_required,
     permission_required,
 )
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q, Count, Sum
 from django.utils.dateparse import parse_date
@@ -2570,3 +2572,216 @@ def operations_report(request):
             "case_closed_count": case_closed_count,
         },
     )
+
+@login_required
+@permission_required(
+    "passengers.view_baggage",
+    raise_exception=True,
+)
+def export_operations_csv(request):
+
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    baggage = Baggage.objects.select_related(
+        "passenger",
+        "passenger__flight",
+        "inspection",
+        "inspection__assessment",
+        "inspection__assessment__payment",
+        "clearance",
+    ).prefetch_related(
+        "cases"
+    ).order_by(
+        "-created_at"
+    )
+
+    # -----------------------------------
+    # DATE FILTER
+    # -----------------------------------
+
+    parsed_date_from = parse_date(date_from)
+    parsed_date_to = parse_date(date_to)
+
+    if parsed_date_from:
+        baggage = baggage.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+    if parsed_date_to:
+        baggage = baggage.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+    # -----------------------------------
+    # CREATE CSV RESPONSE
+    # -----------------------------------
+
+    response = HttpResponse(
+        content_type="text/csv"
+    )
+
+    response["Content-Disposition"] = (
+        'attachment; filename="boc_naia_operations_report.csv"'
+    )
+
+    writer = csv.writer(response)
+
+    # -----------------------------------
+    # HEADER
+    # -----------------------------------
+
+    writer.writerow([
+        "Passenger Reference",
+        "Passenger Name",
+        "Nationality",
+        "Flight Number",
+        "Airline",
+        "Baggage Tag",
+        "Baggage Description",
+        "Weight",
+        "Declared",
+        "Inspection Status",
+        "Inspection Result",
+        "Assessment Status",
+        "Declared Value",
+        "Assessed Value",
+        "Duty",
+        "Tax",
+        "Payment Status",
+        "Amount Due",
+        "Amount Paid",
+        "Clearance Status",
+        "Clearance Reference",
+        "Case Status",
+    ])
+
+    # -----------------------------------
+    # DATA
+    # -----------------------------------
+
+    for baggage_item in baggage:
+
+        passenger = baggage_item.passenger
+
+        flight = passenger.flight
+
+        inspection = getattr(
+            baggage_item,
+            "inspection",
+            None,
+        )
+
+        assessment = None
+        payment = None
+
+        if inspection:
+            assessment = getattr(
+                inspection,
+                "assessment",
+                None,
+            )
+
+        if assessment:
+            payment = getattr(
+                assessment,
+                "payment",
+                None,
+            )
+
+        clearance = getattr(
+            baggage_item,
+            "clearance",
+            None,
+        )
+
+        active_case = (
+            baggage_item.cases
+            .filter(
+                status__in=[
+                    "open",
+                    "under_review",
+                ]
+            )
+            .first()
+        )
+
+        writer.writerow([
+            passenger.reference_number,
+
+            str(passenger),
+
+            passenger.nationality,
+
+            flight.flight_number
+            if flight
+            else "",
+
+            flight.airline
+            if flight
+            else "",
+
+            baggage_item.baggage_tag,
+
+            baggage_item.description,
+
+            baggage_item.weight,
+
+            "Yes"
+            if baggage_item.declared
+            else "No",
+
+            inspection.get_status_display()
+            if inspection
+            else "",
+
+            inspection.get_result_display()
+            if inspection
+            else "",
+
+            assessment.get_status_display()
+            if assessment
+            else "",
+
+            assessment.declared_value
+            if assessment
+            else "",
+
+            assessment.assessed_value
+            if assessment
+            else "",
+
+            assessment.duty_amount
+            if assessment
+            else "",
+
+            assessment.tax_amount
+            if assessment
+            else "",
+
+            payment.get_status_display()
+            if payment
+            else "",
+
+            payment.amount_due
+            if payment
+            else "",
+
+            payment.amount_paid
+            if payment
+            else "",
+
+            clearance.get_status_display()
+            if clearance
+            else "",
+
+            clearance.clearance_reference
+            if clearance
+            else "",
+
+            active_case.get_status_display()
+            if active_case
+            else "",
+        ])
+
+    return response

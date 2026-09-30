@@ -176,4 +176,9 @@ urlpatterns = [
     views.operations_report,
     name="operations_report",
     ),
+    path(
+    "reports/operations/export/",
+    views.export_operations_csv,
+    name="export_operations_csv",
+    ),
 ]
