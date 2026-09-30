@@ -1082,16 +1082,63 @@ def payment_list(request):
         "assessment__inspection",
         "assessment__inspection__baggage",
         "assessment__inspection__baggage__passenger",
-    ).order_by("-created_at")
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    method = request.GET.get("method", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        payments = payments.filter(
+            Q(payment_reference__icontains=search)
+            | Q(
+                assessment__inspection__baggage__baggage_tag__icontains=search
+            )
+            | Q(
+                assessment__inspection__baggage__passenger__reference_number__icontains=search
+            )
+            | Q(remarks__icontains=search)
+        )
+
+    if status:
+        payments = payments.filter(status=status)
+
+    if method:
+        payments = payments.filter(payment_method=method)
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+        if parsed_from:
+            payments = payments.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+        if parsed_to:
+            payments = payments.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    payments = payments.order_by("-created_at")
 
     return render(
         request,
         "passengers/payment_list.html",
         {
             "payments": payments,
+            "search": search,
+            "selected_status": status,
+            "selected_method": method,
+            "date_from": date_from,
+            "date_to": date_to,
+            "status_choices": Payment.STATUS_CHOICES,
+            "method_choices": Payment.METHOD_CHOICES,
         },
     )
-
+    
 @login_required
 @permission_required(
     "passengers.add_payment",
