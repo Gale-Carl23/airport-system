@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import (
     permission_required,
 )
 from django.shortcuts import redirect, render, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Count, Sum
+from django.utils.dateparse import parse_date
 from django.utils.dateparse import parse_date
 from .models import (
     Baggage,
@@ -2294,5 +2295,278 @@ def global_search(request):
             "payments": payments,
             "clearances": clearances,
             "cases": cases,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_baggage",
+    raise_exception=True,
+)
+def operations_report(request):
+
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    passengers = Passenger.objects.all()
+    baggage = Baggage.objects.all()
+    inspections = Inspection.objects.all()
+    assessments = Assessment.objects.all()
+    payments = Payment.objects.all()
+    clearances = Clearance.objects.all()
+    cases = Case.objects.all()
+
+    # -----------------------------------
+    # DATE FILTERS
+    # -----------------------------------
+
+    parsed_date_from = None
+    parsed_date_to = None
+
+    if date_from:
+        parsed_date_from = parse_date(date_from)
+
+    if date_to:
+        parsed_date_to = parse_date(date_to)
+
+    if parsed_date_from:
+        passengers = passengers.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        baggage = baggage.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        inspections = inspections.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        assessments = assessments.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        payments = payments.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        clearances = clearances.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+        cases = cases.filter(
+            created_at__date__gte=parsed_date_from
+        )
+
+    if parsed_date_to:
+        passengers = passengers.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        baggage = baggage.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        inspections = inspections.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        assessments = assessments.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        payments = payments.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        clearances = clearances.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+        cases = cases.filter(
+            created_at__date__lte=parsed_date_to
+        )
+
+    # -----------------------------------
+    # BASIC COUNTS
+    # -----------------------------------
+
+    passenger_count = passengers.count()
+
+    baggage_count = baggage.count()
+
+    inspection_count = inspections.count()
+
+    assessment_count = assessments.count()
+
+    payment_count = payments.count()
+
+    clearance_count = clearances.count()
+
+    case_count = cases.count()
+
+    # -----------------------------------
+    # INSPECTION SUMMARY
+    # -----------------------------------
+
+    inspection_cleared_count = inspections.filter(
+        result="cleared"
+    ).count()
+
+    inspection_assessment_count = inspections.filter(
+        result="for_assessment"
+    ).count()
+
+    inspection_held_count = inspections.filter(
+        result="held"
+    ).count()
+
+    inspection_seized_count = inspections.filter(
+        result="seized"
+    ).count()
+
+    inspection_pending_count = inspections.filter(
+        status="pending"
+    ).count()
+
+    inspection_in_progress_count = inspections.filter(
+        status="in_progress"
+    ).count()
+
+    inspection_completed_count = inspections.filter(
+        status="completed"
+    ).count()
+
+    # -----------------------------------
+    # ASSESSMENT SUMMARY
+    # -----------------------------------
+
+    assessment_pending_count = assessments.filter(
+        status="pending"
+    ).count()
+
+    assessment_completed_count = assessments.filter(
+        status="completed"
+    ).count()
+
+    assessment_totals = assessments.aggregate(
+        total_declared_value=Sum("declared_value"),
+        total_assessed_value=Sum("assessed_value"),
+        total_duty=Sum("duty_amount"),
+        total_tax=Sum("tax_amount"),
+    )
+
+    # -----------------------------------
+    # PAYMENT SUMMARY
+    # -----------------------------------
+
+    payment_pending_count = payments.filter(
+        status="pending"
+    ).count()
+
+    payment_paid_count = payments.filter(
+        status="paid"
+    ).count()
+
+    payment_cancelled_count = payments.filter(
+        status="cancelled"
+    ).count()
+
+    payment_totals = payments.aggregate(
+        total_amount_due=Sum("amount_due"),
+        total_amount_paid=Sum("amount_paid"),
+    )
+
+    # -----------------------------------
+    # CLEARANCE SUMMARY
+    # -----------------------------------
+
+    clearance_pending_count = clearances.filter(
+        status="pending"
+    ).count()
+
+    clearance_cleared_count = clearances.filter(
+        status="cleared"
+    ).count()
+
+    clearance_held_count = clearances.filter(
+        status="held"
+    ).count()
+
+    clearance_referred_count = clearances.filter(
+        status="referred"
+    ).count()
+
+    # -----------------------------------
+    # CASE SUMMARY
+    # -----------------------------------
+
+    case_open_count = cases.filter(
+        status="open"
+    ).count()
+
+    case_under_review_count = cases.filter(
+        status="under_review"
+    ).count()
+
+    case_resolved_count = cases.filter(
+        status="resolved"
+    ).count()
+
+    case_closed_count = cases.filter(
+        status="closed"
+    ).count()
+
+    # -----------------------------------
+    # RENDER
+    # -----------------------------------
+
+    return render(
+        request,
+        "passengers/operations_report.html",
+        {
+            "date_from": date_from,
+            "date_to": date_to,
+
+            # Basic counts
+            "passenger_count": passenger_count,
+            "baggage_count": baggage_count,
+            "inspection_count": inspection_count,
+            "assessment_count": assessment_count,
+            "payment_count": payment_count,
+            "clearance_count": clearance_count,
+            "case_count": case_count,
+
+            # Inspection
+            "inspection_cleared_count": inspection_cleared_count,
+            "inspection_assessment_count": inspection_assessment_count,
+            "inspection_held_count": inspection_held_count,
+            "inspection_seized_count": inspection_seized_count,
+            "inspection_pending_count": inspection_pending_count,
+            "inspection_in_progress_count": inspection_in_progress_count,
+            "inspection_completed_count": inspection_completed_count,
+
+            # Assessment
+            "assessment_pending_count": assessment_pending_count,
+            "assessment_completed_count": assessment_completed_count,
+            "assessment_totals": assessment_totals,
+
+            # Payment
+            "payment_pending_count": payment_pending_count,
+            "payment_paid_count": payment_paid_count,
+            "payment_cancelled_count": payment_cancelled_count,
+            "payment_totals": payment_totals,
+
+            # Clearance
+            "clearance_pending_count": clearance_pending_count,
+            "clearance_cleared_count": clearance_cleared_count,
+            "clearance_held_count": clearance_held_count,
+            "clearance_referred_count": clearance_referred_count,
+
+            # Cases
+            "case_open_count": case_open_count,
+            "case_under_review_count": case_under_review_count,
+            "case_resolved_count": case_resolved_count,
+            "case_closed_count": case_closed_count,
         },
     )

@@ -171,4 +171,9 @@ urlpatterns = [
     views.global_search,
     name="global_search",
     ),
+    path(
+    "reports/operations/",
+    views.operations_report,
+    name="operations_report",
+    ),
 ]

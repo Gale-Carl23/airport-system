@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Operations Report | BOC-NAIA
+</title>
+
+</head>
+
+<body>
+
+<h1>
+    BOC-NAIA Operations System
+</h1>
+
+<h2>
+    Operations Summary Report
+</h2>
+
+
+<!-- Date Filter -->
+
+<div class="card">
+
+    <h3>
+        Report Period
+    </h3>
+
+    <form
+        method="get"
+        class="filter-form"
+    >
+
+        <label>
+            From:
+
+            <input
+                type="date"
+                name="date_from"
+                value="{{ date_from }}"
+            >
+
+        </label>
+
+
+        <label>
+            To:
+
+            <input
+                type="date"
+                name="date_to"
+                value="{{ date_to }}"
+            >
+
+        </label>
+
+
+        <button type="submit">
+            Generate Report
+        </button>
+
+
+        <a href="{% url 'operations_report' %}">
+            Reset
+        </a>
+
+    </form>
+
+</div>
+
+
+<!-- Overall Operations -->
+
+<div class="card">
+
+    <h3>
+        Overall Operations
+    </h3>
+
+    <div class="summary-grid">
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Total Passengers
+            </span>
+
+            <span class="summary-value">
+                {{ passenger_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Total Baggage
+            </span>
+
+            <span class="summary-value">
+                {{ baggage_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Inspections
+            </span>
+
+            <span class="summary-value">
+                {{ inspection_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Assessments
+            </span>
+
+            <span class="summary-value">
+                {{ assessment_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Payments
+            </span>
+
+            <span class="summary-value">
+                {{ payment_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Clearances
+            </span>
+
+            <span class="summary-value">
+                {{ clearance_count }}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Cases
+            </span>
+
+            <span class="summary-value">
+                {{ case_count }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Inspection Report -->
+
+<div class="card">
+
+    <h3>
+        Inspection Summary
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Category</th>
+                <th>Count</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Pending</td>
+                <td>{{ inspection_pending_count }}</td>
+            </tr>
+
+            <tr>
+                <td>In Progress</td>
+                <td>{{ inspection_in_progress_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Completed</td>
+                <td>{{ inspection_completed_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Cleared</td>
+                <td>{{ inspection_cleared_count }}</td>
+            </tr>
+
+            <tr>
+                <td>For Assessment</td>
+                <td>{{ inspection_assessment_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Held</td>
+                <td>{{ inspection_held_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Seized</td>
+                <td>{{ inspection_seized_count }}</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Assessment Report -->
+
+<div class="card">
+
+    <h3>
+        Assessment Summary
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Category</th>
+                <th>Value</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Pending Assessments</td>
+                <td>{{ assessment_pending_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Completed Assessments</td>
+                <td>{{ assessment_completed_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Total Declared Value</td>
+                <td>
+                    ₱{{ assessment_totals.total_declared_value|default:"0.00" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Assessed Value</td>
+                <td>
+                    ₱{{ assessment_totals.total_assessed_value|default:"0.00" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Duty</td>
+                <td>
+                    ₱{{ assessment_totals.total_duty|default:"0.00" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Tax</td>
+                <td>
+                    ₱{{ assessment_totals.total_tax|default:"0.00" }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Payment Report -->
+
+<div class="card">
+
+    <h3>
+        Payment Summary
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Category</th>
+                <th>Value</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Pending Payments</td>
+                <td>{{ payment_pending_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Paid Payments</td>
+                <td>{{ payment_paid_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Cancelled Payments</td>
+                <td>{{ payment_cancelled_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Total Amount Due</td>
+                <td>
+                    ₱{{ payment_totals.total_amount_due|default:"0.00" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Amount Paid</td>
+                <td>
+                    ₱{{ payment_totals.total_amount_paid|default:"0.00" }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Clearance Report -->
+
+<div class="card">
+
+    <h3>
+        Clearance Summary
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Status</th>
+                <th>Count</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Pending</td>
+                <td>{{ clearance_pending_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Cleared</td>
+                <td>{{ clearance_cleared_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Held</td>
+                <td>{{ clearance_held_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Referred</td>
+                <td>{{ clearance_referred_count }}</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Case Report -->
+
+<div class="card">
+
+    <h3>
+        Enforcement / Case Summary
+    </h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Status</th>
+                <th>Count</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Open</td>
+                <td>{{ case_open_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Under Review</td>
+                <td>{{ case_under_review_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Resolved</td>
+                <td>{{ case_resolved_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Closed</td>
+                <td>{{ case_closed_count }}</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Navigation -->
+
+<div class="actions">
+
+    <a href="{% url 'dashboard' %}">
+        Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>
