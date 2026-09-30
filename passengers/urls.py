@@ -47,6 +47,11 @@ urlpatterns = [
     name="baggage_update",
     ),
     path(
+    "baggage/<int:baggage_id>/timeline/",
+    views.baggage_timeline,
+    name="baggage_timeline",
+    ),
+    path(
     "inspections/",
     views.inspection_list,
     name="inspection_list",

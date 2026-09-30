@@ -371,6 +371,99 @@ def flight_detail(request, flight_id):
     "passengers.view_baggage",
     raise_exception=True,
 )
+def baggage_timeline(request, baggage_id):
+    baggage = get_object_or_404(
+        Baggage.objects.select_related(
+            "passenger",
+            "passenger__flight",
+        ),
+        id=baggage_id,
+    )
+
+    inspection = getattr(baggage, "inspection", None)
+
+    assessment = None
+    payment = None
+    clearance = None
+    cases = Case.objects.filter(
+        baggage=baggage
+    ).select_related(
+        "created_by",
+        "resolved_by",
+    ).order_by("-created_at")
+
+    if inspection:
+        assessment = getattr(
+            inspection,
+            "assessment",
+            None,
+        )
+
+    if assessment:
+        payment = getattr(
+            assessment,
+            "payment",
+            None,
+        )
+
+    clearance = getattr(
+        baggage,
+        "clearance",
+        None,
+    )
+
+    # Get audit history for this baggage
+    # and all related workflow records.
+    audit_logs = AuditLog.objects.filter(
+        Q(
+            model_name="Baggage",
+            object_id=baggage.id,
+        )
+        |
+        Q(
+            model_name="Inspection",
+            object_id=inspection.id if inspection else -1,
+        )
+        |
+        Q(
+            model_name="Assessment",
+            object_id=assessment.id if assessment else -1,
+        )
+        |
+        Q(
+            model_name="Payment",
+            object_id=payment.id if payment else -1,
+        )
+        |
+        Q(
+            model_name="Clearance",
+            object_id=clearance.id if clearance else -1,
+        )
+    ).select_related(
+        "user"
+    ).order_by(
+        "-created_at"
+    )
+
+    return render(
+        request,
+        "passengers/baggage_timeline.html",
+        {
+            "baggage": baggage,
+            "inspection": inspection,
+            "assessment": assessment,
+            "payment": payment,
+            "clearance": clearance,
+            "cases": cases,
+            "audit_logs": audit_logs,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_baggage",
+    raise_exception=True,
+)
 def baggage_list(request):
     baggage = Baggage.objects.select_related(
         "passenger",

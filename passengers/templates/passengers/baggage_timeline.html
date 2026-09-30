@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head> <meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Baggage Timeline | BOC-NAIA
+</title>
+
+
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <h1>
+        BOC-NAIA Operations System
+    </h1>
+
+    <h2>
+        Baggage Workflow Timeline
+    </h2>
+
+</div>
+
+
+<!-- Baggage Information -->
+
+<div class="card">
+
+    <h3>
+        Baggage Information
+    </h3>
+
+    <div class="info-grid">
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Baggage Tag
+            </span>
+
+            {{ baggage.baggage_tag }}
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Passenger
+            </span>
+
+            {{ baggage.passenger }}
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Passenger Reference
+            </span>
+
+            {{ baggage.passenger.reference_number }}
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Weight
+            </span>
+
+            {{ baggage.weight }} kg
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Declared
+            </span>
+
+            {% if baggage.declared %}
+                Yes
+            {% else %}
+                No
+            {% endif %}
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Flight
+            </span>
+
+            {% if baggage.passenger.flight %}
+                {{ baggage.passenger.flight.flight_number }}
+            {% else %}
+                -
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Workflow -->
+
+<div class="card">
+
+    <h3>
+        Workflow Status
+    </h3>
+
+    <div class="workflow">
+
+
+        <!-- Inspection -->
+
+        <div
+            class="workflow-item
+            {% if inspection and inspection.status == 'completed' %}
+                completed
+            {% elif inspection %}
+                pending
+            {% else %}
+                alert
+            {% endif %}"
+        >
+
+            <div class="workflow-title">
+                1. Inspection
+            </div>
+
+            {% if inspection %}
+
+                <div class="workflow-status">
+                    {{ inspection.get_status_display }}
+                </div>
+
+                <div>
+                    Result:
+                    {{ inspection.get_result_display }}
+                </div>
+
+                {% if inspection.inspected_at %}
+                    <div>
+                        Inspected:
+                        {{ inspection.inspected_at }}
+                    </div>
+                {% endif %}
+
+            {% else %}
+
+                No inspection recorded.
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Assessment -->
+
+        <div
+            class="workflow-item
+            {% if assessment and assessment.status == 'completed' %}
+                completed
+            {% elif assessment %}
+                pending
+            {% else %}
+                pending
+            {% endif %}"
+        >
+
+            <div class="workflow-title">
+                2. Assessment
+            </div>
+
+            {% if assessment %}
+
+                <div class="workflow-status">
+                    {{ assessment.get_status_display }}
+                </div>
+
+                <div>
+                    Declared Value:
+                    ₱{{ assessment.declared_value }}
+                </div>
+
+                <div>
+                    Assessed Value:
+                    ₱{{ assessment.assessed_value }}
+                </div>
+
+                <div>
+                    Duty:
+                    ₱{{ assessment.duty_amount }}
+                </div>
+
+                <div>
+                    Tax:
+                    ₱{{ assessment.tax_amount }}
+                </div>
+
+            {% else %}
+
+                No assessment recorded.
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Payment -->
+
+        <div
+            class="workflow-item
+            {% if payment and payment.status == 'paid' %}
+                completed
+            {% elif payment %}
+                pending
+            {% else %}
+                pending
+            {% endif %}"
+        >
+
+            <div class="workflow-title">
+                3. Payment
+            </div>
+
+            {% if payment %}
+
+                <div class="workflow-status">
+                    {{ payment.get_status_display }}
+                </div>
+
+                <div>
+                    Amount Due:
+                    ₱{{ payment.amount_due }}
+                </div>
+
+                <div>
+                    Amount Paid:
+                    ₱{{ payment.amount_paid }}
+                </div>
+
+                {% if payment.paid_at %}
+                    <div>
+                        Paid:
+                        {{ payment.paid_at }}
+                    </div>
+                {% endif %}
+
+            {% else %}
+
+                No payment recorded.
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Clearance -->
+
+        <div
+            class="workflow-item
+            {% if clearance and clearance.status == 'cleared' %}
+                completed
+            {% elif clearance %}
+                pending
+            {% else %}
+                pending
+            {% endif %}"
+        >
+
+            <div class="workflow-title">
+                4. Clearance
+            </div>
+
+            {% if clearance %}
+
+                <div class="workflow-status">
+                    {{ clearance.get_status_display }}
+                </div>
+
+                <div>
+                    Reference:
+                    {{ clearance.clearance_reference }}
+                </div>
+
+                {% if clearance.cleared_at %}
+                    <div>
+                        Cleared:
+                        {{ clearance.cleared_at }}
+                    </div>
+                {% endif %}
+
+            {% else %}
+
+                No clearance recorded.
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Cases -->
+
+        <div
+            class="workflow-item
+            {% if cases %}
+                alert
+            {% else %}
+                pending
+            {% endif %}"
+        >
+
+            <div class="workflow-title">
+                5. Enforcement / Cases
+            </div>
+
+            {% if cases %}
+
+                {% for case in cases %}
+
+                    <div class="case">
+
+                        <strong>
+                            {{ case.case_reference }}
+                        </strong>
+
+                        <br>
+
+                        Type:
+                        {{ case.get_case_type_display }}
+
+                        <br>
+
+                        Status:
+                        {{ case.get_status_display }}
+
+                        <br>
+
+                        Created:
+                        {{ case.created_at }}
+
+                        {% if case.resolved_at %}
+
+                            <br>
+
+                            Resolved:
+                            {{ case.resolved_at }}
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                No enforcement case recorded.
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Audit History -->
+
+<div class="card">
+
+    <h3>
+        Audit History
+    </h3>
+
+    {% if audit_logs %}
+
+        <table class="audit-table">
+
+            <thead>
+
+                <tr>
+                    <th>Date / Time</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Record</th>
+                    <th>Description</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for log in audit_logs %}
+
+                    <tr>
+
+                        <td>
+                            {{ log.created_at }}
+                        </td>
+
+                        <td>
+                            {{ log.user.username }}
+                        </td>
+
+                        <td>
+                            {{ log.get_action_display }}
+                        </td>
+
+                        <td>
+                            {{ log.model_name }}
+                            #{{ log.object_id }}
+                        </td>
+
+                        <td>
+                            {{ log.description }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No audit history available.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- Actions -->
+
+<div class="actions">
+
+    <a
+        href="{% url 'baggage_detail' baggage.id %}"
+    >
+        Back to Baggage
+    </a>
+
+    <a
+        href="{% url 'baggage_list' %}"
+    >
+        Baggage List
+    </a>
+
+    <a
+        href="{% url 'dashboard' %}"
+    >
+        Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>
