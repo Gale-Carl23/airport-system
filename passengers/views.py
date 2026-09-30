@@ -1415,17 +1415,66 @@ def clearance_detail(request, clearance_id):
 )
 def case_list(request):
     cases = Case.objects.select_related(
-    "baggage",
-    "baggage__passenger",
-    "created_by",
-    "resolved_by",
-    ).order_by("-created_at")
+        "baggage",
+        "baggage__passenger",
+        "baggage__passenger__flight",
+        "created_by",
+        "resolved_by",
+    ).all()
+
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    case_type = request.GET.get("case_type", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if search:
+        cases = cases.filter(
+            Q(case_reference__icontains=search)
+            | Q(baggage__baggage_tag__icontains=search)
+            | Q(baggage__passenger__reference_number__icontains=search)
+            | Q(baggage__passenger__first_name__icontains=search)
+            | Q(baggage__passenger__last_name__icontains=search)
+            | Q(description__icontains=search)
+            | Q(resolution__icontains=search)
+        )
+
+    if status:
+        cases = cases.filter(status=status)
+
+    if case_type:
+        cases = cases.filter(case_type=case_type)
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+
+        if parsed_from:
+            cases = cases.filter(
+                created_at__date__gte=parsed_from
+            )
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+
+        if parsed_to:
+            cases = cases.filter(
+                created_at__date__lte=parsed_to
+            )
+
+    cases = cases.order_by("-created_at")
 
     return render(
         request,
         "passengers/case_list.html",
         {
             "cases": cases,
+            "search": search,
+            "selected_status": status,
+            "selected_case_type": case_type,
+            "date_from": date_from,
+            "date_to": date_to,
+            "status_choices": Case.STATUS_CHOICES,
+            "case_type_choices": Case.TYPE_CHOICES,
         },
     )
 
