@@ -6,261 +6,732 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <form method="post" action="{% url 'logout' %}" style="display: inline;"> {% csrf_token %} <button type="submit" class="logout-btn"> Logout </button> </form>
-    <h1>BOC-NAIA Operations Dashboard</h1>
+    <div class="dashboard-container">
 
-    <p>
-        Welcome, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>.
-    </p>
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
 
-    <hr>
+    <div class="dashboard-header">
 
-    <h2>Overview</h2>
-    <form method="get" action="{% url 'global_search' %}">
-        <input
-            type="search"
-            name="q"
-            placeholder="Search passenger, baggage, flight, case..."
-            value="{{ query }}"
-        >
+        <div>
 
-        <button type="submit">
-            Search
-        </button>
-    </form>
+            <p class="dashboard-eyebrow">
+                BOC-NAIA OPERATIONS SYSTEM
+            </p>
 
-    <div>
+            <h1>
+                Dashboard
+            </h1>
 
-        {% if show_passengers %}
-            <div>
-                <h3>Passengers</h3>
+            <p class="dashboard-subtitle">
+                Welcome, {{ request.user.get_full_name|default:request.user.username }}.
+            </p>
 
-                <p>
-                    Total:
-                    <strong>{{ passenger_count }}</strong>
-                </p>
-
-                <a href="{% url 'passenger_list' %}">
-                    View Passengers
-                </a>
-            </div>
-        {% endif %}
+        </div>
 
 
-        {% if show_baggage %}
-            <div>
-                <h3>Baggage</h3>
+        <div class="role-badge">
 
-                <p>
-                    Total:
-                    <strong>{{ baggage_count }}</strong>
-                </p>
+            {{ role_name }}
 
-                <a href="{% url 'baggage_list' %}">
-                    View Baggage
-                </a>
-            </div>
-        {% endif %}
-
-
-        {% if show_inspections %}
-            <div>
-                <h3>Inspections</h3>
-
-                <p>
-                    Pending:
-                    <strong>{{ pending_inspection_count }}</strong>
-                </p>
-
-                <a href="{% url 'inspection_list' %}">
-                    View Inspections
-                </a>
-            </div>
-        {% endif %}
-
-
-        {% if show_assessments %}
-            <div>
-                <h3>Assessments</h3>
-
-                <p>
-                    For Assessment:
-                    <strong>{{ for_assessment_count }}</strong>
-                </p>
-
-                <a href="{% url 'assessment_list' %}">
-                    View Assessments
-                </a>
-            </div>
-        {% endif %}
-
-
-        {% if show_payments %}
-            <div>
-                <h3>Payments</h3>
-
-                <p>
-                    Pending:
-                    <strong>{{ pending_payment_count }}</strong>
-                </p>
-
-                <a href="{% url 'payment_list' %}">
-                    View Payments
-                </a>
-            </div>
-        {% endif %}
-
-
-        {% if show_cases %}
-            <div>
-                <h3>Enforcement Cases</h3>
-
-                <p>
-                    Active:
-                    <strong>{{ active_case_count }}</strong>
-                </p>
-
-                <a href="{% url 'case_list' %}">
-                    View Cases
-                </a>
-            </div>
-        {% endif %}
-
-
-        {% if show_clearances %}
-            <div>
-                <h3>Clearances</h3>
-
-                <p>
-                    Pending:
-                    <strong>{{ pending_clearance_count }}</strong>
-                </p>
-
-                <a href="{% url 'clearance_list' %}">
-                    View Clearances
-                </a>
-            </div>
-        {% endif %}
+        </div>
 
     </div>
 
-    <hr>
 
-    <h2>Workflow</h2>
+    <!-- ===================================================== -->
+    <!-- ROLE WORK QUEUE -->
+    <!-- ===================================================== -->
 
-    <p>
-        Passenger → Baggage → Inspection
-    </p>
+    <section class="dashboard-section">
 
-    <p>
-        Inspection → Cleared → Clearance
-    </p>
+        <div class="section-heading">
 
-    <p>
-        Inspection → For Assessment → Assessment → Payment → Clearance
-    </p>
+            <div>
 
-    <p>
-        Inspection → Held / Seized → Case → Enforcement
-    </p>
+                <h2>
+                    My Work Queue
+                </h2>
 
-    <hr>
+                <p>
+                    Operational tasks and areas assigned to your role.
+                </p>
 
-    <h2>Quick Access</h2>
+            </div>
 
-    {% if show_passengers %}
-        <p>
-            <a href="{% url 'passenger_list' %}">
-                Passenger Records
-            </a>
-        </p>
+        </div>
+
+
+        {% if role_queue %}
+
+            <div class="queue-grid">
+
+                {% for item in role_queue %}
+
+                    <a
+                        href="{% url item.url %}"
+                        class="queue-card"
+                    >
+
+                        <div class="queue-card-main">
+
+                            <h3>
+                                {{ item.title }}
+                            </h3>
+
+                            <p>
+                                {{ item.description }}
+                            </p>
+
+                        </div>
+
+
+                        <div class="queue-card-side">
+
+                            <span class="queue-count">
+                                {{ item.count }}
+                            </span>
+
+                            <span class="queue-arrow">
+                                →
+                            </span>
+
+                        </div>
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-card">
+
+                <h3>
+                    No work queue available
+                </h3>
+
+                <p>
+                    No role-specific operational queue is currently
+                    assigned to this account.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- SYSTEM OVERVIEW -->
+    <!-- ===================================================== -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Operations Overview
+                </h2>
+
+                <p>
+                    Current system-wide operational statistics.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+
+            {% if show_passengers %}
+
+                <a
+                    href="{% url 'passenger_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Total Passengers
+                    </span>
+
+                    <span class="stat-value">
+                        {{ passenger_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_baggage %}
+
+                <a
+                    href="{% url 'baggage_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Total Baggage
+                    </span>
+
+                    <span class="stat-value">
+                        {{ baggage_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_inspections %}
+
+                <a
+                    href="{% url 'inspection_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Pending Inspections
+                    </span>
+
+                    <span class="stat-value">
+                        {{ pending_inspection_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_assessments %}
+
+                <a
+                    href="{% url 'assessment_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        For Assessment
+                    </span>
+
+                    <span class="stat-value">
+                        {{ for_assessment_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_payments %}
+
+                <a
+                    href="{% url 'payment_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Pending Payments
+                    </span>
+
+                    <span class="stat-value">
+                        {{ pending_payment_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_cases %}
+
+                <a
+                    href="{% url 'case_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Active Cases
+                    </span>
+
+                    <span class="stat-value">
+                        {{ active_case_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            {% if show_clearances %}
+
+                <a
+                    href="{% url 'clearance_list' %}"
+                    class="stat-card"
+                >
+
+                    <span class="stat-label">
+                        Pending Clearances
+                    </span>
+
+                    <span class="stat-value">
+                        {{ pending_clearance_count }}
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- NEEDS ATTENTION -->
+    <!-- ===================================================== -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Needs Attention
+                </h2>
+
+                <p>
+                    Operational records currently requiring action.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="attention-grid">
+
+
+            <!-- Pending Inspections -->
+
+            {% if show_inspections %}
+
+                <div class="attention-card">
+
+                    <div class="attention-header">
+
+                        <h3>
+                            Pending Inspections
+                        </h3>
+
+                        <span>
+                            {{ pending_inspection_count }}
+                        </span>
+
+                    </div>
+
+
+                    {% for inspection in pending_inspections %}
+
+                        <a
+                            href="{% url 'inspection_detail' inspection.id %}"
+                            class="attention-item"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    {{ inspection.baggage.baggage_tag }}
+                                </strong>
+
+                                <small>
+                                    {{ inspection.baggage.passenger }}
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+                    {% empty %}
+
+                        <p class="empty-text">
+                            No pending inspections.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- Pending Payments -->
+
+            {% if show_payments %}
+
+                <div class="attention-card">
+
+                    <div class="attention-header">
+
+                        <h3>
+                            Pending Payments
+                        </h3>
+
+                        <span>
+                            {{ pending_payment_count }}
+                        </span>
+
+                    </div>
+
+
+                    {% for payment in pending_payments %}
+
+                        <a
+                            href="{% url 'payment_detail' payment.id %}"
+                            class="attention-item"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    {{ payment.assessment.inspection.baggage.baggage_tag }}
+                                </strong>
+
+                                <small>
+                                    Amount Due:
+                                    {{ payment.amount_due }}
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+                    {% empty %}
+
+                        <p class="empty-text">
+                            No pending payments.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- Active Cases -->
+
+            {% if show_cases %}
+
+                <div class="attention-card">
+
+                    <div class="attention-header">
+
+                        <h3>
+                            Active Cases
+                        </h3>
+
+                        <span>
+                            {{ active_case_count }}
+                        </span>
+
+                    </div>
+
+
+                    {% for case in active_cases %}
+
+                        <a
+                            href="{% url 'case_detail' case.id %}"
+                            class="attention-item"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    {{ case.case_reference }}
+                                </strong>
+
+                                <small>
+                                    {{ case.get_status_display }}
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+                    {% empty %}
+
+                        <p class="empty-text">
+                            No active cases.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- Pending Clearances -->
+
+            {% if show_clearances %}
+
+                <div class="attention-card">
+
+                    <div class="attention-header">
+
+                        <h3>
+                            Pending Clearances
+                        </h3>
+
+                        <span>
+                            {{ pending_clearance_count }}
+                        </span>
+
+                    </div>
+
+
+                    {% for clearance in pending_clearances %}
+
+                        <a
+                            href="{% url 'clearance_update' clearance.id %}"
+                            class="attention-item"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    {{ clearance.baggage.baggage_tag }}
+                                </strong>
+
+                                <small>
+                                    {{ clearance.get_status_display }}
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+                    {% empty %}
+
+                        <p class="empty-text">
+                            No pending clearances.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- OPERATIONS -->
+    <!-- ===================================================== -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Operations
+                </h2>
+
+                <p>
+                    Access operational modules available to your account.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="operations-grid">
+
+
+            {% if show_passengers %}
+
+                <a
+                    href="{% url 'passenger_list' %}"
+                    class="operation-card"
+                >
+                    Passenger Management
+                </a>
+
+            {% endif %}
+
+
+            {% if show_flights %}
+
+                <a
+                    href="{% url 'flight_list' %}"
+                    class="operation-card"
+                >
+                    Flight Management
+                </a>
+
+            {% endif %}
+
+
+            {% if show_baggage %}
+
+                <a
+                    href="{% url 'baggage_list' %}"
+                    class="operation-card"
+                >
+                    Baggage Management
+                </a>
+
+            {% endif %}
+
+
+            {% if show_inspections %}
+
+                <a
+                    href="{% url 'inspection_list' %}"
+                    class="operation-card"
+                >
+                    Inspection
+                </a>
+
+            {% endif %}
+
+
+            {% if show_assessments %}
+
+                <a
+                    href="{% url 'assessment_list' %}"
+                    class="operation-card"
+                >
+                    Assessment
+                </a>
+
+            {% endif %}
+
+
+            {% if show_payments %}
+
+                <a
+                    href="{% url 'payment_list' %}"
+                    class="operation-card"
+                >
+                    Payments
+                </a>
+
+            {% endif %}
+
+
+            {% if show_clearances %}
+
+                <a
+                    href="{% url 'clearance_list' %}"
+                    class="operation-card"
+                >
+                    Clearance
+                </a>
+
+            {% endif %}
+
+
+            {% if show_cases %}
+
+                <a
+                    href="{% url 'case_list' %}"
+                    class="operation-card"
+                >
+                    Case Management
+                </a>
+
+            {% endif %}
+
+
+            {% if show_audit_logs %}
+
+                <a
+                    href="{% url 'audit_log_list' %}"
+                    class="operation-card"
+                >
+                    Audit Logs
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- ADMIN -->
+    <!-- ===================================================== -->
+
+    {% if is_admin %}
+
+        <section class="dashboard-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Administration
+                    </h2>
+
+                    <p>
+                        System administration tools.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="operations-grid">
+
+                <a
+                    href="{% url 'admin:index' %}"
+                    class="operation-card"
+                >
+                    Django Administration
+                </a>
+
+            </div>
+
+        </section>
+
     {% endif %}
 
-    {% if show_baggage %}
-        <p>
-            <a href="{% url 'baggage_list' %}">
-                Baggage Records
-            </a>
-        </p>
-    {% endif %}
-
-    {% if show_inspections %}
-        <p>
-            <a href="{% url 'inspection_list' %}">
-                Inspection Records
-            </a>
-        </p>
-    {% endif %}
-
-    {% if show_assessments %}
-        <p>
-            <a href="{% url 'assessment_list' %}">
-                Assessment Records
-            </a>
-        </p>
-    {% endif %}
-
-    {% if show_payments %}
-        <p>
-            <a href="{% url 'payment_list' %}">
-                Payment Records
-            </a>
-        </p>
-    {% endif %}
-
-    {% if show_cases %}
-        <p>
-            <a href="{% url 'case_list' %}">
-                Enforcement Cases
-            </a>
-        </p>
-    {% endif %}
-
-    {% if show_clearances %}
-        <p>
-            <a href="{% url 'clearance_list' %}">
-                Clearance Records
-            </a>
-        </p>
-    {% endif %}
-    <p>
-        <a href="{% url 'operations_report' %}">
-            Operations Reports
-        </a>
-    </p>
-
-    <p>
-        <a href="{% url 'notifications' %}">
-            Notifications
-        </a>
-    </p>
-
-    <p>
-        <a href="{% url 'document_list' %}">
-            Documents
-        </a>
-    </p>
-
-
-    <hr>
-
-    <h2>Account</h2>
-
-    <p>
-        <strong>Username:</strong>
-        {{ request.user.username }}
-    </p>
-
-    <p>
-        <strong>Name:</strong>
-        {{ request.user.get_full_name|default:"-" }}
-    </p>
-
-    <p>
-        <strong>Email:</strong>
-        {{ request.user.email|default:"-" }}
-    </p>
-
-    
+</div>
 </body>
 </html>
