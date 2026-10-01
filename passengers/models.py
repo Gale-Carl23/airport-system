@@ -382,3 +382,49 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action} - {self.model_name}"
+
+class Document(models.Model):
+    DOCUMENT_TYPE_CHOICES = [
+        ("inspection", "Inspection Document"),
+        ("assessment", "Assessment Document"),
+        ("payment", "Payment Document"),
+        ("clearance", "Clearance Document"),
+        ("case", "Case Document"),
+        ("other", "Other"),
+    ]
+
+    baggage = models.ForeignKey(
+        Baggage,
+        on_delete=models.PROTECT,
+        related_name="documents",
+    )
+
+    title = models.CharField(
+        max_length=255
+    )
+
+    document_type = models.CharField(
+        max_length=30,
+        choices=DOCUMENT_TYPE_CHOICES,
+    )
+
+    file = models.FileField(
+        upload_to="boc_naia/documents/%Y/%m/%d/"
+    )
+
+    description = models.TextField(
+        blank=True
+    )
+
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="uploaded_documents",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.title
