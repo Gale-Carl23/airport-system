@@ -2287,11 +2287,33 @@ def audit_log_detail(request, log_id):
         id=log_id,
     )
 
+    previous_data = audit_log.previous_data or {}
+    new_data = audit_log.new_data or {}
+
+    field_names = list(dict.fromkeys([
+        *previous_data.keys(),
+        *new_data.keys(),
+    ]))
+
+    changes = []
+    for field_name in field_names:
+        old_value = previous_data.get(field_name)
+        new_value = new_data.get(field_name)
+
+        changes.append({
+            "field": field_name,
+            "previous": old_value,
+            "new": new_value,
+            "changed": old_value != new_value,
+        })
+
     return render(
         request,
         "passengers/audit_log_detail.html",
         {
             "audit_log": audit_log,
+            "changes": changes,
+            "has_change_data": bool(previous_data or new_data),
         },
     )
 
