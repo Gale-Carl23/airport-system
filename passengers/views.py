@@ -22,6 +22,42 @@ from .models import (
     AuditLog,
     Document
 )
+
+def _audit_value(value):
+    """Convert common Django/Python values into JSON-safe audit values."""
+    if value is None:
+        return None
+
+    if hasattr(value, "pk") and hasattr(value, "_meta"):
+        return {
+            "id": value.pk,
+            "label": str(value),
+        }
+
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+
+    return str(value)
+
+
+def build_audit_snapshot(before, after, fields):
+    """Return only changed fields, split into before/after dictionaries."""
+    previous_data = {}
+    new_data = {}
+
+    for field in fields:
+        old_value = before.get(field)
+        new_value = getattr(after, field, None)
+
+        old_serialized = _audit_value(old_value)
+        new_serialized = _audit_value(new_value)
+
+        if old_serialized != new_serialized:
+            previous_data[field] = old_serialized
+            new_data[field] = new_serialized
+
+    return previous_data, new_data
+
 from .forms import (
     BaggageForm,
     FlightForm,
@@ -229,6 +265,19 @@ def passenger_update(request, passenger_id):
                 )
 
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_passenger,
+                    [
+                        "reference_number",
+                        "first_name",
+                        "last_name",
+                        "passport_number",
+                        "nationality",
+                        "flight",
+                        "arrival_datetime",
+                    ],
+                )
                 AuditLog.objects.create(
                     user=request.user,
                     action="update",
@@ -239,6 +288,8 @@ def passenger_update(request, passenger_id):
                         f"{updated_passenger.reference_number}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect(
@@ -644,6 +695,17 @@ def baggage_update(request, baggage_id):
                 )
 
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_baggage,
+                    [
+                        "passenger",
+                        "baggage_tag",
+                        "description",
+                        "weight",
+                        "declared",
+                    ],
+                )
                 AuditLog.objects.create(
                     user=request.user,
                     action="update",
@@ -654,6 +716,8 @@ def baggage_update(request, baggage_id):
                         f"{updated_baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect("baggage_list")
@@ -834,6 +898,22 @@ def inspection_update(request, inspection_id):
                 )
 
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    {
+                        "status": old_status,
+                        "result": old_result,
+                        "findings": old_findings,
+                        "inspected_at": old_inspected_at,
+                    },
+                    updated_inspection,
+                    [
+                        "status",
+                        "result",
+                        "findings",
+                        "inspected_at",
+                    ],
+                )
+
                 if (
                     old_status != updated_inspection.status
                     or old_result != updated_inspection.result
@@ -852,6 +932,8 @@ def inspection_update(request, inspection_id):
                         f"{updated_inspection.baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect("inspection_list")
@@ -1139,6 +1221,19 @@ def assessment_update(request, assessment_id):
                 )
 
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_assessment,
+                    [
+                        "status",
+                        "declared_value",
+                        "assessed_value",
+                        "duty_amount",
+                        "tax_amount",
+                        "remarks",
+                        "assessed_at",
+                    ],
+                )
                 action = (
                     "status_change"
                     if old_values["status"] != updated_assessment.status
@@ -1155,6 +1250,8 @@ def assessment_update(request, assessment_id):
                         f"{updated_assessment.inspection.baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect("assessment_list")
@@ -1460,6 +1557,19 @@ def payment_update(request, payment_id):
                 )
 
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_payment,
+                    [
+                        "status",
+                        "amount_due",
+                        "amount_paid",
+                        "payment_method",
+                        "payment_reference",
+                        "paid_at",
+                        "remarks",
+                    ],
+                )
                 action = (
                     "status_change"
                     if old_values["status"] != updated_payment.status
@@ -1476,6 +1586,8 @@ def payment_update(request, payment_id):
                         f"{updated_payment.assessment.inspection.baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect("payment_list")
@@ -1686,6 +1798,16 @@ def clearance_update(request, clearance_id):
                     f"{updated_clearance.remarks}"
                 )
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_clearance,
+                    [
+                        "status",
+                        "clearance_reference",
+                        "cleared_at",
+                        "remarks",
+                    ],
+                )
                 action = (
                     "status_change"
                     if old_values["status"] != updated_clearance.status
@@ -1704,6 +1826,8 @@ def clearance_update(request, clearance_id):
                         f"{updated_clearance.baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
             return redirect("clearance_list")
 
@@ -1988,6 +2112,18 @@ def case_update(request, case_id):
                     f"{updated_case.resolved_at}"
                 )
             if changes:
+                previous_data, new_data = build_audit_snapshot(
+                    old_values,
+                    updated_case,
+                    [
+                        "case_type",
+                        "status",
+                        "description",
+                        "resolution",
+                        "resolved_at",
+                    ],
+                )
+
                 if old_values["status"] != updated_case.status:
                     if updated_case.status in ["resolved", "closed"]:
                         action = "case_resolution"
@@ -2006,6 +2142,8 @@ def case_update(request, case_id):
                         f"for baggage {updated_case.baggage.baggage_tag}: "
                         + "; ".join(changes)
                     ),
+                    previous_data=previous_data,
+                    new_data=new_data,
                 )
 
             return redirect("case_list")
