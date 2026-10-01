@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -12,7 +11,7 @@
     >
 
     <title>
-        Documents | BOC-NAIA
+        Document Details | BOC-NAIA
     </title>
 
     <style>
@@ -24,62 +23,39 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 900px;
         }
 
-        .filters {
+        .card {
             background: white;
             border: 1px solid #ddd;
             border-radius: 8px;
-            padding: 18px;
+            padding: 25px;
             margin-bottom: 20px;
         }
 
-        input,
-        select {
-            padding: 8px;
-            margin-right: 8px;
+        .row {
+            margin-bottom: 15px;
         }
 
-        button,
+        .label {
+            font-weight: bold;
+        }
+
+        .description {
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+
         .btn {
-            padding: 8px 12px;
+            display: inline-block;
+            padding: 8px 14px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background: white;
             text-decoration: none;
             color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
             background: white;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f0f0f0;
-        }
-
-        .pagination {
-            margin-top: 20px;
-        }
-
-        .pagination a,
-        .pagination span {
-            display: inline-block;
-            padding: 7px 10px;
-            margin-right: 4px;
-            border: 1px solid #ccc;
-            text-decoration: none;
-            color: #333;
+            margin-right: 8px;
         }
 
     </style>
@@ -95,203 +71,152 @@
     </h1>
 
     <h2>
-        Documents
+        Document Details
     </h2>
 
-    <div class="filters">
 
-        <form method="get">
+    <div class="card">
 
-            <input
-                type="text"
-                name="search"
-                value="{{ search }}"
-                placeholder="Search documents..."
-            >
+        <div class="row">
 
-            <select name="document_type">
+            <span class="label">
+                Title:
+            </span>
 
-                <option value="">
-                    All Types
-                </option>
+            {{ document.title }}
 
-                {% for value, label in document_type_choices %}
+        </div>
 
-                    <option
-                        value="{{ value }}"
-                        {% if document_type == value %}
-                            selected
-                        {% endif %}
-                    >
-                        {{ label }}
-                    </option>
 
-                {% endfor %}
+        <div class="row">
 
-            </select>
+            <span class="label">
+                Document Type:
+            </span>
 
-            <button type="submit">
-                Filter
-            </button>
+            {{ document.get_document_type_display }}
 
-        </form>
+        </div>
 
-    </div>
 
-    {% if perms.passengers.add_document %}
+        <div class="row">
 
-        <a href="{% url 'document_create' baggage.id %}">
-            Upload Document
-        </a>
+            <span class="label">
+                Baggage:
+            </span>
 
-    {% endif %}
+            {{ document.baggage.baggage_tag }}
 
-    {% if documents %}
+        </div>
 
-    
 
-        <table>
+        <div class="row">
 
-            <thead>
+            <span class="label">
+                Passenger:
+            </span>
 
-                <tr>
+            {{ document.baggage.passenger }}
 
-                    <th>
-                        Title
-                    </th>
+        </div>
 
-                    <th>
-                        Type
-                    </th>
 
-                    <th>
-                        Baggage
-                    </th>
+        <div class="row">
 
-                    <th>
-                        Uploaded By
-                    </th>
+            <span class="label">
+                Uploaded By:
+            </span>
 
-                    <th>
-                        Date
-                    </th>
+            {{ document.uploaded_by.username }}
 
-                    <th>
-                        Action
-                    </th>
+        </div>
 
-                </tr>
 
-            </thead>
+        <div class="row">
 
-            <tbody>
+            <span class="label">
+                Uploaded At:
+            </span>
 
-                {% for document in documents %}
+            {{ document.created_at|date:"M. j, Y, g:i a" }}
 
-                    <tr>
+        </div>
 
-                        <td>
-                            {{ document.title }}
-                        </td>
 
-                        <td>
-                            {{ document.get_document_type_display }}
-                        </td>
+        {% if document.description %}
 
-                        <td>
-                            {{ document.baggage.baggage_tag }}
-                        </td>
+            <div class="row">
 
-                        <td>
-                            {{ document.uploaded_by.username }}
-                        </td>
-
-                        <td>
-                            {{ document.created_at }}
-                        </td>
-
-                        <td>
-
-                            <a
-                                class="btn"
-                                href="{% url 'document_detail' document.id %}"
-                            >
-                                View
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        {% if documents.has_other_pages %}
-
-            <div class="pagination">
-
-                {% if documents.has_previous %}
-
-                    <a
-                        href="?page=1&search={{ search }}&document_type={{ document_type }}"
-                    >
-                        First
-                    </a>
-
-                    <a
-                        href="?page={{ documents.previous_page_number }}&search={{ search }}&document_type={{ document_type }}"
-                    >
-                        Previous
-                    </a>
-
-                {% endif %}
-
-                <span>
-                    Page
-                    {{ documents.number }}
-                    of
-                    {{ documents.paginator.num_pages }}
+                <span class="label">
+                    Description:
                 </span>
 
-                {% if documents.has_next %}
-
-                    <a
-                        href="?page={{ documents.next_page_number }}&search={{ search }}&document_type={{ document_type }}"
-                    >
-                        Next
-                    </a>
-
-                    <a
-                        href="?page={{ documents.paginator.num_pages }}&search={{ search }}&document_type={{ document_type }}"
-                    >
-                        Last
-                    </a>
-
-                {% endif %}
+                <div class="description">
+                    {{ document.description }}
+                </div>
 
             </div>
 
         {% endif %}
 
-    {% else %}
+    </div>
 
-        <p>
-            No documents found.
-        </p>
 
-    {% endif %}
+    <div class="card">
 
-    <br>
+        <h2>
+            Document File
+        </h2>
 
-    <a
-        class="btn"
-        href="{% url 'dashboard' %}"
-    >
-        Back to Dashboard
-    </a>
+        <a
+            class="btn"
+            href="{{ document.file.url }}"
+            target="_blank"
+        >
+            Open Document
+        </a>
+
+
+        <a
+            class="btn"
+            href="{% url 'document_verify' document.id %}"
+        >
+            Verify Integrity
+        </a>
+
+    </div>
+
+
+    <div>
+
+        <a
+            class="btn"
+            href="{% url 'document_list' %}"
+        >
+            Back to Documents
+        </a>
+
+
+        <a
+            class="btn"
+            href="{% url 'baggage_detail' document.baggage.id %}"
+        >
+            Back to Baggage
+        </a>
+
+
+        {% if perms.passengers.add_document %}
+
+            <a
+                class="btn"
+                href="{% url 'document_create' document.baggage.id %}"
+            >
+                Upload Another Document
+            </a>
+
+        {% endif %}
+
+    </div>
 
 </div>
 

@@ -3089,6 +3089,12 @@ def document_create(request, baggage_id):
 
             document.save()
 
+            document.file_hash = document.calculate_hash()
+
+            document.save(
+                update_fields=["file_hash"]
+            )
+
             AuditLog.objects.create(
                 user=request.user,
                 action="create",
@@ -3144,5 +3150,40 @@ def document_detail(
         "passengers/document_detail.html",
         {
             "document": document,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_document",
+    raise_exception=True,
+)
+def document_verify(
+    request,
+    document_id,
+):
+
+    document = get_object_or_404(
+        Document.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+        ),
+        id=document_id,
+    )
+
+    current_hash = document.calculate_hash()
+
+    integrity_valid = (
+        current_hash == document.file_hash
+    )
+
+    return render(
+        request,
+        "passengers/document_verify.html",
+        {
+            "document": document,
+            "stored_hash": document.file_hash,
+            "current_hash": current_hash,
+            "integrity_valid": integrity_valid,
         },
     )

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Document Integrity | BOC-NAIA
+    </title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f6f8;
+        }
+
+        .container {
+            max-width: 850px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .valid {
+            border-left: 6px solid #198754;
+        }
+
+        .invalid {
+            border-left: 6px solid #dc3545;
+        }
+
+        .status {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .hash {
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 5px;
+            word-break: break-all;
+            font-family: monospace;
+            margin-top: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            background: white;
+            margin-right: 8px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Document Integrity Verification
+    </h1>
+
+
+    {% if integrity_valid %}
+
+        <div class="card valid">
+
+            <div class="status">
+                Integrity Valid
+            </div>
+
+            <p>
+                The current file hash matches the
+                original stored hash.
+            </p>
+
+            <p>
+                No file modification was detected
+                by this integrity check.
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <div class="card invalid">
+
+            <div class="status">
+                Integrity Mismatch
+            </div>
+
+            <p>
+                The current file hash does not match
+                the original stored hash.
+            </p>
+
+            <p>
+                The document may have been modified
+                or replaced after its original upload.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="card">
+
+        <h2>
+            Document Information
+        </h2>
+
+        <p>
+
+            <span class="label">
+                Title:
+            </span>
+
+            {{ document.title }}
+
+        </p>
+
+
+        <p>
+
+            <span class="label">
+                Document Type:
+            </span>
+
+            {{ document.get_document_type_display }}
+
+        </p>
+
+
+        <p>
+
+            <span class="label">
+                Baggage:
+            </span>
+
+            {{ document.baggage.baggage_tag }}
+
+        </p>
+
+
+        <p>
+
+            <span class="label">
+                Uploaded By:
+            </span>
+
+            {{ document.uploaded_by.username }}
+
+        </p>
+
+
+        <p>
+
+            <span class="label">
+                Uploaded At:
+            </span>
+
+            {{ document.created_at|date:"M. j, Y, g:i a" }}
+
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            SHA-256 Verification
+        </h2>
+
+
+        <p class="label">
+            Original Stored Hash
+        </p>
+
+        <div class="hash">
+            {{ stored_hash }}
+        </div>
+
+
+        <p class="label">
+            Current File Hash
+        </p>
+
+        <div class="hash">
+            {{ current_hash }}
+        </div>
+
+    </div>
+
+
+    <div>
+
+        <a
+            class="btn"
+            href="{% url 'document_detail' document.id %}"
+        >
+            Back to Document
+        </a>
+
+
+        <a
+            class="btn"
+            href="{% url 'document_list' %}"
+        >
+            Documents
+        </a>
+
+    </div>
+
+</div>

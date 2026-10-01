@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -98,6 +97,7 @@
         Documents
     </h2>
 
+
     <div class="filters">
 
         <form method="get">
@@ -138,6 +138,7 @@
 
     </div>
 
+
     {% if documents %}
 
         <table>
@@ -174,6 +175,7 @@
 
             </thead>
 
+
             <tbody>
 
                 {% for document in documents %}
@@ -197,7 +199,7 @@
                         </td>
 
                         <td>
-                            {{ document.created_at }}
+                            {{ document.created_at|date:"M. j, Y, g:i a" }}
                         </td>
 
                         <td>
@@ -219,6 +221,7 @@
 
         </table>
 
+
         {% if documents.has_other_pages %}
 
             <div class="pagination">
@@ -239,12 +242,16 @@
 
                 {% endif %}
 
+
                 <span>
+
                     Page
                     {{ documents.number }}
                     of
                     {{ documents.paginator.num_pages }}
+
                 </span>
+
 
                 {% if documents.has_next %}
 
@@ -266,6 +273,7 @@
 
         {% endif %}
 
+
     {% else %}
 
         <p>
@@ -273,6 +281,7 @@
         </p>
 
     {% endif %}
+
 
     <br>
 

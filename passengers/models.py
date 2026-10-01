@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+import hashlib
 
 class Passenger(models.Model):
     reference_number = models.CharField(max_length=20, unique=True)
@@ -412,6 +412,11 @@ class Document(models.Model):
         upload_to="boc_naia/documents/%Y/%m/%d/"
     )
 
+    file_hash = models.CharField(
+        max_length=64,
+        editable=False,
+    )
+
     description = models.TextField(
         blank=True
     )
@@ -425,6 +430,18 @@ class Document(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True
     )
+
+    def calculate_hash(self):
+        sha256 = hashlib.sha256()
+
+        self.file.seek(0)
+
+        for chunk in self.file.chunks():
+            sha256.update(chunk)
+
+        self.file.seek(0)
+
+        return sha256.hexdigest()
 
     def __str__(self):
         return self.title

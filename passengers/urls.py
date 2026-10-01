@@ -197,6 +197,11 @@ urlpatterns = [
         views.document_detail,
         name="document_detail",
     ),
+    path(
+    "documents/<int:document_id>/verify/",
+    views.document_verify,
+    name="document_verify",
+    ),
 
     path(
         "baggage/<int:baggage_id>/documents/add/",
