@@ -1,4 +1,5 @@
 import csv
+from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import (
     login_required,
@@ -2785,3 +2786,206 @@ def export_operations_csv(request):
         ])
 
     return response
+
+@login_required
+def notifications(request):
+
+    notifications = []
+
+    user = request.user
+
+    # -----------------------------------
+    # CUSTOMS EXAMINER
+    # -----------------------------------
+
+    if user.has_perm("passengers.view_inspection"):
+
+        pending_inspections = (
+            Inspection.objects
+            .filter(
+                status__in=[
+                    "pending",
+                    "in_progress",
+                ]
+            )
+            .select_related(
+                "baggage",
+                "baggage__passenger",
+            )
+            .order_by("-created_at")
+        )
+
+        for inspection in pending_inspections:
+
+            notifications.append({
+                "type": "Inspection",
+                "title": "Inspection requires attention",
+                "message": (
+                    f"Baggage "
+                    f"{inspection.baggage.baggage_tag}"
+                ),
+                "url": reverse(
+                    "inspection_detail",
+                    args=[inspection.id],
+                ),
+                "created_at": inspection.created_at,
+            })
+
+    # -----------------------------------
+    # ASSESSMENT OFFICER
+    # -----------------------------------
+
+    if user.has_perm("passengers.view_assessment"):
+
+        assessments = (
+            Assessment.objects
+            .filter(
+                status="pending",
+                inspection__result="for_assessment",
+            )
+            .select_related(
+                "inspection",
+                "inspection__baggage",
+                "inspection__baggage__passenger",
+            )
+            .order_by("-created_at")
+        )
+
+        for assessment in assessments:
+
+            notifications.append({
+                "type": "Assessment",
+                "title": "Assessment required",
+                "message": (
+                    f"Baggage "
+                    f"{assessment.inspection.baggage.baggage_tag}"
+                ),
+                "url": reverse(
+                    "assessment_detail",
+                    args=[assessment.id],
+                ),
+                "created_at": assessment.created_at,
+            })
+
+    # -----------------------------------
+    # CASHIER
+    # -----------------------------------
+
+    if user.has_perm("passengers.view_payment"):
+
+        payments = (
+            Payment.objects
+            .filter(
+                status="pending"
+            )
+            .select_related(
+                "assessment",
+                "assessment__inspection",
+                "assessment__inspection__baggage",
+            )
+            .order_by("-created_at")
+        )
+
+        for payment in payments:
+
+            notifications.append({
+                "type": "Payment",
+                "title": "Payment requires attention",
+                "message": (
+                    f"Baggage "
+                    f"{payment.assessment.inspection.baggage.baggage_tag}"
+                ),
+                "url": reverse(
+                    "payment_detail",
+                    args=[payment.id],
+                ),
+                "created_at": payment.created_at,
+            })
+
+    # -----------------------------------
+    # ENFORCEMENT
+    # -----------------------------------
+
+    if user.has_perm("passengers.view_case"):
+
+        cases = (
+            Case.objects
+            .filter(
+                status__in=[
+                    "open",
+                    "under_review",
+                ]
+            )
+            .select_related(
+                "baggage",
+                "baggage__passenger",
+            )
+            .order_by("-created_at")
+        )
+
+        for case in cases:
+
+            notifications.append({
+                "type": "Case",
+                "title": "Case requires attention",
+                "message": (
+                    f"Case "
+                    f"{case.case_reference}"
+                ),
+                "url": reverse(
+                    "case_detail",
+                    args=[case.id],
+                ),
+                "created_at": case.created_at,
+            })
+
+    # -----------------------------------
+    # CLEARANCE OFFICER
+    # -----------------------------------
+
+    if user.has_perm("passengers.view_clearance"):
+
+        clearances = (
+            Clearance.objects
+            .filter(
+                status="pending"
+            )
+            .select_related(
+                "baggage",
+                "baggage__passenger",
+            )
+            .order_by("-created_at")
+        )
+
+        for clearance in clearances:
+
+            notifications.append({
+                "type": "Clearance",
+                "title": "Clearance requires attention",
+                "message": (
+                    f"Baggage "
+                    f"{clearance.baggage.baggage_tag}"
+                ),
+                "url": reverse(
+                    "clearance_detail",
+                    args=[clearance.id],
+                ),
+                "created_at": clearance.created_at,
+            })
+
+    # -----------------------------------
+    # SORT ALL NOTIFICATIONS
+    # -----------------------------------
+
+    notifications.sort(
+        key=lambda item: item["created_at"],
+        reverse=True,
+    )
+
+    return render(
+        request,
+        "passengers/notifications.html",
+        {
+            "notifications": notifications,
+        },
+    )

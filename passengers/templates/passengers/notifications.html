@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Notifications | BOC-NAIA
+</title>
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background: #f5f6f8;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .notification-container {
+        max-width: 900px;
+    }
+
+    .notification {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 12px;
+    }
+
+    .notification-type {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .notification-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    .notification-message {
+        margin-bottom: 8px;
+    }
+
+    .notification-date {
+        font-size: 13px;
+        color: #777;
+        margin-bottom: 10px;
+    }
+
+    .notification a {
+        display: inline-block;
+        padding: 7px 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #333;
+        background: #f8f8f8;
+    }
+
+    .empty {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 25px;
+    }
+
+    .actions {
+        margin-top: 20px;
+    }
+
+    .actions a {
+        display: inline-block;
+        padding: 8px 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #333;
+        background: white;
+        margin-right: 8px;
+    }
+
+</style>
+
+</head>
+
+<body>
+
+<h1>
+    BOC-NAIA Operations System
+</h1>
+
+<h2>
+    Notifications
+</h2>
+
+
+<div class="notification-container">
+
+    {% if notifications %}
+
+        {% for notification in notifications %}
+
+            <div class="notification">
+
+                <div class="notification-type">
+                    {{ notification.type }}
+                </div>
+
+                <div class="notification-title">
+                    {{ notification.title }}
+                </div>
+
+                <div class="notification-message">
+                    {{ notification.message }}
+                </div>
+
+                <div class="notification-date">
+                    {{ notification.created_at }}
+                </div>
+
+                <a href="{{ notification.url }}">
+                    View Record
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+
+            <strong>
+                No notifications.
+            </strong>
+
+            <p>
+                There are currently no records
+                requiring your attention.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<div class="actions">
+
+    <a href="{% url 'dashboard' %}">
+        Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>

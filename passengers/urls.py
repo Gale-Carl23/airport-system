@@ -181,4 +181,9 @@ urlpatterns = [
     views.export_operations_csv,
     name="export_operations_csv",
     ),
+    path(
+    "notifications/",
+    views.notifications,
+    name="notifications",
+    ),
 ]
