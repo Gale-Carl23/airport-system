@@ -186,4 +186,21 @@ urlpatterns = [
     views.notifications,
     name="notifications",
     ),
+    path(
+    "documents/",
+    views.document_list,
+    name="document_list",
+    ),
+
+    path(
+        "documents/<int:document_id>/",
+        views.document_detail,
+        name="document_detail",
+    ),
+
+    path(
+        "baggage/<int:baggage_id>/documents/add/",
+        views.document_create,
+        name="document_create",
+    ),
 ]

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Upload Document | BOC-NAIA
+    </title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f6f8;
+        }
+
+        .container {
+            max-width: 700px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .submit {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .errorlist {
+            color: #b00020;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Upload Document
+    </h1>
+
+    <p>
+        Baggage:
+        <strong>
+            {{ baggage.baggage_tag }}
+        </strong>
+    </p>
+
+    <div class="card">
+
+        <form
+            method="post"
+            enctype="multipart/form-data"
+        >
+
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+
+                <div class="field">
+
+                    {{ field.label_tag }}
+
+                    {{ field }}
+
+                    {{ field.errors }}
+
+                </div>
+
+            {% endfor %}
+
+            <button
+                type="submit"
+                class="submit"
+            >
+                Upload Document
+            </button>
+
+        </form>
+
+        <a
+            href="{% url 'baggage_detail' baggage.id %}"
+            class="back"
+        >
+            Back to Baggage
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

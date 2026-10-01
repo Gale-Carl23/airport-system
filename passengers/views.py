@@ -20,6 +20,7 @@ from .models import (
     Clearance,
     Case,
     AuditLog,
+    Document
 )
 from .forms import (
     BaggageForm,
@@ -30,6 +31,7 @@ from .forms import (
     PaymentForm,
     ClearanceForm,
     CaseForm,
+    DocumentForm
 )
 
 
@@ -2987,5 +2989,160 @@ def notifications(request):
         "passengers/notifications.html",
         {
             "notifications": notifications,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_document",
+    raise_exception=True,
+)
+def document_list(request):
+
+    documents = (
+        Document.objects
+        .select_related(
+            "baggage",
+            "baggage__passenger",
+            "uploaded_by",
+        )
+        .order_by("-created_at")
+    )
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    document_type = request.GET.get(
+        "document_type",
+        ""
+    ).strip()
+
+    if search:
+        documents = documents.filter(
+            Q(title__icontains=search)
+            |
+            Q(description__icontains=search)
+            |
+            Q(baggage__baggage_tag__icontains=search)
+            |
+            Q(baggage__passenger__reference_number__icontains=search)
+        )
+
+    if document_type:
+        documents = documents.filter(
+            document_type=document_type
+        )
+
+    paginator = Paginator(
+        documents,
+        20
+    )
+
+    page_number = request.GET.get(
+        "page"
+    )
+
+    documents = paginator.get_page(
+        page_number
+    )
+
+    return render(
+        request,
+        "passengers/document_list.html",
+        {
+            "documents": documents,
+            "search": search,
+            "document_type": document_type,
+            "document_type_choices": Document.DOCUMENT_TYPE_CHOICES,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.add_document",
+    raise_exception=True,
+)
+def document_create(request, baggage_id):
+
+    baggage = get_object_or_404(
+        Baggage,
+        id=baggage_id,
+    )
+
+    if request.method == "POST":
+
+        form = DocumentForm(
+            request.POST,
+            request.FILES,
+        )
+
+        if form.is_valid():
+
+            document = form.save(
+                commit=False
+            )
+
+            document.baggage = baggage
+            document.uploaded_by = request.user
+
+            document.save()
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="create",
+                model_name="Document",
+                object_id=document.id,
+                description=(
+                    f"Uploaded document "
+                    f"'{document.title}' "
+                    f"for baggage "
+                    f"{baggage.baggage_tag}."
+                ),
+            )
+
+            return redirect(
+                "document_list"
+            )
+
+    else:
+
+        form = DocumentForm()
+
+    return render(
+        request,
+        "passengers/document_form.html",
+        {
+            "form": form,
+            "baggage": baggage,
+        },
+    )
+
+@login_required
+@permission_required(
+    "passengers.view_document",
+    raise_exception=True,
+)
+def document_detail(
+    request,
+    document_id,
+):
+
+    document = get_object_or_404(
+        Document.objects.select_related(
+            "baggage",
+            "baggage__passenger",
+            "baggage__passenger__flight",
+            "uploaded_by",
+        ),
+        id=document_id,
+    )
+
+    return render(
+        request,
+        "passengers/document_detail.html",
+        {
+            "document": document,
         },
     )

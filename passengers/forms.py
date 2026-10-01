@@ -8,6 +8,7 @@ from .models import (
     Payment,
     Clearance,
     Case,
+    Document
 )
 
 
@@ -771,4 +772,30 @@ class CaseForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+class DocumentForm(forms.ModelForm):
+
+    class Meta:
+        model = Document
+        fields = [
+            "title",
+            "document_type",
+            "file",
+            "description",
+        ]
+
+        widgets = {
+            "title": forms.TextInput(
+                attrs={
+                    "placeholder": "Document title",
+                }
+            ),
+
+            "description": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": "Optional description",
+                }
+            ),
+        }
 

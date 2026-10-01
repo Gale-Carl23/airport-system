@@ -424,5 +424,21 @@
 
 </div>
 
+{% if perms.passengers.add_document %}
+
+    <a href="{% url 'document_create' baggage.id %}">
+        Upload Document
+    </a>
+
+    {% endif %}
+
+    {% if perms.passengers.view_document %}
+
+        <a href="{% url 'document_list' %}">
+            View Documents
+        </a>
+
+    {% endif %}
+
 </body>
 </html>
