@@ -245,6 +245,12 @@
         color: #2563eb;
         font-size: 11px;
         font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .next-action:hover {
+        text-decoration: underline;
     }
 
     .empty-state {
@@ -504,7 +510,7 @@
 
                 <div class="queue-list">
                     {% for inspection in pending_inspections %}
-                    <a class="queue-item" href="{% url 'inspection_detail' inspection.id %}">
+                    <div class="queue-item">
                         <div class="queue-main">
                             <strong>{{ inspection.baggage.baggage_tag }}</strong>
                             <span>›</span>
@@ -518,11 +524,13 @@
                                 {{ inspection.age_label }} · {{ inspection.age_display }}
                             </span>
 
-                            {% if perms.passengers.change_inspection %}
-                            <span class="next-action">Continue →</span>
+                            {% if inspection.next_action_url %}
+                            <a class="next-action" href="{{ inspection.next_action_url }}">
+                                {{ inspection.next_action_label }} →
+                            </a>
                             {% endif %}
                         </div>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="empty-state">No pending inspections.</div>
                     {% endfor %}
@@ -543,7 +551,7 @@
 
                 <div class="queue-list">
                     {% for assessment in pending_assessments %}
-                    <a class="queue-item" href="{% url 'assessment_detail' assessment.id %}">
+                    <div class="queue-item">
                         <div class="queue-main">
                             <strong>{{ assessment.inspection.baggage.baggage_tag }}</strong>
                             <span>›</span>
@@ -557,11 +565,13 @@
                                 {{ assessment.age_label }} · {{ assessment.age_display }}
                             </span>
 
-                            {% if perms.passengers.change_assessment %}
-                            <span class="next-action">Complete →</span>
+                            {% if assessment.next_action_url %}
+                            <a class="next-action" href="{{ assessment.next_action_url }}">
+                                {{ assessment.next_action_label }} →
+                            </a>
                             {% endif %}
                         </div>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="empty-state">No pending assessments.</div>
                     {% endfor %}
@@ -582,7 +592,7 @@
 
                 <div class="queue-list">
                     {% for payment in pending_payments %}
-                    <a class="queue-item" href="{% url 'payment_detail' payment.id %}">
+                    <div class="queue-item">
                         <div class="queue-main">
                             <strong>{{ payment.assessment.inspection.baggage.baggage_tag }}</strong>
                             <span>›</span>
@@ -595,11 +605,13 @@
                                 {{ payment.age_label }} · {{ payment.age_display }}
                             </span>
 
-                            {% if perms.passengers.change_payment %}
-                            <span class="next-action">Process →</span>
+                            {% if payment.next_action_url %}
+                            <a class="next-action" href="{{ payment.next_action_url }}">
+                                {{ payment.next_action_label }} →
+                            </a>
                             {% endif %}
                         </div>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="empty-state">No pending payments.</div>
                     {% endfor %}
@@ -607,6 +619,46 @@
 
                 <div class="queue-footer">
                     <a href="{% url 'payment_list' %}">View All Payments →</a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if show_payments %}
+            <div class="queue-card">
+                <div class="queue-card-header">
+                    <strong>Payments to Create</strong>
+                    <span class="count-badge">{{ ready_payment_count }}</span>
+                </div>
+
+                <div class="queue-list">
+                    {% for assessment in ready_payments %}
+                    <div class="queue-item">
+                        <div class="queue-main">
+                            <strong>{{ assessment.inspection.baggage.baggage_tag }}</strong>
+                            <span>›</span>
+                        </div>
+                        <div class="queue-sub">
+                            {{ assessment.inspection.baggage.passenger }} · Assessment completed
+                        </div>
+                        <div class="queue-action">
+                            <span class="age-badge age-{{ assessment.age_class }}">
+                                {{ assessment.age_label }} · {{ assessment.age_display }}
+                            </span>
+
+                            {% if assessment.next_action_url %}
+                            <a class="next-action" href="{{ assessment.next_action_url }}">
+                                {{ assessment.next_action_label }} →
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">No payments to create.</div>
+                    {% endfor %}
+                </div>
+
+                <div class="queue-footer">
+                    <a href="{% url 'assessment_list' %}">View Assessments →</a>
                 </div>
             </div>
             {% endif %}
@@ -620,7 +672,7 @@
 
                 <div class="queue-list">
                     {% for case in active_cases %}
-                    <a class="queue-item" href="{% url 'case_detail' case.id %}">
+                    <div class="queue-item">
                         <div class="queue-main">
                             <strong>{{ case.case_reference }}</strong>
                             <span>›</span>
@@ -634,11 +686,13 @@
                                 {{ case.age_label }} · {{ case.age_display }}
                             </span>
 
-                            {% if perms.passengers.change_case %}
-                            <span class="next-action">Continue →</span>
+                            {% if case.next_action_url %}
+                            <a class="next-action" href="{{ case.next_action_url }}">
+                                {{ case.next_action_label }} →
+                            </a>
                             {% endif %}
                         </div>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="empty-state">No active cases.</div>
                     {% endfor %}
@@ -659,7 +713,7 @@
 
                 <div class="queue-list">
                     {% for clearance in pending_clearances %}
-                    <a class="queue-item" href="{% url 'clearance_detail' clearance.id %}">
+                    <div class="queue-item">
                         <div class="queue-main">
                             <strong>{{ clearance.clearance_reference }}</strong>
                             <span>›</span>
@@ -672,11 +726,13 @@
                                 {{ clearance.age_label }} · {{ clearance.age_display }}
                             </span>
 
-                            {% if perms.passengers.change_clearance %}
-                            <span class="next-action">Process →</span>
+                            {% if clearance.next_action_url %}
+                            <a class="next-action" href="{{ clearance.next_action_url }}">
+                                {{ clearance.next_action_label }} →
+                            </a>
                             {% endif %}
                         </div>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="empty-state">No pending clearances.</div>
                     {% endfor %}
@@ -684,6 +740,46 @@
 
                 <div class="queue-footer">
                     <a href="{% url 'clearance_list' %}">View All Clearances →</a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if show_clearances %}
+            <div class="queue-card">
+                <div class="queue-card-header">
+                    <strong>Clearances to Create</strong>
+                    <span class="count-badge">{{ ready_clearance_count }}</span>
+                </div>
+
+                <div class="queue-list">
+                    {% for payment in ready_clearances %}
+                    <div class="queue-item">
+                        <div class="queue-main">
+                            <strong>{{ payment.assessment.inspection.baggage.baggage_tag }}</strong>
+                            <span>›</span>
+                        </div>
+                        <div class="queue-sub">
+                            {{ payment.assessment.inspection.baggage.passenger }} · Payment completed
+                        </div>
+                        <div class="queue-action">
+                            <span class="age-badge age-{{ payment.age_class }}">
+                                {{ payment.age_label }} · {{ payment.age_display }}
+                            </span>
+
+                            {% if payment.next_action_url %}
+                            <a class="next-action" href="{{ payment.next_action_url }}">
+                                {{ payment.next_action_label }} →
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">No clearances to create.</div>
+                    {% endfor %}
+                </div>
+
+                <div class="queue-footer">
+                    <a href="{% url 'clearance_list' %}">View Clearances →</a>
                 </div>
             </div>
             {% endif %}

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 
 from passengers.models import (
@@ -72,6 +73,68 @@ def add_aging_info(items):
         item.age_class = info["class"]
         item.age_label = info["label"]
         item.age_seconds = info["seconds"]
+
+    return items
+
+
+def add_next_actions(items, user, item_type):
+    """Attach permission-aware next-action metadata to queue objects."""
+
+    for item in items:
+        item.next_action_url = None
+        item.next_action_label = None
+
+        if item_type == "inspection":
+            if (
+                item.status == "pending"
+                or item.status == "in_progress"
+            ):
+                if user.has_perm("passengers.change_inspection"):
+                    item.next_action_url = reverse("inspection_update", args=[item.id])
+                    item.next_action_label = "Continue Inspection"
+            elif item.status == "completed":
+                if item.result == "for_assessment":
+                    if user.has_perm("passengers.add_assessment"):
+                        item.next_action_url = (
+                            f"{reverse('assessment_create')}?inspection={item.id}"
+                        )
+                        item.next_action_label = "Create Assessment"
+                elif item.result == "held" or item.result == "seized":
+                    if user.has_perm("passengers.add_case"):
+                        item.next_action_url = (
+                            f"{reverse('case_create')}?baggage={item.baggage_id}"
+                        )
+                        item.next_action_label = "Create Case"
+                elif item.result == "cleared":
+                    if user.has_perm("passengers.add_clearance"):
+                        item.next_action_url = (
+                            f"{reverse('clearance_create')}?baggage={item.baggage_id}"
+                        )
+                        item.next_action_label = "Create Clearance"
+
+        elif item_type == "assessment":
+            if item.status == "pending":
+                if user.has_perm("passengers.change_assessment"):
+                    item.next_action_url = reverse("assessment_update", args=[item.id])
+                    item.next_action_label = "Complete Assessment"
+
+        elif item_type == "payment":
+            if item.status == "pending":
+                if user.has_perm("passengers.change_payment"):
+                    item.next_action_url = reverse("payment_update", args=[item.id])
+                    item.next_action_label = "Process Payment"
+
+        elif item_type == "case":
+            if item.status in ("open", "under_review"):
+                if user.has_perm("passengers.change_case"):
+                    item.next_action_url = reverse("case_update", args=[item.id])
+                    item.next_action_label = "Continue Case"
+
+        elif item_type == "clearance":
+            if item.status == "pending":
+                if user.has_perm("passengers.change_clearance"):
+                    item.next_action_url = reverse("clearance_update", args=[item.id])
+                    item.next_action_label = "Process Clearance"
 
     return items
 
@@ -196,6 +259,7 @@ def dashboard(request):
             .order_by("created_at")[:8]
         )
         add_aging_info(pending_inspections)
+        add_next_actions(pending_inspections, user, "inspection")
 
     if show_assessments:
         pending_assessments = list(
@@ -210,6 +274,7 @@ def dashboard(request):
             .order_by("created_at")[:8]
         )
         add_aging_info(pending_assessments)
+        add_next_actions(pending_assessments, user, "assessment")
 
     if show_payments:
         pending_payments = list(
@@ -225,6 +290,7 @@ def dashboard(request):
             .order_by("created_at")[:8]
         )
         add_aging_info(pending_payments)
+        add_next_actions(pending_payments, user, "payment")
 
     if show_cases:
         active_cases = list(
@@ -241,6 +307,7 @@ def dashboard(request):
             .order_by("created_at")[:8]
         )
         add_aging_info(active_cases)
+        add_next_actions(active_cases, user, "case")
 
     if show_clearances:
         pending_clearances = list(
@@ -254,6 +321,7 @@ def dashboard(request):
             .order_by("created_at")[:8]
         )
         add_aging_info(pending_clearances)
+        add_next_actions(pending_clearances, user, "clearance")
 
     # ------------------------------------------------------------
     # ROLE
