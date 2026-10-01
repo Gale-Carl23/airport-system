@@ -380,6 +380,16 @@ class AuditLog(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    previous_data = models.JSONField(
+    null=True,
+    blank=True,
+    )
+
+    new_data = models.JSONField(
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         return f"{self.user.username} - {self.action} - {self.model_name}"
 

@@ -191,15 +191,18 @@ class CaseAdmin(admin.ModelAdmin):
         "resolved_by__username",
     )
 
+from django.contrib import admin
+from .models import AuditLog
+
+
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
     list_display = (
+        "created_at",
         "user",
         "action",
         "model_name",
         "object_id",
-        "description",
-        "created_at",
     )
 
     list_filter = (
@@ -210,8 +213,9 @@ class AuditLogAdmin(admin.ModelAdmin):
 
     search_fields = (
         "user__username",
-        "model_name",
         "description",
+        "model_name",
+        "object_id",
     )
 
     readonly_fields = (
@@ -220,5 +224,16 @@ class AuditLogAdmin(admin.ModelAdmin):
         "model_name",
         "object_id",
         "description",
+        "previous_data",
+        "new_data",
         "created_at",
     )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
