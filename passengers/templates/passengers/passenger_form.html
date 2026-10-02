@@ -1,45 +1,466 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Add Passenger | BOC-NAIA</title>
-</head>
+{% block title %}
+    {% if passenger %}Edit Passenger{% else %}Register Passenger{% endif %} | BOC-NAIA
+{% endblock %}
 
-<body>
+{% block nav_passengers %}active{% endblock %}
+{% block page_heading %}Passenger Registration{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block extra_css %}
+<style>
+    .passenger-form-page {
+        max-width: 1050px;
+        margin: 0 auto;
+        animation: pageEnter 0.35s ease-out;
+    }
 
-    {% if passenger %}
-        <h2>Edit Passenger</h2>
-    {% else %}
-        <h2>Register Passenger</h2>
-    {% endif %}
+    @keyframes pageEnter {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    <form method="post">
+    .form-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
 
-        {% csrf_token %}
+    .form-header-text {
+        min-width: 0;
+    }
 
-        {{ form.as_p }}
+    .form-eyebrow {
+        margin: 0 0 6px;
+        color: #B8944E;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .form-title {
+        margin: 0;
+        color: #252A28;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .form-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .record-badge {
+        flex-shrink: 0;
+        padding: 8px 12px;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+        background: #FFFFFF;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .form-card {
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(38, 51, 47, 0.045);
+        overflow: hidden;
+        animation: cardEnter 0.4s ease-out;
+    }
+
+    @keyframes cardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #E5E8E5;
+        background: #FAFBFA;
+    }
+
+    .section-marker {
+        width: 4px;
+        height: 30px;
+        border-radius: 2px;
+        background: #17324D;
+        flex-shrink: 0;
+    }
+
+    .form-card-header h2 {
+        margin: 0;
+        color: #252A28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .form-card-header p {
+        margin: 3px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .form-body {
+        padding: 26px 28px 28px;
+    }
+
+    .django-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .django-form p {
+        margin: 0;
+        min-width: 0;
+    }
+
+    .django-form p:has(textarea) {
+        grid-column: 1 / -1;
+    }
+
+    .django-form label {
+        display: block;
+        margin-bottom: 7px;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .django-form input,
+    .django-form select,
+    .django-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #CBD2CD;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #252A28;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.45;
+        outline: none;
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease,
+            transform 0.18s ease;
+    }
+
+    .django-form input,
+    .django-form select {
+        min-height: 42px;
+    }
+
+    .django-form textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .django-form input:hover,
+    .django-form select:hover,
+    .django-form textarea:hover {
+        border-color: #AAB5AE;
+    }
+
+    .django-form input:focus,
+    .django-form select:focus,
+    .django-form textarea:focus {
+        border-color: #17324D;
+        box-shadow: 0 0 0 3px rgba(23, 50, 77, 0.08);
+        background: #FCFDFC;
+    }
+
+    .django-form input[type="checkbox"] {
+        width: 16px;
+        min-height: 16px;
+        margin: 2px 8px 0 0;
+        accent-color: #3F514A;
+        vertical-align: middle;
+    }
+
+    .django-form p:has(input[type="checkbox"]) label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .django-form .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7A827D;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .django-form ul.errorlist {
+        margin: 0 0 7px;
+        padding: 0;
+        list-style: none;
+        color: #9A3B35;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .form-errors {
+        margin-bottom: 22px;
+        padding: 12px 14px;
+        border: 1px solid #E4B9B5;
+        border-left: 4px solid #9A3B35;
+        border-radius: 5px;
+        background: #FFF8F7;
+        color: #7E302B;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .form-errors strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid #E5E8E5;
+    }
+
+    .action-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+    }
+
+    .button:active {
+        transform: translateY(0);
+    }
+
+    .button-primary {
+        background: #17324D;
+        border-color: #17324D;
+        color: #FFFFFF;
+        box-shadow: 0 2px 5px rgba(23, 50, 77, 0.12);
+    }
+
+    .button-primary:hover {
+        background: #122A41;
+        border-color: #122A41;
+        box-shadow: 0 4px 9px rgba(23, 50, 77, 0.16);
+    }
+
+    .button-secondary {
+        background: #FFFFFF;
+        border-color: #CBD2CD;
+        color: #3F514A;
+    }
+
+    .button-secondary:hover {
+        background: #F4F5F3;
+        border-color: #AAB5AE;
+    }
+
+    .required-note {
+        color: #7A827D;
+        font-size: 11px;
+    }
+
+    .required-note span {
+        color: #9A3B35;
+    }
+
+    @media (max-width: 760px) {
+        .form-header {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-title {
+            font-size: 24px;
+        }
+
+        .django-form {
+            grid-template-columns: 1fr;
+        }
+
+        .django-form p:has(textarea) {
+            grid-column: auto;
+        }
+
+        .form-body {
+            padding: 22px 18px;
+        }
+
+        .form-actions {
+            align-items: stretch;
+            flex-direction: column-reverse;
+        }
+
+        .action-group {
+            width: 100%;
+        }
+
+        .action-group .button {
+            flex: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .passenger-form-page,
+        .form-card {
+            animation: none;
+        }
+
+        .button,
+        .django-form input,
+        .django-form select,
+        .django-form textarea {
+            transition: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="passenger-form-page">
+
+    <div class="form-header">
+        <div class="form-header-text">
+            <p class="form-eyebrow">Passenger Records</p>
+
+            <h1 class="form-title">
+                {% if passenger %}
+                    Edit Passenger
+                {% else %}
+                    Register Passenger
+                {% endif %}
+            </h1>
+
+            <p class="form-subtitle">
+                {% if passenger %}
+                    Update the passenger record and keep the operational information accurate.
+                {% else %}
+                    Create a new passenger record for BOC-NAIA processing.
+                {% endif %}
+            </p>
+        </div>
 
         {% if passenger %}
-            <button type="submit">
-                Save Changes
-            </button>
+            <div class="record-badge">
+                Editing Existing Record
+            </div>
         {% else %}
-            <button type="submit">
-                Save Passenger
-            </button>
+            <div class="record-badge">
+                New Passenger Record
+            </div>
         {% endif %}
+    </div>
 
-    </form>
+    <div class="form-card">
 
-    <br>
+        <div class="form-card-header">
+            <div class="section-marker"></div>
 
-    <a href="{% url 'passenger_list' %}">
-        Back to Passenger List
-    </a>
+            <div>
+                <h2>Passenger Information</h2>
+                <p>Enter the passenger's identification and arrival information.</p>
+            </div>
+        </div>
 
-</body>
-</html>
+        <div class="form-body">
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    <strong>Unable to save this record</strong>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="django-form">
+                    {{ form.as_p }}
+                </div>
+
+                <div class="form-actions">
+
+                    <span class="required-note">
+                        <span>*</span> Required fields
+                    </span>
+
+                    <div class="action-group">
+                        <a href="{% url 'passenger_list' %}" class="button button-secondary">
+                            Cancel
+                        </a>
+
+                        {% if passenger %}
+                            <button type="submit" class="button button-primary">
+                                Save Changes
+                            </button>
+                        {% else %}
+                            <button type="submit" class="button button-primary">
+                                Save Passenger
+                            </button>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
