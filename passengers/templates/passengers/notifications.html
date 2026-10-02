@@ -1,175 +1,288 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="en">
+{% block title %}Notifications | BOC-NAIA{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
 
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-    Notifications | BOC-NAIA
-</title>
+{% block content %}
 
 <style>
-
-    body {
-        font-family: Arial, sans-serif;
-        margin: 30px;
-        background: #f5f6f8;
+    .notifications-page {
+        max-width: 980px;
     }
 
-    h1 {
-        margin-bottom: 5px;
+    .page-intro {
+        margin-bottom: 24px;
     }
 
-    .notification-container {
-        max-width: 900px;
+    .page-intro h1 {
+        margin: 0 0 6px;
+        font-size: 26px;
+        font-weight: 650;
+        color: #252A28;
+        letter-spacing: -0.3px;
+    }
+
+    .page-intro p {
+        margin: 0;
+        color: #707873;
+        font-size: 14px;
+    }
+
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .notification {
-        background: white;
-        border: 1px solid #ddd;
+        position: relative;
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
         border-radius: 8px;
-        padding: 18px;
-        margin-bottom: 12px;
+        padding: 18px 20px;
+        transition:
+            border-color 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
     }
 
-    .notification-type {
-        font-size: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-        color: #666;
-        margin-bottom: 5px;
+    .notification:hover {
+        border-color: #BFC7C2;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(38, 51, 47, 0.06);
     }
 
-    .notification-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 6px;
-    }
-
-    .notification-message {
+    .notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
         margin-bottom: 8px;
     }
 
+    .notification-type {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 4px 9px;
+        border: 1px solid #D9DEDA;
+        border-radius: 4px;
+        background: #F4F5F3;
+        color: #3F514A;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+    }
+
     .notification-date {
-        font-size: 13px;
-        color: #777;
-        margin-bottom: 10px;
+        flex-shrink: 0;
+        color: #8A928D;
+        font-size: 12px;
     }
 
-    .notification a {
-        display: inline-block;
-        padding: 7px 12px;
-        border: 1px solid #ccc;
+    .notification-title {
+        margin-bottom: 6px;
+        color: #252A28;
+        font-size: 16px;
+        font-weight: 650;
+        line-height: 1.4;
+    }
+
+    .notification-message {
+        max-width: 820px;
+        margin-bottom: 14px;
+        color: #606964;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .notification-action {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid #C9D0CB;
         border-radius: 5px;
+        background: #FFFFFF;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 650;
         text-decoration: none;
-        color: #333;
-        background: #f8f8f8;
+        transition:
+            background 0.18s ease,
+            border-color 0.18s ease,
+            color 0.18s ease;
     }
 
-    .empty {
-        background: white;
-        border: 1px solid #ddd;
+    .notification-action:hover {
+        background: #F1F3F1;
+        border-color: #AEB8B2;
+        color: #26332F;
+    }
+
+    .empty-state {
+        padding: 44px 28px;
+        border: 1px solid #D9DEDA;
         border-radius: 8px;
-        padding: 25px;
+        background: #FFFFFF;
+        text-align: center;
     }
 
-    .actions {
+    .empty-icon {
+        width: 42px;
+        height: 42px;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #D9DEDA;
+        border-radius: 50%;
+        background: #F4F5F3;
+        color: #707873;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .empty-state strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #252A28;
+        font-size: 15px;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: #7A827D;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .page-actions {
+        display: flex;
+        align-items: center;
         margin-top: 20px;
     }
 
-    .actions a {
-        display: inline-block;
-        padding: 8px 14px;
-        border: 1px solid #ccc;
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 13px;
+        border: 1px solid #D0D6D2;
         border-radius: 5px;
+        background: #FFFFFF;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 650;
         text-decoration: none;
-        color: #333;
-        background: white;
-        margin-right: 8px;
+        transition:
+            background 0.18s ease,
+            border-color 0.18s ease;
     }
 
+    .back-link:hover {
+        background: #F1F3F1;
+        border-color: #B8C1BB;
+    }
+
+    @media (max-width: 700px) {
+        .notification {
+            padding: 16px;
+        }
+
+        .notification-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notification-date {
+            order: -1;
+        }
+
+        .page-intro h1 {
+            font-size: 22px;
+        }
+    }
 </style>
 
-</head>
+<div class="notifications-page">
 
-<body>
-
-<h1>
-    BOC-NAIA Operations System
-</h1>
-
-<h2>
-    Notifications
-</h2>
-
-
-<div class="notification-container">
+    <div class="page-intro">
+        <h1>Notifications</h1>
+        <p>Review system alerts and records requiring your attention.</p>
+    </div>
 
     {% if notifications %}
 
-        {% for notification in notifications %}
+        <div class="notification-list">
 
-            <div class="notification">
+            {% for notification in notifications %}
 
-                <div class="notification-type">
-                    {{ notification.type }}
-                </div>
+                <article class="notification">
 
-                <div class="notification-title">
-                    {{ notification.title }}
-                </div>
+                    <div class="notification-header">
 
-                <div class="notification-message">
-                    {{ notification.message }}
-                </div>
+                        <div class="notification-type">
+                            {{ notification.type }}
+                        </div>
 
-                <div class="notification-date">
-                    {{ notification.created_at }}
-                </div>
+                        <div class="notification-date">
+                            {{ notification.created_at }}
+                        </div>
 
-                <a href="{{ notification.url }}">
-                    View Record
-                </a>
+                    </div>
 
-            </div>
+                    <div class="notification-title">
+                        {{ notification.title }}
+                    </div>
 
-        {% endfor %}
+                    <div class="notification-message">
+                        {{ notification.message }}
+                    </div>
+
+                    <a
+                        href="{{ notification.url }}"
+                        class="notification-action"
+                    >
+                        View Record
+                    </a>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
 
     {% else %}
 
-        <div class="empty">
+        <div class="empty-state">
 
-            <strong>
-                No notifications.
-            </strong>
+            <div class="empty-icon">✓</div>
+
+            <strong>No notifications</strong>
 
             <p>
-                There are currently no records
-                requiring your attention.
+                There are currently no records requiring your attention.
             </p>
 
         </div>
 
     {% endif %}
 
+    <div class="page-actions">
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="back-link"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
 </div>
 
-
-<div class="actions">
-
-    <a href="{% url 'dashboard' %}">
-        Back to Dashboard
-    </a>
-
-</div>
-
-</body>
-
-</html>
+{% endblock %}
