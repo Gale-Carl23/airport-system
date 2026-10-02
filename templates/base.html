@@ -181,6 +181,26 @@
 
             </div>
 
+            <div class="nav-section">
+                <span class="nav-section-title">Monitoring & Reports</span>
+
+                <a
+                    href="{% url 'notifications' %}"
+                    class="nav-link {% block nav_notifications %}{% endblock %}"
+                >
+                    <span class="nav-icon">!</span>
+                    <span>Notifications</span>
+                </a>
+
+                <a
+                    href="{% url 'operations_report' %}"
+                    class="nav-link {% block nav_operations_report %}{% endblock %}"
+                >
+                    <span class="nav-icon">▤</span>
+                    <span>Operations Report</span>
+                </a>
+            </div>
+
 
             <!-- =================================================
                  RECORDS
