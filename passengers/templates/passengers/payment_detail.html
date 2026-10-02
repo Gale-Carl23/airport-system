@@ -1,205 +1,788 @@
-<h1>Payment Detail</h1>
+{% extends "base.html" %}
 
-<p>
-    <a href="{% url 'payment_list' %}">
-        Back to Payments
-    </a>
-</p>
+{% block title %}Payment Detail | BOC-NAIA{% endblock %}
+{% block nav_payments %}active{% endblock %}
+{% block page_heading %}Payment Detail{% endblock %}
 
-<hr>
+{% block content %}
 
-<h2>Payment Information</h2>
+<style>
+    .detail-page {
+        max-width: 1100px;
+    }
 
-<p>
-    <strong>Status:</strong>
-    {{ payment.get_status_display }}
-</p>
+    .page-intro {
+        margin-bottom: 22px;
+    }
 
-<p>
-    <strong>Amount Due:</strong>
-    {{ payment.amount_due }}
-</p>
+    .page-intro h1 {
+        margin: 0 0 6px;
+        color: #252A28;
+        font-size: 26px;
+        font-weight: 650;
+        letter-spacing: -0.3px;
+    }
 
-<p>
-    <strong>Amount Paid:</strong>
-    {{ payment.amount_paid }}
-</p>
+    .page-intro p {
+        margin: 0;
+        color: #707873;
+        font-size: 14px;
+    }
 
-<p>
-    <strong>Payment Method:</strong>
-    {{ payment.get_payment_method_display }}
-</p>
+    .top-actions {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 18px;
+    }
 
-<p>
-    <strong>Payment Reference:</strong>
-    {{ payment.payment_reference|default:"-" }}
-</p>
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 13px;
+        border: 1px solid #CDD4CF;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+        transition:
+            background 0.18s ease,
+            border-color 0.18s ease,
+            transform 0.18s ease;
+    }
 
-<p>
-    <strong>Paid At:</strong>
-    {{ payment.paid_at|default:"-" }}
-</p>
+    .btn:hover {
+        background: #F2F4F2;
+        border-color: #B8C1BB;
+        transform: translateY(-1px);
+    }
 
-<p>
-    <strong>Remarks:</strong>
-    {{ payment.remarks|default:"-" }}
-</p>
+    .btn-primary {
+        background: #3F514A;
+        border-color: #3F514A;
+        color: #FFFFFF;
+    }
 
-<hr>
+    .btn-primary:hover {
+        background: #34443E;
+        border-color: #34443E;
+    }
 
-<h2>Assessment</h2>
+    .btn-navy {
+        background: #17324D;
+        border-color: #17324D;
+        color: #FFFFFF;
+    }
 
-<p>
-    <strong>Status:</strong>
-    {{ assessment.get_status_display }}
-</p>
+    .btn-navy:hover {
+        background: #122A40;
+        border-color: #122A40;
+    }
 
-<p>
-    <strong>Declared Value:</strong>
-    {{ assessment.declared_value }}
-</p>
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
 
-<p>
-    <strong>Assessed Value:</strong>
-    {{ assessment.assessed_value }}
-</p>
+    .detail-card {
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        background: #FFFFFF;
+        overflow: hidden;
+        animation: cardEnter 0.25s ease both;
+    }
 
-<p>
-    <strong>Duty:</strong>
-    {{ assessment.duty_amount }}
-</p>
+    .detail-card.full-width {
+        grid-column: 1 / -1;
+    }
 
-<p>
-    <strong>Tax:</strong>
-    {{ assessment.tax_amount }}
-</p>
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 18px;
+        border-bottom: 1px solid #D9DEDA;
+        background: #F8F9F8;
+    }
 
-<p>
-    <a href="{% url 'assessment_detail' assessment.id %}">
-        View Assessment
-    </a>
-</p>
+    .card-title {
+        margin: 0;
+        color: #26332F;
+        font-size: 14px;
+        font-weight: 700;
+    }
 
-<hr>
+    .card-body {
+        padding: 18px;
+    }
 
-<h2>Inspection</h2>
+    .field-list {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
 
-<p>
-    <strong>Status:</strong>
-    {{ inspection.get_status_display }}
-</p>
+    .field-row {
+        display: grid;
+        grid-template-columns: 175px minmax(0, 1fr);
+        gap: 16px;
+        padding: 11px 0;
+        border-bottom: 1px solid #E7EAE8;
+    }
 
-<p>
-    <strong>Result:</strong>
-    {{ inspection.get_result_display }}
-</p>
+    .field-row:first-child {
+        padding-top: 0;
+    }
 
-<p>
-    <strong>Findings:</strong>
-    {{ inspection.findings|default:"-" }}
-</p>
+    .field-row:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
 
-<p>
-    <a href="{% url 'inspection_detail' inspection.id %}">
-        View Inspection
-    </a>
-</p>
+    .field-label {
+        color: #707873;
+        font-size: 11px;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
 
-<hr>
+    .field-value {
+        min-width: 0;
+        color: #303734;
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
 
-<h2>Baggage</h2>
+    .field-value strong {
+        color: #252A28;
+        font-weight: 650;
+    }
 
-<p>
-    <strong>Baggage Tag:</strong>
-    {{ baggage.baggage_tag }}
-</p>
+    .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 25px;
+        padding: 3px 9px;
+        border: 1px solid #D9DEDA;
+        border-radius: 4px;
+        background: #F4F5F3;
+        color: #59625D;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
 
-<p>
-    <strong>Description:</strong>
-    {{ baggage.description }}
-</p>
+    .status.paid,
+    .status.cleared,
+    .status.completed {
+        background: #EDF3EF;
+        border-color: #C9D8CF;
+        color: #365444;
+    }
 
-<p>
-    <strong>Weight:</strong>
-    {{ baggage.weight }}
-</p>
+    .status.pending,
+    .status.in-progress,
+    .status.in_progress {
+        background: #F6F1E7;
+        border-color: #E1D4B9;
+        color: #755E2F;
+    }
 
-<p>
-    <a href="{% url 'baggage_detail' baggage.id %}">
-        View Baggage
-    </a>
-</p>
+    .status.cancelled,
+    .status.held,
+    .status.seized {
+        background: #F3ECEA;
+        border-color: #DDCBC6;
+        color: #70483F;
+    }
 
-<hr>
+    .amount {
+        font-size: 15px;
+        font-weight: 700;
+        color: #26332F;
+        font-variant-numeric: tabular-nums;
+    }
 
-<h2>Passenger</h2>
+    .record-link {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 15px;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+    }
 
-<p>
-    <strong>Name:</strong>
-    {{ baggage.passenger.first_name }}
-    {{ baggage.passenger.last_name }}
-</p>
+    .record-link:hover {
+        color: #26332F;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
 
-<p>
-    <strong>Reference Number:</strong>
-    {{ baggage.passenger.reference_number }}
-</p>
+    .notice {
+        padding: 13px 15px;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+        background: #F6F7F6;
+        color: #59625D;
+        font-size: 13px;
+        line-height: 1.55;
+    }
 
-<p>
-    <strong>Passport Number:</strong>
-    {{ baggage.passenger.passport_number }}
-</p>
+    .notice.success {
+        border-color: #C9D8CF;
+        background: #EDF3EF;
+        color: #365444;
+    }
 
-<p>
-    <strong>Nationality:</strong>
-    {{ baggage.passenger.nationality }}
-</p>
+    .clearance-action {
+        margin-top: 14px;
+    }
 
-<hr>
+    .bottom-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding-bottom: 8px;
+    }
 
-<h2>Clearance</h2>
+    @keyframes cardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
 
-{% if clearance %}
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    <p>
-        <strong>Status:</strong>
-        {{ clearance.get_status_display }}
-    </p>
+    @media (max-width: 760px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
 
-    <p>
-        <strong>Reference:</strong>
-        {{ clearance.clearance_reference }}
-    </p>
+        .detail-card.full-width {
+            grid-column: auto;
+        }
 
-    <p>
-        <a href="{% url 'clearance_update' clearance.id %}">
-            View / Update Clearance
+        .field-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+
+        .page-intro h1 {
+            font-size: 22px;
+        }
+    }
+</style>
+
+
+<div class="detail-page">
+
+    <div class="page-intro">
+        <h1>Payment Detail</h1>
+        <p>Review payment information and its related operational records.</p>
+    </div>
+
+
+    <div class="top-actions">
+        <a
+            href="{% url 'payment_list' %}"
+            class="btn"
+        >
+            ← Back to Payments
         </a>
-    </p>
+    </div>
 
-{% elif payment.status == "paid" %}
 
-    <p>
-        Payment is complete.
-        Clearance can now be created.
-    </p>
+    <div class="detail-grid">
 
-    <a href="{% url 'clearance_create' %}?payment={{ payment.id }}">
-        Create Clearance
-    </a>
+        <!-- Payment Information -->
 
-{% else %}
+        <section class="detail-card">
 
-    <p>
-        Clearance is unavailable until payment is completed.
-    </p>
+            <div class="card-header">
+                <h2 class="card-title">
+                    Payment Information
+                </h2>
 
-{% endif %}
+                <span class="status {{ payment.status }}">
+                    {{ payment.get_status_display }}
+                </span>
+            </div>
 
-<hr>
+            <div class="card-body">
 
-<p>
-    <a href="{% url 'payment_update' payment.id %}">
-        Update Payment
-    </a>
-</p>
+                <div class="field-list">
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Status
+                        </div>
+
+                        <div class="field-value">
+                            <span class="status {{ payment.status }}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Amount Due
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ payment.amount_due }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Amount Paid
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ payment.amount_paid }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Payment Method
+                        </div>
+
+                        <div class="field-value">
+                            {{ payment.get_payment_method_display }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Payment Reference
+                        </div>
+
+                        <div class="field-value">
+                            {{ payment.payment_reference|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Paid At
+                        </div>
+
+                        <div class="field-value">
+                            {{ payment.paid_at|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Remarks
+                        </div>
+
+                        <div class="field-value">
+                            {{ payment.remarks|default:"-" }}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Assessment -->
+
+        <section class="detail-card">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    Assessment
+                </h2>
+
+                <span class="status {{ assessment.status }}">
+                    {{ assessment.get_status_display }}
+                </span>
+            </div>
+
+            <div class="card-body">
+
+                <div class="field-list">
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Status
+                        </div>
+
+                        <div class="field-value">
+                            <span class="status {{ assessment.status }}">
+                                {{ assessment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Declared Value
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ assessment.declared_value }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Assessed Value
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ assessment.assessed_value }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Duty
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ assessment.duty_amount }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Tax
+                        </div>
+
+                        <div class="field-value amount">
+                            ₱{{ assessment.tax_amount }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <a
+                    href="{% url 'assessment_detail' assessment.id %}"
+                    class="record-link"
+                >
+                    View Assessment →
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Inspection -->
+
+        <section class="detail-card">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    Inspection
+                </h2>
+
+                <span class="status {{ inspection.status }}">
+                    {{ inspection.get_status_display }}
+                </span>
+            </div>
+
+            <div class="card-body">
+
+                <div class="field-list">
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Status
+                        </div>
+
+                        <div class="field-value">
+                            <span class="status {{ inspection.status }}">
+                                {{ inspection.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Result
+                        </div>
+
+                        <div class="field-value">
+                            {{ inspection.get_result_display }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Findings
+                        </div>
+
+                        <div class="field-value">
+                            {{ inspection.findings|default:"-" }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <a
+                    href="{% url 'inspection_detail' inspection.id %}"
+                    class="record-link"
+                >
+                    View Inspection →
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Baggage -->
+
+        <section class="detail-card">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    Baggage
+                </h2>
+            </div>
+
+            <div class="card-body">
+
+                <div class="field-list">
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Baggage Tag
+                        </div>
+
+                        <div class="field-value">
+                            <strong>{{ baggage.baggage_tag }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Description
+                        </div>
+
+                        <div class="field-value">
+                            {{ baggage.description }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Weight
+                        </div>
+
+                        <div class="field-value">
+                            {{ baggage.weight }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <a
+                    href="{% url 'baggage_detail' baggage.id %}"
+                    class="record-link"
+                >
+                    View Baggage →
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Passenger -->
+
+        <section class="detail-card">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    Passenger
+                </h2>
+            </div>
+
+            <div class="card-body">
+
+                <div class="field-list">
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Name
+                        </div>
+
+                        <div class="field-value">
+                            <strong>
+                                {{ baggage.passenger.first_name }}
+                                {{ baggage.passenger.last_name }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Reference Number
+                        </div>
+
+                        <div class="field-value">
+                            {{ baggage.passenger.reference_number }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Passport Number
+                        </div>
+
+                        <div class="field-value">
+                            {{ baggage.passenger.passport_number }}
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field-label">
+                            Nationality
+                        </div>
+
+                        <div class="field-value">
+                            {{ baggage.passenger.nationality }}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Clearance -->
+
+        <section class="detail-card full-width">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    Clearance
+                </h2>
+
+                {% if clearance %}
+                    <span class="status {{ clearance.status }}">
+                        {{ clearance.get_status_display }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="card-body">
+
+                {% if clearance %}
+
+                    <div class="field-list">
+
+                        <div class="field-row">
+                            <div class="field-label">
+                                Status
+                            </div>
+
+                            <div class="field-value">
+                                <span class="status {{ clearance.status }}">
+                                    {{ clearance.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field-row">
+                            <div class="field-label">
+                                Reference
+                            </div>
+
+                            <div class="field-value">
+                                <strong>
+                                    {{ clearance.clearance_reference }}
+                                </strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'clearance_update' clearance.id %}"
+                        class="record-link"
+                    >
+                        View / Update Clearance →
+                    </a>
+
+                {% elif payment.status == "paid" %}
+
+                    <div class="notice success">
+                        Payment is complete. Clearance can now be created.
+                    </div>
+
+                    <div class="clearance-action">
+
+                        <a
+                            href="{% url 'clearance_create' %}?payment={{ payment.id }}"
+                            class="btn btn-primary"
+                        >
+                            Create Clearance
+                        </a>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="notice">
+                        Clearance is unavailable until payment is completed.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- Bottom Actions -->
+
+    <div class="bottom-actions">
+
+        <a
+            href="{% url 'payment_update' payment.id %}"
+            class="btn btn-primary"
+        >
+            Update Payment
+        </a>
+
+        <a
+            href="{% url 'payment_list' %}"
+            class="btn"
+        >
+            Back to Payments
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

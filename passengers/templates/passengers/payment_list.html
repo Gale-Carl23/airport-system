@@ -1,166 +1,714 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payments | BOC-NAIA System</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <h1>Payments</h1>
+{% block title %}Payments | BOC-NAIA Operations System{% endblock %}
+{% block page_heading %}Payment Records{% endblock %}
+{% block nav_payments %}active{% endblock %}
 
-    <p>
-        <a href="{% url 'payment_create' %}">
-            Add Payment
-        </a>
-    </p>
+{% block extra_css %}
+<style>
+    .page-intro {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
 
-    
+    .page-intro h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+        font-weight: 650;
+        color: #252A28;
+        letter-spacing: -0.02em;
+    }
+
+    .page-intro p {
+        margin: 0;
+        color: #707873;
+        font-size: 14px;
+    }
+
+    .primary-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 16px;
+        background: #3F514A;
+        color: #FFFFFF;
+        text-decoration: none;
+        border: 1px solid #3F514A;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    .primary-action:hover {
+        background: #34443E;
+        transform: translateY(-1px);
+    }
+
+    .filter-panel {
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 20px;
+        animation: panelIn 0.35s ease both;
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .filter-title {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: #252A28;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.7fr) repeat(2, minmax(150px, 1fr))
+                           minmax(140px, 0.8fr) minmax(140px, 0.8fr) auto auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-field label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #707873;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        width: 100%;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 11px;
+        border: 1px solid #D9DEDA;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #252A28;
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .filter-form input:focus,
+    .filter-form select:focus {
+        border-color: #3F514A;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, 0.09);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .filter-button {
+        height: 40px;
+        padding: 0 15px;
+        border: 1px solid #3F514A;
+        border-radius: 5px;
+        background: #3F514A;
+        color: #FFFFFF;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    .filter-button:hover {
+        background: #34443E;
+        transform: translateY(-1px);
+    }
+
+    .reset-link {
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 12px;
+        color: #707873;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #D9DEDA;
+        border-radius: 5px;
+        background: #FFFFFF;
+        transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .reset-link:hover {
+        background: #F4F5F3;
+        color: #252A28;
+    }
+
+    .table-panel {
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        overflow: hidden;
+        animation: panelIn 0.4s ease 0.05s both;
+    }
+
+    .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        border-bottom: 1px solid #D9DEDA;
+    }
+
+    .table-header-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #252A28;
+    }
+
+    .table-header-subtitle {
+        margin: 3px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        min-width: 1100px;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        padding: 11px 14px;
+        background: #F4F5F3;
+        border-bottom: 1px solid #D9DEDA;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.055em;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 13px 14px;
+        border-bottom: 1px solid #E8EBE9;
+        color: #252A28;
+        font-size: 13px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+        transition: background 0.15s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background: #FAFBFA;
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .passenger-name {
+        font-weight: 600;
+        color: #252A28;
+    }
+
+    .baggage-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        background: #F4F5F3;
+        border: 1px solid #D9DEDA;
+        border-radius: 4px;
+        color: #3F514A;
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .amount {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: #252A28;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 9px;
+        border-radius: 999px;
+        border: 1px solid #D9DEDA;
+        background: #F4F5F3;
+        color: #3F514A;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .status-badge.paid {
+        background: #EEF4F0;
+        border-color: #C8D8CF;
+        color: #315743;
+    }
+
+    .status-badge.pending {
+        background: #F7F3EA;
+        border-color: #DED2B8;
+        color: #765F2F;
+    }
+
+    .status-badge.cancelled {
+        background: #F3EEEE;
+        border-color: #DDCECE;
+        color: #704949;
+    }
+
+    .method-text {
+        color: #4D5752;
+    }
+
+    .reference-text {
+        font-family: monospace;
+        font-size: 12px;
+        color: #17324D;
+    }
+
+    .muted {
+        color: #707873;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0 9px;
+        border: 1px solid #D9DEDA;
+        border-radius: 4px;
+        background: #FFFFFF;
+        color: #3F514A;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .action-link:hover {
+        background: #F4F5F3;
+        border-color: #BBC4BF;
+    }
+
+    .action-link.primary {
+        background: #3F514A;
+        border-color: #3F514A;
+        color: #FFFFFF;
+    }
+
+    .action-link.primary:hover {
+        background: #34443E;
+        border-color: #34443E;
+    }
+
+    .empty-state {
+        padding: 48px 20px;
+        text-align: center;
+    }
+
+    .empty-state-title {
+        margin: 0 0 6px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #252A28;
+    }
+
+    .empty-state-text {
+        margin: 0;
+        color: #707873;
+        font-size: 13px;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 16px 18px;
+        border-top: 1px solid #D9DEDA;
+        background: #FAFBFA;
+    }
+
+    .pagination a,
+    .pagination-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid #D9DEDA;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #3F514A;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .pagination a:hover {
+        background: #F4F5F3;
+        border-color: #BBC4BF;
+    }
+
+    .pagination-current {
+        background: #3F514A;
+        border-color: #3F514A;
+        color: #FFFFFF;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .filter-form {
+            grid-template-columns: repeat(3, minmax(150px, 1fr));
+        }
+
+        .filter-actions {
+            grid-column: span 3;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .page-intro {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .primary-action {
+            width: 100%;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            grid-column: auto;
+        }
+
+        .filter-button,
+        .reset-link {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .table-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pagination {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-intro">
+    <div>
+        <h1>Payments</h1>
+        <p>Review and manage payment records associated with assessed baggage.</p>
+    </div>
+
+    <a href="{% url 'payment_create' %}" class="primary-action">
+        + Add Payment
+    </a>
+</div>
+
+<div class="filter-panel">
+    <div class="filter-header">
+        <h2 class="filter-title">Payment Filters</h2>
+    </div>
 
     <form method="get" class="filter-form">
 
-        <input
-            type="search"
-            name="q"
-            value="{{ search }}"
-            placeholder="Payment reference, baggage..."
-        >
+        <div class="filter-field">
+            <label for="payment-search">Search</label>
+            <input
+                id="payment-search"
+                type="search"
+                name="q"
+                value="{{ search }}"
+                placeholder="Payment reference, baggage..."
+            >
+        </div>
 
-        <select name="status">
-            <option value="">All Statuses</option>
+        <div class="filter-field">
+            <label for="payment-status">Status</label>
+            <select id="payment-status" name="status">
+                <option value="">All Statuses</option>
 
-            {% for value, label in status_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_status == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
+                {% for value, label in status_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_status == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <select name="method">
-            <option value="">All Methods</option>
+        <div class="filter-field">
+            <label for="payment-method">Method</label>
+            <select id="payment-method" name="method">
+                <option value="">All Methods</option>
 
-            {% for value, label in method_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_method == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
+                {% for value, label in method_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_method == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label>
-            From
-            <input type="date" name="date_from" value="{{ date_from }}">
-        </label>
+        <div class="filter-field">
+            <label for="date-from">From</label>
+            <input
+                id="date-from"
+                type="date"
+                name="date_from"
+                value="{{ date_from }}"
+            >
+        </div>
 
-        <label>
-            To
-            <input type="date" name="date_to" value="{{ date_to }}">
-        </label>
+        <div class="filter-field">
+            <label for="date-to">To</label>
+            <input
+                id="date-to"
+                type="date"
+                name="date_to"
+                value="{{ date_to }}"
+            >
+        </div>
 
-        <button type="submit">Filter</button>
+        <div class="filter-actions">
+            <button type="submit" class="filter-button">
+                Filter
+            </button>
 
-        <a href="{% url 'payment_list' %}">Reset</a>
+            <a href="{% url 'payment_list' %}" class="reset-link">
+                Reset
+            </a>
+        </div>
 
     </form>
+</div>
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Passenger</th>
-                <th>Baggage</th>
-                <th>Status</th>
-                <th>Amount Due</th>
-                <th>Amount Paid</th>
-                <th>Method</th>
-                <th>Reference</th>
-                <th>Paid At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+<div class="table-panel">
 
-        <tbody>
-            {% for payment in payments %}
+    <div class="table-header">
+        <div>
+            <h2 class="table-header-title">Payment Records</h2>
+            <p class="table-header-subtitle">
+                Recorded payment transactions and settlement details
+            </p>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
                 <tr>
-                    <td>
-                        {{ payment.assessment.inspection.baggage.passenger }}
-                    </td>
-
-                    <td>
-                        {{ payment.assessment.inspection.baggage.baggage_tag }}
-                    </td>
-
-                    <td>
-                        {{ payment.get_status_display }}
-                    </td>
-
-                    <td>
-                        {{ payment.amount_due }}
-                    </td>
-
-                    <td>
-                        {{ payment.amount_paid }}
-                    </td>
-
-                    <td>
-                        {{ payment.get_payment_method_display }}
-                    </td>
-
-                    <td>
-                        {{ payment.payment_reference }}
-                    </td>
-
-                    <td>
-                        {{ payment.paid_at|default:"-" }}
-                    </td>
-
-                    <td>
-                        <a href="{% url 'payment_detail' payment.id %}">
-                            View Payment
-                        </a>
-                        <a href="{% url 'payment_update' payment.id %}">
-                            Edit
-                        </a>
-                    </td>
+                    <th>Passenger</th>
+                    <th>Baggage</th>
+                    <th>Status</th>
+                    <th>Amount Due</th>
+                    <th>Amount Paid</th>
+                    <th>Method</th>
+                    <th>Reference</th>
+                    <th>Paid At</th>
+                    <th>Action</th>
                 </tr>
+            </thead>
 
-            {% empty %}
-                <tr>
-                    <td colspan="8">
-                        No payments found.
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>
+                            <span class="passenger-name">
+                                {{ payment.assessment.inspection.baggage.passenger }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="baggage-tag">
+                                {{ payment.assessment.inspection.baggage.baggage_tag }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if payment.status == "paid" %}
+                                <span class="status-badge paid">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            {% elif payment.status == "pending" %}
+                                <span class="status-badge pending">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            {% elif payment.status == "cancelled" %}
+                                <span class="status-badge cancelled">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="status-badge">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="amount">
+                                {{ payment.amount_due }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="amount">
+                                {{ payment.amount_paid }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="method-text">
+                                {{ payment.get_payment_method_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if payment.payment_reference %}
+                                <span class="reference-text">
+                                    {{ payment.payment_reference }}
+                                </span>
+                            {% else %}
+                                <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if payment.paid_at %}
+                                {{ payment.paid_at }}
+                            {% else %}
+                                <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="actions">
+                                <a
+                                    href="{% url 'payment_detail' payment.id %}"
+                                    class="action-link primary"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="{% url 'payment_update' payment.id %}"
+                                    class="action-link"
+                                >
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <p class="empty-state-title">No payments found</p>
+                                <p class="empty-state-text">
+                                    No payment records match the current filters.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     {% if payments.has_other_pages %}
         <div class="pagination">
 
             {% if payments.has_previous %}
-                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
+                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_method %}&method={{ selected_method|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
                     First
                 </a>
 
-                <a href="?page={{ payments.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                <a href="?page={{ payments.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_method %}&method={{ selected_method|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
                     Previous
                 </a>
             {% endif %}
 
-            <span>
-                Page {{ payments.number }}
-                of {{ payments.paginator.num_pages }}
+            <span class="pagination-current">
+                {{ payments.number }} / {{ payments.paginator.num_pages }}
             </span>
 
             {% if payments.has_next %}
-                <a href="?page={{ payments.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                <a href="?page={{ payments.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_method %}&method={{ selected_method|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
                     Next
                 </a>
 
-                <a href="?page={{ payments.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
+                <a href="?page={{ payments.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_method %}&method={{ selected_method|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}">
                     Last
                 </a>
             {% endif %}
@@ -168,11 +716,6 @@
         </div>
     {% endif %}
 
-    <p>
-        <a href="{% url 'dashboard' %}">
-            Back to Dashboard
-        </a>
-    </p>
+</div>
 
-</body>
-</html>
+{% endblock %}
