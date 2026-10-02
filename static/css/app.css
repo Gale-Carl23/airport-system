@@ -9,30 +9,24 @@
     --surface: #FFFFFF;
     --surface-soft: #F8F9F8;
     --surface-muted: #EEF1EF;
-
     --sidebar: #26332F;
     --sidebar-deep: #202B28;
-    --sidebar-hover: rgba(255,255,255,.065);
+    --sidebar-hover: rgba(255, 255, 255, .065);
     --sidebar-text: #C8D0CC;
     --sidebar-muted: #8E9994;
-
     --primary: #3F514A;
     --primary-hover: #34443E;
     --primary-soft: #E8EEEB;
-
     --navy: #17324D;
     --navy-soft: #E9EEF2;
     --gold: #B8944E;
-
     --text: #252A28;
     --text-soft: #4F5954;
     --muted: #707873;
     --muted-light: #8A928D;
-
     --border: #D9DEDA;
     --border-dark: #C7CFCA;
     --border-soft: #E7EBE8;
-
     --success: #3F7868;
     --success-soft: #E8F0ED;
     --warning: #876B35;
@@ -41,12 +35,10 @@
     --danger-soft: #F3EAEA;
     --info: #456B83;
     --info-soft: #EAF0F4;
-
     --radius: 6px;
     --radius-small: 4px;
-    --shadow-xs: 0 1px 2px rgba(37,42,40,.035);
-    --shadow-sm: 0 4px 12px rgba(37,42,40,.055);
-
+    --shadow-xs: 0 1px 2px rgba(37, 42, 40, .035);
+    --shadow-sm: 0 4px 12px rgba(37, 42, 40, .055);
     --sidebar-width: 258px;
     --topbar-height: 58px;
 }
@@ -91,6 +83,7 @@ a:hover {
     color: var(--text);
 }
 
+
 /* =========================================================
    APPLICATION SHELL
    ========================================================= */
@@ -113,6 +106,7 @@ a:hover {
     padding: 30px;
 }
 
+
 /* =========================================================
    SIDEBAR
    ========================================================= */
@@ -127,7 +121,7 @@ a:hover {
     flex-direction: column;
     background: var(--sidebar);
     color: #FFFFFF;
-    border-right: 1px solid rgba(0,0,0,.10);
+    border-right: 1px solid rgba(0, 0, 0, .10);
 }
 
 .sidebar-brand {
@@ -144,9 +138,9 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(184,148,78,.35);
+    border: 1px solid rgba(184, 148, 78, .35);
     border-radius: 5px;
-    background: rgba(184,148,78,.14);
+    background: rgba(184, 148, 78, .14);
     color: #D8BD78;
     font-size: 12px;
     font-weight: 800;
@@ -176,7 +170,7 @@ a:hover {
 .sidebar-divider {
     height: 1px;
     margin: 0 18px;
-    background: rgba(255,255,255,.09);
+    background: rgba(255, 255, 255, .09);
 }
 
 .sidebar-navigation {
@@ -222,7 +216,7 @@ a:hover {
 
 .nav-link.active,
 .nav-link.nav-active {
-    background: rgba(63,81,74,.48);
+    background: rgba(63, 81, 74, .48);
     color: #FFFFFF;
     font-weight: 600;
 }
@@ -246,9 +240,9 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,.09);
+    border: 1px solid rgba(255, 255, 255, .09);
     border-radius: 4px;
-    background: rgba(255,255,255,.035);
+    background: rgba(255, 255, 255, .035);
     color: #AEBAB5;
     font-size: 10px;
     font-weight: 700;
@@ -256,8 +250,8 @@ a:hover {
 
 .nav-link.active .nav-icon,
 .nav-link.nav-active .nav-icon {
-    background: rgba(184,148,78,.14);
-    border-color: rgba(184,148,78,.28);
+    background: rgba(184, 148, 78, .14);
+    border-color: rgba(184, 148, 78, .28);
     color: #D8BD78;
 }
 
@@ -268,8 +262,8 @@ a:hover {
 
 .sidebar-footer {
     padding: 14px;
-    border-top: 1px solid rgba(255,255,255,.08);
-    background: rgba(0,0,0,.08);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .08);
 }
 
 .user-profile {
@@ -286,9 +280,9 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(184,148,78,.28);
+    border: 1px solid rgba(184, 148, 78, .28);
     border-radius: 5px;
-    background: rgba(184,148,78,.13);
+    background: rgba(184, 148, 78, .13);
     color: #D8BD78;
     font-size: 12px;
     font-weight: 700;
@@ -330,9 +324,9 @@ a:hover {
     justify-content: center;
     gap: 8px;
     padding: 7px 10px;
-    border: 1px solid rgba(255,255,255,.09);
+    border: 1px solid rgba(255, 255, 255, .09);
     border-radius: 5px;
-    background: rgba(255,255,255,.035);
+    background: rgba(255, 255, 255, .035);
     color: #AEB9B4;
     font-size: 12px;
     font-weight: 600;
@@ -341,14 +335,15 @@ a:hover {
 }
 
 .logout-button:hover {
-    border-color: rgba(180,125,125,.30);
-    background: rgba(117,75,75,.20);
+    border-color: rgba(180, 125, 125, .30);
+    background: rgba(117, 75, 75, .20);
     color: #E7CCCC;
 }
 
 .logout-icon {
     font-size: 13px;
 }
+
 
 /* =========================================================
    TOPBAR
@@ -363,7 +358,7 @@ a:hover {
     align-items: center;
     justify-content: space-between;
     padding: 0 25px;
-    background: rgba(255,255,255,.97);
+    background: rgba(255, 255, 255, .97);
     border-bottom: 1px solid var(--border);
 }
 
@@ -414,6 +409,7 @@ a:hover {
     display: none;
 }
 
+
 /* =========================================================
    MESSAGES / ALERTS
    ========================================================= */
@@ -454,6 +450,7 @@ a:hover {
     border-left-color: var(--danger);
     background: #FDFBFB;
 }
+
 
 /* =========================================================
    GENERIC CONTENT
@@ -512,6 +509,7 @@ hr {
     border: 0;
     border-top: 1px solid var(--border);
 }
+
 
 /* =========================================================
    BUTTONS
@@ -582,6 +580,7 @@ hr {
     color: #FFFFFF;
 }
 
+
 /* =========================================================
    FORMS
    ========================================================= */
@@ -616,7 +615,7 @@ input:focus,
 select:focus,
 textarea:focus {
     border-color: #718179;
-    box-shadow: 0 0 0 3px rgba(63,81,74,.08);
+    box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
     background: #FFFFFF;
 }
 
@@ -656,6 +655,7 @@ input[type="radio"] {
     font-size: 11px;
     line-height: 1.45;
 }
+
 
 /* =========================================================
    TABLES
@@ -706,6 +706,7 @@ tbody tr:last-child td {
 td a {
     font-weight: 600;
 }
+
 
 /* =========================================================
    BADGES / STATUS
@@ -760,6 +761,7 @@ td a {
     color: #673E3E;
 }
 
+
 /* =========================================================
    PAGINATION
    ========================================================= */
@@ -800,6 +802,7 @@ td a {
     color: #FFFFFF;
 }
 
+
 /* =========================================================
    STAT CARDS
    ========================================================= */
@@ -817,6 +820,7 @@ td a {
     box-shadow: var(--shadow-sm);
     transform: translateY(-1px);
 }
+
 
 /* =========================================================
    MISC
@@ -856,6 +860,7 @@ td a {
     background: #9FA9A3;
 }
 
+
 /* =========================================================
    RESPONSIVE SIDEBAR
    ========================================================= */
@@ -868,22 +873,18 @@ td a {
     .sidebar {
         transform: translateX(-100%);
         transition: transform .25s ease;
-        box-shadow: 8px 0 24px rgba(20,30,27,.15);
+        box-shadow: 8px 0 24px rgba(20, 30, 27, .15);
     }
-
     .sidebar.sidebar-open {
         transform: translateX(0);
     }
-
     .main-wrapper {
         width: 100%;
         margin-left: 0;
     }
-
     .main-content {
         padding: 22px 18px 32px;
     }
-
     .mobile-menu-button {
         width: 36px;
         height: 36px;
@@ -898,13 +899,12 @@ td a {
         color: var(--primary);
         cursor: pointer;
     }
-
     .sidebar-overlay.overlay-visible {
         position: fixed;
         inset: 0;
         z-index: 950;
         display: block;
-        background: rgba(25,35,32,.42);
+        background: rgba(25, 35, 32, .42);
     }
 }
 
@@ -912,16 +912,13 @@ td a {
     .topbar {
         padding: 0 14px;
     }
-
     .topbar-status,
     .topbar-divider {
         display: none;
     }
-
     .topbar-user {
         max-width: 120px;
     }
-
     .main-content {
         padding: 18px 14px 28px;
     }
@@ -931,7 +928,6 @@ td a {
     html {
         scroll-behavior: auto;
     }
-
     *,
     *::before,
     *::after {
