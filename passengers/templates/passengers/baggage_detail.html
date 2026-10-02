@@ -1,444 +1,1200 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Baggage {{ baggage.baggage_tag }}</title>
+{% block title %}Baggage {{ baggage.baggage_tag }}{% endblock %}
 
-    
-</head>
+{% block nav_baggage %}active{% endblock %}
 
-<body>
+{% block page_heading %}Baggage Detail{% endblock %}
 
-<div class="container">
+{% block extra_css %}
+<style>
+    .baggage-page {
+        max-width: 1250px;
+        margin: 0 auto;
+    }
 
-    <div class="header">
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 24px;
+        margin-bottom: 26px;
+    }
+
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        padding: 10px 14px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #3f514a;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .back-button:hover {
+        background: #f5f7f5;
+        border-color: #bfc8c2;
+        transform: translateY(-1px);
+    }
+
+    .card {
+        margin-bottom: 20px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .card:nth-of-type(2) {
+        animation-delay: .05s;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .card-description {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .card-body {
+        padding: 21px;
+    }
+
+    .baggage-reference {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 9px;
+        background: #f1f3f1;
+        border: 1px solid #dce1dd;
+        border-radius: 4px;
+        color: #3f514a;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .reference-dot {
+        width: 6px;
+        height: 6px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-top: 1px solid #e5e9e6;
+        border-left: 1px solid #e5e9e6;
+    }
+
+    .info-item {
+        min-width: 0;
+        padding: 15px 16px;
+        border-right: 1px solid #e5e9e6;
+        border-bottom: 1px solid #e5e9e6;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        display: block;
+        color: #252a28;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .info-value.muted {
+        color: #8a928d;
+        font-weight: 500;
+    }
+
+    .declared-yes {
+        color: #3f514a;
+    }
+
+    .declared-no {
+        color: #8a6e32;
+    }
+
+    .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 18px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 37px;
+        padding: 0 13px;
+        border: 1px solid #3f514a;
+        border-radius: 5px;
+        background: #3f514a;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button.secondary {
+        background: #fff;
+        border-color: #d4dad6;
+        color: #3f514a;
+    }
+
+    .button.secondary:hover {
+        background: #f5f7f5;
+        border-color: #bfc8c2;
+    }
+
+    .workflow {
+        position: relative;
+        padding: 4px 0 0;
+    }
+
+    .workflow::before {
+        content: "";
+        position: absolute;
+        left: 18px;
+        top: 27px;
+        bottom: 28px;
+        width: 1px;
+        background: #d9deda;
+    }
+
+    .step {
+        position: relative;
+        display: grid;
+        grid-template-columns: 37px minmax(0, 1fr);
+        column-gap: 15px;
+        padding-bottom: 22px;
+    }
+
+    .step:last-child {
+        padding-bottom: 0;
+    }
+
+    .step-marker {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 37px;
+        height: 37px;
+        box-sizing: border-box;
+        background: #f4f5f3;
+        border: 1px solid #cfd6d1;
+        border-radius: 50%;
+        color: #707873;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .step.completed .step-marker {
+        background: #3f514a;
+        border-color: #3f514a;
+        color: #fff;
+    }
+
+    .step.active .step-marker {
+        background: #fff;
+        border: 2px solid #b8944e;
+        color: #8a6e32;
+    }
+
+    .step-content {
+        min-width: 0;
+        padding: 2px 0 0;
+    }
+
+    .step-heading {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 8px;
+    }
+
+    .step-heading h3 {
+        margin: 0;
+        color: #252a28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 3px 8px;
+        border: 1px solid #d9deda;
+        border-radius: 4px;
+        background: #f1f3f1;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .status.success {
+        background: #edf3ef;
+        border-color: #cbdacf;
+        color: #3f514a;
+    }
+
+    .status.warning {
+        background: #f6f1e6;
+        border-color: #e4d8bd;
+        color: #8a6e32;
+    }
+
+    .status.danger {
+        background: #f5eeee;
+        border-color: #e1cccc;
+        color: #805656;
+    }
+
+    .status.info {
+        background: #eef2f5;
+        border-color: #d4dce2;
+        color: #4d6576;
+    }
+
+    .step-text {
+        margin: 5px 0;
+        color: #59645f;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .step-text strong {
+        color: #3c4541;
+        font-weight: 600;
+    }
+
+    .step-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .step-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0 10px;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        background: #fff;
+        color: #3f514a;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .step-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .step-link.primary {
+        background: #3f514a;
+        border-color: #3f514a;
+        color: #fff;
+    }
+
+    .step-link.primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+    }
+
+    .case-section {
+        margin-top: 5px;
+        padding-top: 18px;
+        border-top: 1px solid #e5e9e6;
+    }
+
+    .case-title {
+        margin: 0 0 13px;
+        color: #252a28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .case-record {
+        margin-bottom: 10px;
+        padding: 14px;
+        background: #f8f9f8;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
+
+    .case-record:last-child {
+        margin-bottom: 0;
+    }
+
+    .case-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .case-field span {
+        display: block;
+        margin-bottom: 4px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .case-field strong {
+        color: #3c4541;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .case-action {
+        margin-top: 12px;
+    }
+
+    .document-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        padding-top: 17px;
+        margin-top: 17px;
+        border-top: 1px solid #e5e9e6;
+    }
+
+    .documents-label {
+        width: 100%;
+        margin-bottom: 1px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .empty-workflow {
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 950px) {
+        .info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .case-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 680px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .case-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .workflow::before {
+            left: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="baggage-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
         <div>
-            <h1>Baggage {{ baggage.baggage_tag }}</h1>
-            <p>Inspection and processing workflow</p>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Baggage Operations
+            </div>
+
+            <h1 class="page-title">
+                Baggage {{ baggage.baggage_tag }}
+            </h1>
+
+            <p class="page-subtitle">
+                Inspection and processing workflow
+            </p>
         </div>
 
-        <a href="{% url 'baggage_list' %}" class="back">
-            ← Back to Baggage
+        <a href="{% url 'baggage_list' %}" class="back-button">
+            <span>←</span>
+            <span>Back to Baggage</span>
         </a>
+
     </div>
 
 
     <!-- BAGGAGE INFORMATION -->
+    <section class="card">
 
-    <div class="card">
+        <div class="card-header">
 
-        <h2>Baggage Information</h2>
-
-        <div class="info-grid">
-
-            <div class="info-item">
-                <span>Baggage Tag</span>
-                <strong>{{ baggage.baggage_tag }}</strong>
+            <div>
+                <h2 class="card-title">Baggage Information</h2>
+                <p class="card-description">
+                    Identification and passenger information associated with this baggage.
+                </p>
             </div>
 
-            <div class="info-item">
-                <span>Description</span>
-                <strong>{{ baggage.description }}</strong>
-            </div>
+            <span class="baggage-reference">
+                <span class="reference-dot"></span>
+                {{ baggage.baggage_tag }}
+            </span>
 
-            <div class="info-item">
-                <span>Weight</span>
-                <strong>{{ baggage.weight }} kg</strong>
-            </div>
+        </div>
 
-            <div class="info-item">
-                <span>Declared</span>
-                <strong>
-                    {% if baggage.declared %}
-                        Yes
-                    {% else %}
-                        No
-                    {% endif %}
-                </strong>
-            </div>
+        <div class="card-body">
 
-            <div class="info-item">
-                <span>Passenger</span>
-                <strong>
-                    {{ baggage.passenger.first_name }}
-                    {{ baggage.passenger.last_name }}
-                </strong>
-            </div>
+            <div class="info-grid">
 
-            <div class="info-item">
-                <span>Flight</span>
-                <strong>
+                <div class="info-item">
+                    <span class="info-label">Baggage Tag</span>
+                    <strong class="info-value">
+                        {{ baggage.baggage_tag }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Description</span>
+                    <strong class="info-value">
+                        {{ baggage.description }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Weight</span>
+                    <strong class="info-value">
+                        {{ baggage.weight }} kg
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Declared</span>
+
+                    <strong class="info-value">
+                        {% if baggage.declared %}
+                            <span class="declared-yes">Yes</span>
+                        {% else %}
+                            <span class="declared-no">No</span>
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Passenger</span>
+
+                    <strong class="info-value">
+                        {{ baggage.passenger.first_name }}
+                        {{ baggage.passenger.last_name }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Flight</span>
+
                     {% if baggage.passenger.flight %}
-                        {{ baggage.passenger.flight.flight_number }}
+                        <strong class="info-value">
+                            {{ baggage.passenger.flight.flight_number }}
+                        </strong>
                     {% else %}
-                        No flight assigned
+                        <span class="info-value muted">
+                            No flight assigned
+                        </span>
                     {% endif %}
-                </strong>
+                </div>
+
+            </div>
+
+
+            <div class="card-actions">
+
+                <a
+                    href="{% url 'baggage_update' baggage.id %}"
+                    class="button"
+                >
+                    Edit Baggage
+                </a>
+
+                <a
+                    href="{% url 'baggage_timeline' baggage.id %}"
+                    class="button secondary"
+                >
+                    View Workflow Timeline
+                </a>
+
+            </div>
+
+
+            {% if perms.passengers.add_document or perms.passengers.view_document %}
+
+            <div class="document-actions">
+
+                <div class="documents-label">
+                    Documents
+                </div>
+
+                {% if perms.passengers.add_document %}
+                    <a
+                        href="{% url 'document_create' baggage.id %}"
+                        class="step-link primary"
+                    >
+                        Upload Document
+                    </a>
+                {% endif %}
+
+                {% if perms.passengers.view_document %}
+                    <a
+                        href="{% url 'document_list' %}"
+                        class="step-link"
+                    >
+                        View Documents
+                    </a>
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- PROCESSING WORKFLOW -->
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+                <h2 class="card-title">Processing Workflow</h2>
+                <p class="card-description">
+                    Current processing state and available operational actions.
+                </p>
             </div>
 
         </div>
 
-        <a
-            href="{% url 'baggage_update' baggage.id %}"
-            class="button"
-        >
-            Edit Baggage
-        </a>
+        <div class="card-body">
 
-        <a href="{% url 'baggage_timeline' baggage.id %}">
-            View Workflow Timeline
-        </a>
-
-    </div>
+            <div class="workflow">
 
 
-    <!-- WORKFLOW -->
-
-    <div class="card">
-
-        <h2>Processing Workflow</h2>
-
-        <div class="timeline">
-
-
-            <!-- INSPECTION -->
-
-            <div class="step
-                {% if inspection and inspection.status == 'completed' %}
-                    completed
-                {% elif inspection %}
-                    active
-                {% endif %}
-            ">
-
-                <div class="icon">1</div>
-
-                <h3>Inspection</h3>
-
-                {% if inspection %}
-
-                    <span class="status
-                        {% if inspection.status == 'completed' %}
-                            success
-                        {% elif inspection.status == 'in_progress' %}
-                            warning
-                        {% else %}
-                            info
-                        {% endif %}
-                    ">
-                        {{ inspection.get_status_display }}
-                    </span>
-
-                    <p>
-                        Result:
-                        {{ inspection.get_result_display }}
-                    </p>
-
-                    {% if inspection.findings %}
-                        <p>
-                            Findings: {{ inspection.findings }}
-                        </p>
+                <!-- INSPECTION -->
+                <div class="step
+                    {% if inspection and inspection.status == 'completed' %}
+                        completed
+                    {% elif inspection %}
+                        active
                     {% endif %}
+                ">
 
-                    <a
-                        href="{% url 'inspection_update' inspection.id %}"
-                        class="button"
-                    >
-                        View / Update Inspection
-                    </a>
+                    <div class="step-marker">
+                        1
+                    </div>
 
-                {% else %}
+                    <div class="step-content">
 
-                    <p>No inspection has been created yet.</p>
+                        <div class="step-heading">
 
-                    <a
-                        href="{% url 'inspection_create' %}"
-                        class="button"
-                    >
-                        Create Inspection
-                    </a>
+                            <h3>Inspection</h3>
 
-                {% endif %}
+                            {% if inspection %}
 
-            </div>
+                                <span class="status
+                                    {% if inspection.status == 'completed' %}
+                                        success
+                                    {% elif inspection.status == 'in_progress' %}
+                                        warning
+                                    {% else %}
+                                        info
+                                    {% endif %}
+                                ">
+                                    {{ inspection.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
 
 
-            <!-- ASSESSMENT -->
+                        {% if inspection %}
 
-            <div class="step
-                {% if assessment and assessment.status == 'completed' %}
-                    completed
-                {% elif assessment %}
-                    active
-                {% endif %}
-            ">
+                            <p class="step-text">
+                                <strong>Result:</strong>
+                                {{ inspection.get_result_display }}
+                            </p>
 
-                <div class="icon">2</div>
+                            {% if inspection.findings %}
+                                <p class="step-text">
+                                    <strong>Findings:</strong>
+                                    {{ inspection.findings }}
+                                </p>
+                            {% endif %}
 
-                <h3>Assessment</h3>
+                            <div class="step-actions">
 
-                {% if assessment %}
+                                <a
+                                    href="{% url 'inspection_update' inspection.id %}"
+                                    class="step-link primary"
+                                >
+                                    View / Update Inspection
+                                </a>
 
-                    <span class="status
-                        {% if assessment.status == 'completed' %}
-                            success
+                            </div>
+
                         {% else %}
-                            warning
+
+                            <p class="step-text">
+                                No inspection has been created yet.
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'inspection_create' %}"
+                                    class="step-link primary"
+                                >
+                                    Create Inspection
+                                </a>
+
+                            </div>
+
                         {% endif %}
-                    ">
-                        {{ assessment.get_status_display }}
-                    </span>
 
-                    <p>
-                        Assessed Value:
-                        {{ assessment.assessed_value }}
-                    </p>
+                    </div>
 
-                    <p>
-                        Duty:
-                        {{ assessment.duty_amount }}
-                    </p>
-
-                    <p>
-                        Tax:
-                        {{ assessment.tax_amount }}
-                    </p>
-
-                    <a
-                        href="{% url 'assessment_update' assessment.id %}"
-                        class="button"
-                    >
-                        View / Update Assessment
-                    </a>
-
-                {% elif inspection and inspection.result == "for_assessment" %}
-
-                    <p>
-                        Inspection requires assessment.
-                    </p>
-
-                    <a href="{% url 'assessment_create' %}?inspection={{ inspection.id }}">
-                        Create Assessment
-                    </a>
-
-                {% else %}
-
-                    <p>
-                        Assessment is not required at this stage.
-                    </p>
-
-                {% endif %}
-
-            </div>
+                </div>
 
 
-            <!-- PAYMENT -->
-
-            <div class="step
-                {% if payment and payment.status == 'paid' %}
-                    completed
-                {% elif payment %}
-                    active
-                {% endif %}
-            ">
-
-                <div class="icon">3</div>
-
-                <h3>Payment</h3>
-
-                {% if payment %}
-
-                    <span class="status
-                        {% if payment.status == 'paid' %}
-                            success
-                        {% elif payment.status == 'cancelled' %}
-                            danger
-                        {% else %}
-                            warning
-                        {% endif %}
-                    ">
-                        {{ payment.get_status_display }}
-                    </span>
-
-                    <p>
-                        Amount Due:
-                        {{ payment.amount_due }}
-                    </p>
-
-                    <p>
-                        Amount Paid:
-                        {{ payment.amount_paid }}
-                    </p>
-
-                    <a
-                        href="{% url 'payment_update' payment.id %}"
-                        class="button"
-                    >
-                        View / Update Payment
-                    </a>
-
-                {% elif assessment and assessment.status == "completed" %}
-
-                    <p>
-                        Assessment completed. Payment can now be processed.
-                    </p>
-
-                    <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}">
-                        Create Payment
-                    </a>
-
-                {% else %}
-
-                    <p>
-                        Payment is not available yet.
-                    </p>
-
-                {% endif %}
-
-            </div>
-
-
-            <!-- CLEARANCE -->
-
-            <div class="step
-                {% if clearance and clearance.status == 'cleared' %}
-                    completed
-                {% elif clearance %}
-                    active
-                {% endif %}
-            ">
-
-                <div class="icon">4</div>
-
-                <h3>Clearance</h3>
-
-                {% if clearance %}
-
-                    <span class="status
-                        {% if clearance.status == 'cleared' %}
-                            success
-                        {% elif clearance.status == 'held' %}
-                            danger
-                        {% else %}
-                            warning
-                        {% endif %}
-                    ">
-                        {{ clearance.get_status_display }}
-                    </span>
-
-                    <p>
-                        Reference:
-                        {{ clearance.clearance_reference }}
-                    </p>
-
-                    <a
-                        href="{% url 'clearance_update' clearance.id %}"
-                        class="button"
-                    >
-                        View / Update Clearance
-                    </a>
-
-                {% else %}
-
-                    <p>
-                        Clearance has not been created.
-                    </p>
-
-                    {% if payment and payment.status == "paid" %}
-                        <a href="{% url 'clearance_create' %}?payment={{ payment.id }}">
-                            Create Clearance
-                        </a>
-                    {% elif inspection and inspection.result == "cleared" %}
-                        <a
-                            href="{% url 'clearance_create' %}"
-                            class="button"
-                        >
-                            Create Clearance
-                        </a>
-                    {% else %}
-                        <p>
-                            Clearance is waiting for the required process.
-                        </p>
+                <!-- ASSESSMENT -->
+                <div class="step
+                    {% if assessment and assessment.status == 'completed' %}
+                        completed
+                    {% elif assessment %}
+                        active
                     {% endif %}
+                ">
 
-                {% endif %}
+                    <div class="step-marker">
+                        2
+                    </div>
+
+                    <div class="step-content">
+
+                        <div class="step-heading">
+
+                            <h3>Assessment</h3>
+
+                            {% if assessment %}
+
+                                <span class="status
+                                    {% if assessment.status == 'completed' %}
+                                        success
+                                    {% else %}
+                                        warning
+                                    {% endif %}
+                                ">
+                                    {{ assessment.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if assessment %}
+
+                            <p class="step-text">
+                                <strong>Assessed Value:</strong>
+                                {{ assessment.assessed_value }}
+                            </p>
+
+                            <p class="step-text">
+                                <strong>Duty:</strong>
+                                {{ assessment.duty_amount }}
+                            </p>
+
+                            <p class="step-text">
+                                <strong>Tax:</strong>
+                                {{ assessment.tax_amount }}
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'assessment_update' assessment.id %}"
+                                    class="step-link primary"
+                                >
+                                    View / Update Assessment
+                                </a>
+
+                            </div>
+
+                        {% elif inspection and inspection.result == "for_assessment" %}
+
+                            <p class="step-text">
+                                Inspection requires assessment.
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'assessment_create' %}?inspection={{ inspection.id }}"
+                                    class="step-link primary"
+                                >
+                                    Create Assessment
+                                </a>
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="step-text">
+                                Assessment is not required at this stage.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAYMENT -->
+                <div class="step
+                    {% if payment and payment.status == 'paid' %}
+                        completed
+                    {% elif payment %}
+                        active
+                    {% endif %}
+                ">
+
+                    <div class="step-marker">
+                        3
+                    </div>
+
+                    <div class="step-content">
+
+                        <div class="step-heading">
+
+                            <h3>Payment</h3>
+
+                            {% if payment %}
+
+                                <span class="status
+                                    {% if payment.status == 'paid' %}
+                                        success
+                                    {% elif payment.status == 'cancelled' %}
+                                        danger
+                                    {% else %}
+                                        warning
+                                    {% endif %}
+                                ">
+                                    {{ payment.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if payment %}
+
+                            <p class="step-text">
+                                <strong>Amount Due:</strong>
+                                {{ payment.amount_due }}
+                            </p>
+
+                            <p class="step-text">
+                                <strong>Amount Paid:</strong>
+                                {{ payment.amount_paid }}
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'payment_update' payment.id %}"
+                                    class="step-link primary"
+                                >
+                                    View / Update Payment
+                                </a>
+
+                            </div>
+
+                        {% elif assessment and assessment.status == "completed" %}
+
+                            <p class="step-text">
+                                Assessment completed. Payment can now be processed.
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'payment_create' %}?assessment={{ assessment.id }}"
+                                    class="step-link primary"
+                                >
+                                    Create Payment
+                                </a>
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="step-text">
+                                Payment is not available yet.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- CLEARANCE -->
+                <div class="step
+                    {% if clearance and clearance.status == 'cleared' %}
+                        completed
+                    {% elif clearance %}
+                        active
+                    {% endif %}
+                ">
+
+                    <div class="step-marker">
+                        4
+                    </div>
+
+                    <div class="step-content">
+
+                        <div class="step-heading">
+
+                            <h3>Clearance</h3>
+
+                            {% if clearance %}
+
+                                <span class="status
+                                    {% if clearance.status == 'cleared' %}
+                                        success
+                                    {% elif clearance.status == 'held' %}
+                                        danger
+                                    {% else %}
+                                        warning
+                                    {% endif %}
+                                ">
+                                    {{ clearance.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        {% if clearance %}
+
+                            <p class="step-text">
+                                <strong>Reference:</strong>
+                                {{ clearance.clearance_reference }}
+                            </p>
+
+                            <div class="step-actions">
+
+                                <a
+                                    href="{% url 'clearance_update' clearance.id %}"
+                                    class="step-link primary"
+                                >
+                                    View / Update Clearance
+                                </a>
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="step-text">
+                                Clearance has not been created.
+                            </p>
+
+                            <div class="step-actions">
+
+                                {% if payment and payment.status == "paid" %}
+
+                                    <a
+                                        href="{% url 'clearance_create' %}?payment={{ payment.id }}"
+                                        class="step-link primary"
+                                    >
+                                        Create Clearance
+                                    </a>
+
+                                {% elif inspection and inspection.result == "cleared" %}
+
+                                    <a
+                                        href="{% url 'clearance_create' %}"
+                                        class="step-link primary"
+                                    >
+                                        Create Clearance
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="empty-workflow">
+                                        Clearance is waiting for the required process.
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- ENFORCEMENT CASE -->
+                <div class="step">
+
+                    <div class="step-marker">
+                        5
+                    </div>
+
+                    <div class="step-content">
+
+                        <div class="step-heading">
+                            <h3>Enforcement Case</h3>
+                        </div>
+
+
+                        <div class="case-section">
+
+                            {% if cases %}
+
+                                {% for case in cases %}
+
+                                    <div class="case-record">
+
+                                        <div class="case-grid">
+
+                                            <div class="case-field">
+                                                <span>Case Reference</span>
+                                                <strong>
+                                                    {{ case.case_reference }}
+                                                </strong>
+                                            </div>
+
+                                            <div class="case-field">
+                                                <span>Type</span>
+                                                <strong>
+                                                    {{ case.get_case_type_display }}
+                                                </strong>
+                                            </div>
+
+                                            <div class="case-field">
+                                                <span>Status</span>
+                                                <strong>
+                                                    {{ case.get_status_display }}
+                                                </strong>
+                                            </div>
+
+                                            <div class="case-field">
+                                                <span>Created</span>
+                                                <strong>
+                                                    {{ case.created_at }}
+                                                </strong>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="case-action">
+
+                                            <a
+                                                href="{% url 'case_update' case.id %}"
+                                                class="step-link"
+                                            >
+                                                View / Update Case
+                                            </a>
+
+                                        </div>
+
+                                    </div>
+
+                                {% endfor %}
+
+                            {% elif inspection and inspection.result == "held" or inspection and inspection.result == "seized" %}
+
+                                <p class="step-text">
+                                    This baggage is held or seized but has no enforcement case yet.
+                                </p>
+
+                                <div class="step-actions">
+
+                                    <a
+                                        href="{% url 'case_create' %}?baggage={{ baggage.id }}"
+                                        class="step-link primary"
+                                    >
+                                        Create Case
+                                    </a>
+
+                                </div>
+
+                            {% else %}
+
+                                <p class="step-text">
+                                    No enforcement case required.
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
 
             </div>
 
-
-            <!-- CASE -->
-             <h3>Enforcement Case</h3>
-
-{% if cases %}
-
-    {% for case in cases %}
-
-        <p>
-            Case Reference:
-            {{ case.case_reference }}
-        </p>
-
-        <p>
-            Type:
-            {{ case.get_case_type_display }}
-        </p>
-
-        <p>
-            Status:
-            {{ case.get_status_display }}
-        </p>
-
-        <p>
-            Created:
-            {{ case.created_at }}
-        </p>
-
-        <a href="{% url 'case_update' case.id %}">
-            View / Update Case
-        </a>
-
-    {% endfor %}
-
-{% elif inspection and inspection.result == "held" or inspection and inspection.result == "seized" %}
-
-    <p>
-        This baggage is held or seized but has no enforcement case yet.
-    </p>
-
-    <a href="{% url 'case_create' %}?baggage={{ baggage.id }}">
-        Create Case
-    </a>
-
-{% else %}
-
-    <p>
-        No enforcement case required.
-    </p>
-
-{% endif %}
         </div>
 
-    </div>
+    </section>
 
 </div>
-
-{% if perms.passengers.add_document %}
-
-    <a href="{% url 'document_create' baggage.id %}">
-        Upload Document
-    </a>
-
-    {% endif %}
-
-    {% if perms.passengers.view_document %}
-
-        <a href="{% url 'document_list' %}">
-            View Documents
-        </a>
-
-    {% endif %}
-
-</body>
-</html>
+{% endblock %}

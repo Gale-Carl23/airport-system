@@ -1,485 +1,1228 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="en">
+{% block title %}Baggage Timeline | BOC-NAIA{% endblock %}
 
-<head> <meta charset="UTF-8">
+{% block nav_baggage %}active{% endblock %}
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+{% block page_heading %}Baggage Workflow Timeline{% endblock %}
 
-<title>
-    Baggage Timeline | BOC-NAIA
-</title>
+{% block extra_css %}
+<style>
+    .timeline-page {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 26px;
+    }
+
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .reference-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .reference-value {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .card {
+        margin-bottom: 20px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .card:nth-of-type(2) {
+        animation-delay: .04s;
+    }
+
+    .card:nth-of-type(3) {
+        animation-delay: .08s;
+    }
+
+    .card-header {
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .card-subtitle {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Baggage information */
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .info-item {
+        min-height: 76px;
+        padding: 14px 16px;
+        border-right: 1px solid #e0e4e1;
+        border-bottom: 1px solid #e0e4e1;
+        color: #303734;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .info-item:nth-child(3n) {
+        border-right: none;
+    }
+
+    .info-item:nth-last-child(-n + 3) {
+        border-bottom: none;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        color: #252a28;
+        font-weight: 600;
+    }
+
+    .info-value.mono {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+    }
+
+    .status-yes,
+    .status-no {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .status-yes {
+        background: #edf3ef;
+        border: 1px solid #cbdacf;
+        color: #3f514a;
+    }
+
+    .status-no {
+        background: #f6f1e6;
+        border: 1px solid #e4d8bd;
+        color: #8a6e32;
+    }
+
+    /* Workflow */
+
+    .workflow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        position: relative;
+    }
+
+    .workflow-item {
+        position: relative;
+        min-height: 205px;
+        padding: 16px;
+        background: #fafbfa;
+        border: 1px solid #d9deda;
+        border-top: 3px solid #bfc8c2;
+        border-radius: 6px;
+        color: #59645f;
+        font-size: 12px;
+        line-height: 1.6;
+        transition:
+            border-color .18s ease,
+            background-color .18s ease,
+            transform .18s ease;
+    }
+
+    .workflow-item:hover {
+        background: #f7f9f7;
+        transform: translateY(-1px);
+    }
+
+    .workflow-item.completed {
+        background: #f8faf8;
+        border-top-color: #3f514a;
+    }
+
+    .workflow-item.pending {
+        border-top-color: #b8944e;
+    }
+
+    .workflow-item.alert {
+        background: #fbf8f1;
+        border-top-color: #9a7836;
+    }
+
+    .workflow-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-bottom: 11px;
+        background: #eef1ef;
+        border: 1px solid #d9deda;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .completed .workflow-number {
+        background: #e8efea;
+        border-color: #cbdacf;
+        color: #3f514a;
+    }
+
+    .pending .workflow-number {
+        background: #f4efe3;
+        border-color: #e4d8bd;
+        color: #8a6e32;
+    }
+
+    .alert .workflow-number {
+        background: #f1eadb;
+        border-color: #dccca8;
+        color: #795f2d;
+    }
+
+    .workflow-title {
+        margin-bottom: 8px;
+        color: #252a28;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .workflow-status {
+        display: inline-flex;
+        margin-bottom: 10px;
+        padding: 3px 7px;
+        background: #f0f2f0;
+        border: 1px solid #dce1dd;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .completed .workflow-status {
+        background: #eaf1ec;
+        border-color: #cbdacf;
+        color: #3f514a;
+    }
+
+    .pending .workflow-status {
+        background: #f4efe3;
+        border-color: #e4d8bd;
+        color: #80652e;
+    }
+
+    .alert .workflow-status {
+        background: #f1eadb;
+        border-color: #dccca8;
+        color: #795f2d;
+    }
+
+    .workflow-detail {
+        margin-top: 5px;
+    }
+
+    .detail-label {
+        color: #707873;
+    }
+
+    .detail-value {
+        color: #303734;
+        font-weight: 600;
+    }
+
+    .case-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 9px;
+    }
+
+    .case {
+        padding: 9px 10px;
+        background: #fff;
+        border: 1px solid #e1e4e2;
+        border-left: 3px solid #9a7836;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .case-reference {
+        display: block;
+        margin-bottom: 2px;
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    /* Audit history */
+
+    .audit-wrapper {
+        overflow-x: auto;
+    }
+
+    .audit-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+    }
+
+    .audit-table th {
+        padding: 12px 15px;
+        background: #f7f8f7;
+        border-bottom: 1px solid #d9deda;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .audit-table td {
+        padding: 13px 15px;
+        border-bottom: 1px solid #e8ebe9;
+        color: #3c4541;
+        font-size: 12px;
+        vertical-align: top;
+    }
+
+    .audit-table tbody tr {
+        transition: background-color .16s ease;
+    }
+
+    .audit-table tbody tr:hover {
+        background: #fafbfa;
+    }
+
+    .audit-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .audit-date {
+        color: #59645f;
+        white-space: nowrap;
+    }
+
+    .audit-user {
+        color: #252a28;
+        font-weight: 600;
+    }
+
+    .audit-action {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 3px 7px;
+        background: #eef1ef;
+        border: 1px solid #d9deda;
+        border-radius: 4px;
+        color: #3f514a;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .audit-record {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .audit-description {
+        max-width: 360px;
+        color: #59645f;
+        line-height: 1.5;
+    }
+
+    .empty-history {
+        padding: 42px 20px;
+        text-align: center;
+    }
+
+    .empty-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin: 0 auto 13px;
+        background: #f1f3f1;
+        border: 1px solid #dce1dd;
+        border-radius: 6px;
+        color: #707873;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        margin: 0 0 5px;
+        color: #252a28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .empty-description {
+        margin: 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    /* Actions */
+
+    .page-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        padding-top: 18px;
+        border-top: 1px solid #d9deda;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 13px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease,
+            transform .16s ease;
+    }
+
+    .action-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+        transform: translateY(-1px);
+    }
+
+    .action-link.primary {
+        background: #3f514a;
+        border-color: #3f514a;
+        color: #fff;
+    }
+
+    .action-link.primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .workflow {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .info-item:nth-child(3n) {
+            border-right: 1px solid #e0e4e1;
+        }
+
+        .info-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .info-item:nth-last-child(-n + 3) {
+            border-bottom: 1px solid #e0e4e1;
+        }
+
+        .info-item:nth-last-child(-n + 2) {
+            border-bottom: none;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item,
+        .info-item:nth-child(2n),
+        .info-item:nth-child(3n) {
+            border-right: none;
+            border-bottom: 1px solid #e0e4e1;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .workflow {
+            grid-template-columns: 1fr;
+        }
+
+        .workflow-item {
+            min-height: auto;
+        }
+
+        .page-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .action-link {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
 
 
+{% block content %}
+<div class="timeline-page">
 
-</head>
+    <!-- PAGE HEADER -->
+    <div class="page-header">
 
-<body>
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Baggage Operations
+            </div>
 
-<div class="header">
+            <h1 class="page-title">
+                Baggage Workflow Timeline
+            </h1>
 
-    <h1>
-        BOC-NAIA Operations System
-    </h1>
+            <p class="page-subtitle">
+                Review the complete processing history and current workflow status of this baggage record.
+            </p>
+        </div>
 
-    <h2>
-        Baggage Workflow Timeline
-    </h2>
-
-</div>
-
-
-<!-- Baggage Information -->
-
-<div class="card">
-
-    <h3>
-        Baggage Information
-    </h3>
-
-    <div class="info-grid">
-
-        <div class="info-item">
-
-            <span class="info-label">
+        <div>
+            <span class="reference-label">
                 Baggage Tag
             </span>
 
-            {{ baggage.baggage_tag }}
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span class="info-label">
-                Passenger
+            <span class="reference-value">
+                {{ baggage.baggage_tag }}
             </span>
-
-            {{ baggage.passenger }}
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span class="info-label">
-                Passenger Reference
-            </span>
-
-            {{ baggage.passenger.reference_number }}
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span class="info-label">
-                Weight
-            </span>
-
-            {{ baggage.weight }} kg
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span class="info-label">
-                Declared
-            </span>
-
-            {% if baggage.declared %}
-                Yes
-            {% else %}
-                No
-            {% endif %}
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span class="info-label">
-                Flight
-            </span>
-
-            {% if baggage.passenger.flight %}
-                {{ baggage.passenger.flight.flight_number }}
-            {% else %}
-                -
-            {% endif %}
-
         </div>
 
     </div>
 
-</div>
+
+    <!-- BAGGAGE INFORMATION -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Baggage Information
+            </h2>
+
+            <p class="card-subtitle">
+                Identification and passenger information associated with this baggage.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Baggage Tag
+                    </span>
+
+                    <span class="info-value mono">
+                        {{ baggage.baggage_tag }}
+                    </span>
+                </div>
 
 
-<!-- Workflow -->
+                <div class="info-item">
+                    <span class="info-label">
+                        Passenger
+                    </span>
 
-<div class="card">
-
-    <h3>
-        Workflow Status
-    </h3>
-
-    <div class="workflow">
+                    <span class="info-value">
+                        {{ baggage.passenger }}
+                    </span>
+                </div>
 
 
-        <!-- Inspection -->
+                <div class="info-item">
+                    <span class="info-label">
+                        Passenger Reference
+                    </span>
 
-        <div
-            class="workflow-item
-            {% if inspection and inspection.status == 'completed' %}
-                completed
-            {% elif inspection %}
-                pending
-            {% else %}
-                alert
-            {% endif %}"
-        >
+                    <span class="info-value mono">
+                        {{ baggage.passenger.reference_number }}
+                    </span>
+                </div>
 
-            <div class="workflow-title">
-                1. Inspection
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Weight
+                    </span>
+
+                    <span class="info-value">
+                        {{ baggage.weight }} kg
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Declaration
+                    </span>
+
+                    {% if baggage.declared %}
+
+                        <span class="status-yes">
+                            Declared
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-no">
+                            Undeclared
+                        </span>
+
+                    {% endif %}
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Flight
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if baggage.passenger.flight %}
+                            {{ baggage.passenger.flight.flight_number }}
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </span>
+                </div>
+
             </div>
 
-            {% if inspection %}
+        </div>
 
-                <div class="workflow-status">
-                    {{ inspection.get_status_display }}
-                </div>
+    </section>
 
-                <div>
-                    Result:
-                    {{ inspection.get_result_display }}
-                </div>
 
-                {% if inspection.inspected_at %}
-                    <div>
-                        Inspected:
-                        {{ inspection.inspected_at }}
+    <!-- WORKFLOW -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Workflow Status
+            </h2>
+
+            <p class="card-subtitle">
+                Current processing state across inspection, assessment, payment, clearance, and enforcement.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="workflow">
+
+                <!-- INSPECTION -->
+                <div
+                    class="workflow-item
+                    {% if inspection and inspection.status == 'completed' %}
+                        completed
+                    {% elif inspection %}
+                        pending
+                    {% else %}
+                        alert
+                    {% endif %}"
+                >
+
+                    <div class="workflow-number">
+                        01
                     </div>
-                {% endif %}
 
-            {% else %}
-
-                No inspection recorded.
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- Assessment -->
-
-        <div
-            class="workflow-item
-            {% if assessment and assessment.status == 'completed' %}
-                completed
-            {% elif assessment %}
-                pending
-            {% else %}
-                pending
-            {% endif %}"
-        >
-
-            <div class="workflow-title">
-                2. Assessment
-            </div>
-
-            {% if assessment %}
-
-                <div class="workflow-status">
-                    {{ assessment.get_status_display }}
-                </div>
-
-                <div>
-                    Declared Value:
-                    ₱{{ assessment.declared_value }}
-                </div>
-
-                <div>
-                    Assessed Value:
-                    ₱{{ assessment.assessed_value }}
-                </div>
-
-                <div>
-                    Duty:
-                    ₱{{ assessment.duty_amount }}
-                </div>
-
-                <div>
-                    Tax:
-                    ₱{{ assessment.tax_amount }}
-                </div>
-
-            {% else %}
-
-                No assessment recorded.
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- Payment -->
-
-        <div
-            class="workflow-item
-            {% if payment and payment.status == 'paid' %}
-                completed
-            {% elif payment %}
-                pending
-            {% else %}
-                pending
-            {% endif %}"
-        >
-
-            <div class="workflow-title">
-                3. Payment
-            </div>
-
-            {% if payment %}
-
-                <div class="workflow-status">
-                    {{ payment.get_status_display }}
-                </div>
-
-                <div>
-                    Amount Due:
-                    ₱{{ payment.amount_due }}
-                </div>
-
-                <div>
-                    Amount Paid:
-                    ₱{{ payment.amount_paid }}
-                </div>
-
-                {% if payment.paid_at %}
-                    <div>
-                        Paid:
-                        {{ payment.paid_at }}
+                    <div class="workflow-title">
+                        Inspection
                     </div>
-                {% endif %}
 
-            {% else %}
+                    {% if inspection %}
 
-                No payment recorded.
+                        <div class="workflow-status">
+                            {{ inspection.get_status_display }}
+                        </div>
 
-            {% endif %}
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Result:
+                            </span>
 
-        </div>
+                            <span class="detail-value">
+                                {{ inspection.get_result_display }}
+                            </span>
+                        </div>
 
+                        {% if inspection.inspected_at %}
 
-        <!-- Clearance -->
+                            <div class="workflow-detail">
+                                <span class="detail-label">
+                                    Inspected:
+                                </span>
 
-        <div
-            class="workflow-item
-            {% if clearance and clearance.status == 'cleared' %}
-                completed
-            {% elif clearance %}
-                pending
-            {% else %}
-                pending
-            {% endif %}"
-        >
-
-            <div class="workflow-title">
-                4. Clearance
-            </div>
-
-            {% if clearance %}
-
-                <div class="workflow-status">
-                    {{ clearance.get_status_display }}
-                </div>
-
-                <div>
-                    Reference:
-                    {{ clearance.clearance_reference }}
-                </div>
-
-                {% if clearance.cleared_at %}
-                    <div>
-                        Cleared:
-                        {{ clearance.cleared_at }}
-                    </div>
-                {% endif %}
-
-            {% else %}
-
-                No clearance recorded.
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- Cases -->
-
-        <div
-            class="workflow-item
-            {% if cases %}
-                alert
-            {% else %}
-                pending
-            {% endif %}"
-        >
-
-            <div class="workflow-title">
-                5. Enforcement / Cases
-            </div>
-
-            {% if cases %}
-
-                {% for case in cases %}
-
-                    <div class="case">
-
-                        <strong>
-                            {{ case.case_reference }}
-                        </strong>
-
-                        <br>
-
-                        Type:
-                        {{ case.get_case_type_display }}
-
-                        <br>
-
-                        Status:
-                        {{ case.get_status_display }}
-
-                        <br>
-
-                        Created:
-                        {{ case.created_at }}
-
-                        {% if case.resolved_at %}
-
-                            <br>
-
-                            Resolved:
-                            {{ case.resolved_at }}
+                                <span class="detail-value">
+                                    {{ inspection.inspected_at }}
+                                </span>
+                            </div>
 
                         {% endif %}
 
+                    {% else %}
+
+                        <div class="workflow-detail">
+                            No inspection recorded.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- ASSESSMENT -->
+                <div
+                    class="workflow-item
+                    {% if assessment and assessment.status == 'completed' %}
+                        completed
+                    {% elif assessment %}
+                        pending
+                    {% else %}
+                        pending
+                    {% endif %}"
+                >
+
+                    <div class="workflow-number">
+                        02
                     </div>
 
-                {% endfor %}
+                    <div class="workflow-title">
+                        Assessment
+                    </div>
 
-            {% else %}
+                    {% if assessment %}
 
-                No enforcement case recorded.
+                        <div class="workflow-status">
+                            {{ assessment.get_status_display }}
+                        </div>
 
-            {% endif %}
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Declared:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ assessment.declared_value }}
+                            </span>
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Assessed:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ assessment.assessed_value }}
+                            </span>
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Duty:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ assessment.duty_amount }}
+                            </span>
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Tax:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ assessment.tax_amount }}
+                            </span>
+                        </div>
+
+                    {% else %}
+
+                        <div class="workflow-detail">
+                            No assessment recorded.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- PAYMENT -->
+                <div
+                    class="workflow-item
+                    {% if payment and payment.status == 'paid' %}
+                        completed
+                    {% elif payment %}
+                        pending
+                    {% else %}
+                        pending
+                    {% endif %}"
+                >
+
+                    <div class="workflow-number">
+                        03
+                    </div>
+
+                    <div class="workflow-title">
+                        Payment
+                    </div>
+
+                    {% if payment %}
+
+                        <div class="workflow-status">
+                            {{ payment.get_status_display }}
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Amount Due:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ payment.amount_due }}
+                            </span>
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Amount Paid:
+                            </span>
+
+                            <span class="detail-value">
+                                ₱{{ payment.amount_paid }}
+                            </span>
+                        </div>
+
+                        {% if payment.paid_at %}
+
+                            <div class="workflow-detail">
+                                <span class="detail-label">
+                                    Paid:
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ payment.paid_at }}
+                                </span>
+                            </div>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <div class="workflow-detail">
+                            No payment recorded.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- CLEARANCE -->
+                <div
+                    class="workflow-item
+                    {% if clearance and clearance.status == 'cleared' %}
+                        completed
+                    {% elif clearance %}
+                        pending
+                    {% else %}
+                        pending
+                    {% endif %}"
+                >
+
+                    <div class="workflow-number">
+                        04
+                    </div>
+
+                    <div class="workflow-title">
+                        Clearance
+                    </div>
+
+                    {% if clearance %}
+
+                        <div class="workflow-status">
+                            {{ clearance.get_status_display }}
+                        </div>
+
+                        <div class="workflow-detail">
+                            <span class="detail-label">
+                                Reference:
+                            </span>
+
+                            <span class="detail-value">
+                                {{ clearance.clearance_reference }}
+                            </span>
+                        </div>
+
+                        {% if clearance.cleared_at %}
+
+                            <div class="workflow-detail">
+                                <span class="detail-label">
+                                    Cleared:
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ clearance.cleared_at }}
+                                </span>
+                            </div>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <div class="workflow-detail">
+                            No clearance recorded.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- CASES -->
+                <div
+                    class="workflow-item
+                    {% if cases %}
+                        alert
+                    {% else %}
+                        pending
+                    {% endif %}"
+                >
+
+                    <div class="workflow-number">
+                        05
+                    </div>
+
+                    <div class="workflow-title">
+                        Enforcement / Cases
+                    </div>
+
+                    {% if cases %}
+
+                        <div class="workflow-status">
+                            {{ cases|length }} Case{{ cases|length|pluralize }}
+                        </div>
+
+                        <div class="case-list">
+
+                            {% for case in cases %}
+
+                                <div class="case">
+
+                                    <span class="case-reference">
+                                        {{ case.case_reference }}
+                                    </span>
+
+                                    <div>
+                                        Type:
+                                        {{ case.get_case_type_display }}
+                                    </div>
+
+                                    <div>
+                                        Status:
+                                        {{ case.get_status_display }}
+                                    </div>
+
+                                    <div>
+                                        Created:
+                                        {{ case.created_at }}
+                                    </div>
+
+                                    {% if case.resolved_at %}
+
+                                        <div>
+                                            Resolved:
+                                            {{ case.resolved_at }}
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="workflow-detail">
+                            No enforcement case recorded.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
 
         </div>
+
+    </section>
+
+
+    <!-- AUDIT HISTORY -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Audit History
+            </h2>
+
+            <p class="card-subtitle">
+                Recorded system activity associated with this baggage workflow.
+            </p>
+        </div>
+
+
+        {% if audit_logs %}
+
+            <div class="audit-wrapper">
+
+                <table class="audit-table">
+
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Record</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for log in audit_logs %}
+
+                            <tr>
+
+                                <td>
+                                    <span class="audit-date">
+                                        {{ log.created_at }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <span class="audit-user">
+                                        {{ log.user.username }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <span class="audit-action">
+                                        {{ log.get_action_display }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <span class="audit-record">
+                                        {{ log.model_name }} #{{ log.object_id }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <div class="audit-description">
+                                        {{ log.description }}
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-history">
+
+                <div class="empty-mark">
+                    L
+                </div>
+
+                <h3 class="empty-title">
+                    No audit history available
+                </h3>
+
+                <p class="empty-description">
+                    No recorded system activity is currently associated with this baggage workflow.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ACTIONS -->
+    <div class="page-actions">
+
+        <a
+            href="{% url 'baggage_detail' baggage.id %}"
+            class="action-link primary"
+        >
+            Back to Baggage
+        </a>
+
+        <a
+            href="{% url 'baggage_list' %}"
+            class="action-link"
+        >
+            Baggage List
+        </a>
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="action-link"
+        >
+            Dashboard
+        </a>
 
     </div>
 
 </div>
-
-
-<!-- Audit History -->
-
-<div class="card">
-
-    <h3>
-        Audit History
-    </h3>
-
-    {% if audit_logs %}
-
-        <table class="audit-table">
-
-            <thead>
-
-                <tr>
-                    <th>Date / Time</th>
-                    <th>User</th>
-                    <th>Action</th>
-                    <th>Record</th>
-                    <th>Description</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for log in audit_logs %}
-
-                    <tr>
-
-                        <td>
-                            {{ log.created_at }}
-                        </td>
-
-                        <td>
-                            {{ log.user.username }}
-                        </td>
-
-                        <td>
-                            {{ log.get_action_display }}
-                        </td>
-
-                        <td>
-                            {{ log.model_name }}
-                            #{{ log.object_id }}
-                        </td>
-
-                        <td>
-                            {{ log.description }}
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No audit history available.
-        </p>
-
-    {% endif %}
-
-</div>
-
-
-<!-- Actions -->
-
-<div class="actions">
-
-    <a
-        href="{% url 'baggage_detail' baggage.id %}"
-    >
-        Back to Baggage
-    </a>
-
-    <a
-        href="{% url 'baggage_list' %}"
-    >
-        Baggage List
-    </a>
-
-    <a
-        href="{% url 'dashboard' %}"
-    >
-        Dashboard
-    </a>
-
-</div>
-
-</body>
-
-</html>
+{% endblock %}

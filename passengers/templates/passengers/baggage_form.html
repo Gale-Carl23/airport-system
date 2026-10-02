@@ -1,37 +1,446 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Register Baggage | BOC-NAIA{% endblock %}
 
-    <title>Register Baggage | BOC-NAIA</title>
-</head>
+{% block nav_baggage %}active{% endblock %}
 
-<body>
+{% block page_heading %}Register Baggage{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block extra_css %}
+<style>
+    .form-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <h2>Register Baggage</h2>
+    .page-header {
+        margin-bottom: 26px;
+    }
 
-    <form method="post">
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        {% csrf_token %}
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-        {{ form.as_p }}
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-        <button type="submit">
-            Save Baggage
-        </button>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-    </form>
+    .form-card {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: formIn .35s ease both;
+    }
 
-    <br>
+    .form-card-header {
+        padding: 18px 22px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-    <a href="{% url 'baggage_list' %}">
-        Back to Baggage
-    </a>
+    .form-card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
 
-</body>
+    .form-card-description {
+        margin: 5px 0 0;
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.5;
+    }
 
-</html>
+    .form-body {
+        padding: 24px 22px;
+    }
+
+    .form-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 19px 20px;
+    }
+
+    .field {
+        min-width: 0;
+    }
+
+    .field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #3c4541;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 11px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #252a28;
+        font: inherit;
+        font-size: 13px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .field input,
+    .field select {
+        height: 40px;
+    }
+
+    .field textarea {
+        min-height: 105px;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .field input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+        margin: 0;
+        accent-color: #3f514a;
+    }
+
+    .field-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 40px;
+    }
+
+    .field-checkbox label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .field-help {
+        margin-top: 5px;
+        color: #8a928d;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .field-errors {
+        margin: 6px 0 0;
+        padding: 0;
+        color: #805656;
+        font-size: 11px;
+        list-style: none;
+    }
+
+    .field-error {
+        margin-top: 6px;
+        padding: 8px 10px;
+        background: #f8eeee;
+        border: 1px solid #e5d2d2;
+        border-radius: 4px;
+        color: #805656;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .form-errors {
+        margin-bottom: 20px;
+        padding: 12px 14px;
+        background: #f8eeee;
+        border: 1px solid #e5d2d2;
+        border-left: 3px solid #805656;
+        border-radius: 5px;
+        color: #805656;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .form-errors strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 20px;
+        margin-top: 22px;
+        border-top: 1px solid #e5e9e6;
+    }
+
+    .required-note {
+        color: #8a928d;
+        font-size: 11px;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 9px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 15px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-primary {
+        border: 1px solid #3f514a;
+        background: #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        border: 1px solid #d4dad6;
+        background: #fff;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f5f7f5;
+        border-color: #bfc8c2;
+    }
+
+    @keyframes formIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 700px) {
+        .form-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .field.full-width {
+            grid-column: auto;
+        }
+
+        .form-body {
+            padding: 18px 16px;
+        }
+
+        .form-card-header {
+            padding: 17px 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+
+        .form-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .action-group {
+            width: 100%;
+            flex-direction: column-reverse;
+        }
+
+        .button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Baggage Operations
+        </div>
+
+        <h1 class="page-title">Register Baggage</h1>
+
+        <p class="page-subtitle">
+            Record baggage information and associate it with the appropriate passenger.
+        </p>
+
+    </div>
+
+
+    <section class="form-card">
+
+        <div class="form-card-header">
+            <h2 class="form-card-title">Baggage Information</h2>
+
+            <p class="form-card-description">
+                Enter the baggage details below. Required fields must be completed before saving.
+            </p>
+        </div>
+
+
+        <div class="form-body">
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    <strong>Please review the form.</strong>
+
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="form-fields">
+
+                    {% for field in form %}
+
+                        <div class="field {% if field.name == 'description' %}full-width{% endif %}">
+
+                            {% if field.field.widget.input_type == "checkbox" %}
+
+                                <div class="field-checkbox">
+                                    {{ field }}
+                                    <label for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+                                </div>
+
+                            {% else %}
+
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                            {% endif %}
+
+
+                            {% if field.help_text %}
+                                <div class="field-help">
+                                    {{ field.help_text }}
+                                </div>
+                            {% endif %}
+
+
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <span class="required-note">
+                        Fields marked as required must be completed.
+                    </span>
+
+                    <div class="action-group">
+
+                        <a
+                            href="{% url 'baggage_list' %}"
+                            class="button button-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Save Baggage
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

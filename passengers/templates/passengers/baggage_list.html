@@ -1,182 +1,911 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Baggage | BOC-NAIA{% endblock %}
 
-    <title>Baggage | BOC-NAIA</title>
-</head>
+{% block nav_baggage %}active{% endblock %}
 
-<body>
+{% block page_heading %}Baggage Records{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block extra_css %}
+<style>
+    .baggage-page {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
 
-    <h2>Baggage</h2>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 26px;
+    }
 
-    <a href="{% url 'baggage_create' %}">
-        Register Baggage
-    </a>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-    <br>
-    <br>
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-    <form method="get" class="filter-form">
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-        <input
-            type="search"
-            name="q"
-            value="{{ search }}"
-            placeholder="Baggage tag, passenger, passport..."
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .primary-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 39px;
+        padding: 0 15px;
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .primary-button:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .filter-panel {
+        margin-bottom: 20px;
+        padding: 18px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.8fr) minmax(160px, 1fr) minmax(145px, .8fr) minmax(145px, .8fr) auto auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-field {
+        min-width: 0;
+    }
+
+    .filter-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .filter-input,
+    .filter-select {
+        width: 100%;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 11px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #252a28;
+        font: inherit;
+        font-size: 13px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .filter-button,
+    .reset-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        padding: 0 15px;
+        box-sizing: border-box;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .filter-button {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .filter-button:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .reset-button {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease;
+    }
+
+    .reset-button:hover {
+        background: #f5f7f5;
+        border-color: #bfc8c2;
+    }
+
+    .table-panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .table-heading {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .table-description {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .record-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 9px;
+        background: #f1f3f1;
+        border: 1px solid #dce1dd;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .record-dot {
+        width: 6px;
+        height: 6px;
+        background: #3f514a;
+        border-radius: 50%;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .baggage-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+    }
+
+    .baggage-table th {
+        padding: 12px 16px;
+        background: #f7f8f7;
+        border-bottom: 1px solid #d9deda;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .baggage-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e8ebe9;
+        color: #3c4541;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .baggage-table tbody tr {
+        transition: background-color .16s ease;
+    }
+
+    .baggage-table tbody tr:hover {
+        background: #fafbfa;
+    }
+
+    .baggage-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .tag-link {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .tag-link:hover {
+        text-decoration: underline;
+    }
+
+    .passenger-name {
+        color: #252a28;
+        font-weight: 600;
+    }
+
+    .description {
+        max-width: 250px;
+        color: #59645f;
+        line-height: 1.45;
+    }
+
+    .weight {
+        color: #3f514a;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .declaration {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .declaration.yes {
+        background: #edf3ef;
+        border: 1px solid #cbdacf;
+        color: #3f514a;
+    }
+
+    .declaration.no {
+        background: #f6f1e6;
+        border: 1px solid #e4d8bd;
+        color: #8a6e32;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0 9px;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        background: #fff;
+        color: #3f514a;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .action-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .action-link.primary {
+        background: #3f514a;
+        border-color: #3f514a;
+        color: #fff;
+    }
+
+    .action-link.primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+    }
+
+    .empty-state {
+        padding: 55px 24px;
+        text-align: center;
+    }
+
+    .empty-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin: 0 auto 14px;
+        background: #f1f3f1;
+        border: 1px solid #dce1dd;
+        border-radius: 6px;
+        color: #707873;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        margin: 0 0 6px;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .empty-description {
+        margin: 0;
+        color: #707873;
+        font-size: 13px;
+    }
+
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 18px;
+        background: #fafbfa;
+        border-top: 1px solid #e3e7e4;
+    }
+
+    .pagination-info {
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .pagination-info strong {
+        color: #3f514a;
+        font-weight: 700;
+    }
+
+    .pagination-links {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pagination-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 32px;
+        padding: 0 9px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease,
+            color .16s ease;
+    }
+
+    .pagination-link:hover {
+        background: #f3f5f3;
+        border-color: #bfc8c2;
+        color: #3f514a;
+    }
+
+    .pagination-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 32px;
+        padding: 0 9px;
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .filter-form {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .filter-field:first-child {
+            grid-column: span 3;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .primary-button {
+            width: 100%;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-field:first-child {
+            grid-column: auto;
+        }
+
+        .filter-button,
+        .reset-button {
+            width: 100%;
+        }
+
+        .table-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .pagination-bar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .pagination-links {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="baggage-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Baggage Operations
+            </div>
+
+            <h1 class="page-title">Baggage Records</h1>
+
+            <p class="page-subtitle">
+                Search, review, and manage registered baggage records.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'baggage_create' %}"
+            class="primary-button"
         >
-
-        <select name="declared">
-            <option value="">All Declaration Status</option>
-
-            <option
-                value="yes"
-                {% if selected_declared == "yes" %}selected{% endif %}
-            >
-                Declared
-            </option>
-
-            <option
-                value="no"
-                {% if selected_declared == "no" %}selected{% endif %}
-            >
-                Undeclared
-            </option>
-        </select>
-
-        <label>
-            From
-            <input
-                type="date"
-                name="date_from"
-                value="{{ date_from }}"
-            >
-        </label>
-
-        <label>
-            To
-            <input
-                type="date"
-                name="date_to"
-                value="{{ date_to }}"
-            >
-        </label>
-
-        <button type="submit">Filter</button>
-
-        <a href="{% url 'baggage_list' %}">
-            Reset
+            + Register Baggage
         </a>
 
-    </form>
+    </div>
 
-    <table border="1">
 
-        <thead>
-            <tr>
-                <th>Baggage Tag</th>
-                <th>Passenger</th>
-                <th>Description</th>
-                <th>Weight</th>
-                <th>Declared</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+    <!-- FILTERS -->
+    <section class="filter-panel">
 
-        <tbody>
+        <form method="get" class="filter-form">
 
-            {% for item in baggage %}
+            <div class="filter-field">
 
-                <tr>
-                    <td>
-                        <a href="{% url 'baggage_detail' item.id %}">
-                            {{ item.baggage_tag }}
-                        </a>
-                    </td>
+                <label
+                    for="baggage-search"
+                    class="filter-label"
+                >
+                    Search
+                </label>
 
-                    <td>
-                        {{ item.passenger }}
-                    </td>
+                <input
+                    id="baggage-search"
+                    class="filter-input"
+                    type="search"
+                    name="q"
+                    value="{{ search }}"
+                    placeholder="Baggage tag, passenger, passport..."
+                >
 
-                    <td>
-                        {{ item.description }}
-                    </td>
+            </div>
 
-                    <td>
-                        {{ item.weight }} kg
-                    </td>
 
-                    <td>
-                        {% if item.declared %}
-                            Yes
-                        {% else %}
-                            No
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'baggage_detail' item.id %}">
-                            View Baggage
-                        </a>
-                        <a href="{% url 'baggage_update' item.id %}">
-                            Edit
-                        </a>
-                    </td>
-                </tr>
+            <div class="filter-field">
 
-            {% empty %}
+                <label
+                    for="declared-status"
+                    class="filter-label"
+                >
+                    Declaration Status
+                </label>
 
-                <tr>
-                    <td colspan="5">
-                        No baggage records found.
-                    </td>
-                </tr>
+                <select
+                    id="declared-status"
+                    class="filter-select"
+                    name="declared"
+                >
+                    <option value="">
+                        All Declaration Status
+                    </option>
 
-            {% endfor %}
+                    <option
+                        value="yes"
+                        {% if selected_declared == "yes" %}selected{% endif %}
+                    >
+                        Declared
+                    </option>
 
-        </tbody>
+                    <option
+                        value="no"
+                        {% if selected_declared == "no" %}selected{% endif %}
+                    >
+                        Undeclared
+                    </option>
 
-    </table>
-    {% if baggage.has_other_pages %}
-        <div class="pagination">
+                </select>
 
-            {% if baggage.has_previous %}
-                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    First
-                </a>
+            </div>
 
-                <a href="?page={{ baggage.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Previous
-                </a>
-            {% endif %}
 
-            <span>
-                Page {{ baggage.number }}
-                of {{ baggage.paginator.num_pages }}
-            </span>
+            <div class="filter-field">
 
-            {% if baggage.has_next %}
-                <a href="?page={{ baggage.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Next
-                </a>
+                <label
+                    for="date-from"
+                    class="filter-label"
+                >
+                    From
+                </label>
 
-                <a href="?page={{ baggage.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Last
-                </a>
+                <input
+                    id="date-from"
+                    class="filter-input"
+                    type="date"
+                    name="date_from"
+                    value="{{ date_from }}"
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label
+                    for="date-to"
+                    class="filter-label"
+                >
+                    To
+                </label>
+
+                <input
+                    id="date-to"
+                    class="filter-input"
+                    type="date"
+                    name="date_to"
+                    value="{{ date_to }}"
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                Filter
+            </button>
+
+
+            <a
+                href="{% url 'baggage_list' %}"
+                class="reset-button"
+            >
+                Reset
+            </a>
+
+        </form>
+
+    </section>
+
+
+    <!-- TABLE -->
+    <section class="table-panel">
+
+        <div class="table-header">
+
+            <div>
+                <h2 class="table-heading">
+                    Registered Baggage
+                </h2>
+
+                <p class="table-description">
+                    Baggage records currently available in the system.
+                </p>
+            </div>
+
+            {% if baggage.paginator %}
+                <span class="record-count">
+                    <span class="record-dot"></span>
+                    {{ baggage.paginator.count }} record{{ baggage.paginator.count|pluralize }}
+                </span>
             {% endif %}
 
         </div>
-    {% endif %}
 
-    <br>
 
-    <a href="{% url 'dashboard' %}">
-        Back to Dashboard
-    </a>
+        <div class="table-wrapper">
 
-</body>
+            <table class="baggage-table">
 
-</html>
+                <thead>
+                    <tr>
+                        <th>Baggage Tag</th>
+                        <th>Passenger</th>
+                        <th>Description</th>
+                        <th>Weight</th>
+                        <th>Declared</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in baggage %}
+
+                        <tr>
+
+                            <td>
+                                <a
+                                    href="{% url 'baggage_detail' item.id %}"
+                                    class="tag-link"
+                                >
+                                    {{ item.baggage_tag }}
+                                </a>
+                            </td>
+
+
+                            <td>
+                                <span class="passenger-name">
+                                    {{ item.passenger }}
+                                </span>
+                            </td>
+
+
+                            <td>
+                                <div class="description">
+                                    {{ item.description }}
+                                </div>
+                            </td>
+
+
+                            <td>
+                                <span class="weight">
+                                    {{ item.weight }} kg
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                {% if item.declared %}
+
+                                    <span class="declaration yes">
+                                        Declared
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="declaration no">
+                                        Undeclared
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <a
+                                        href="{% url 'baggage_detail' item.id %}"
+                                        class="action-link primary"
+                                    >
+                                        View
+                                    </a>
+
+                                    <a
+                                        href="{% url 'baggage_update' item.id %}"
+                                        class="action-link"
+                                    >
+                                        Edit
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-mark">
+                                        B
+                                    </div>
+
+                                    <h3 class="empty-title">
+                                        No baggage records found
+                                    </h3>
+
+                                    <p class="empty-description">
+                                        No baggage records match the current search and filter criteria.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- PAGINATION -->
+        {% if baggage.has_other_pages %}
+
+            <div class="pagination-bar">
+
+                <div class="pagination-info">
+                    Page
+                    <strong>{{ baggage.number }}</strong>
+                    of
+                    <strong>{{ baggage.paginator.num_pages }}</strong>
+                </div>
+
+
+                <div class="pagination-links">
+
+                    {% if baggage.has_previous %}
+
+                        <a
+                            href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_declared %}&declared={{ selected_declared|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                            class="pagination-link"
+                        >
+                            First
+                        </a>
+
+                        <a
+                            href="?page={{ baggage.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_declared %}&declared={{ selected_declared|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                            class="pagination-link"
+                        >
+                            Previous
+                        </a>
+
+                    {% endif %}
+
+
+                    <span class="pagination-current">
+                        {{ baggage.number }}
+                    </span>
+
+
+                    {% if baggage.has_next %}
+
+                        <a
+                            href="?page={{ baggage.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_declared %}&declared={{ selected_declared|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                            class="pagination-link"
+                        >
+                            Next
+                        </a>
+
+                        <a
+                            href="?page={{ baggage.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_declared %}&declared={{ selected_declared|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                            class="pagination-link"
+                        >
+                            Last
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+{% endblock %}
