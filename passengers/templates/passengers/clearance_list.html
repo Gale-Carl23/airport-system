@@ -1,165 +1,863 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Clearances | BOC-NAIA System</title>
-</head>
+{% block title %}Clearances | BOC-NAIA{% endblock %}
 
-<body>
+{% block nav_clearances %}active{% endblock %}
 
-    <h1>Clearances</h1>
+{% block page_heading %}Clearances{% endblock %}
 
-    <p>
-        <a href="{% url 'clearance_create' %}">
-            Add Clearance
-        </a>
-    </p>
+{% block extra_css %}
+<style>
+    .clearance-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 
-    
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
 
-    <form method="get" class="filter-form">
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        <input
-            type="search"
-            name="q"
-            value="{{ search }}"
-            placeholder="Clearance reference, baggage..."
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .primary-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 15px;
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .primary-button:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .filter-panel {
+        margin-bottom: 18px;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        animation: panelIn .35s ease both;
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 13px;
+    }
+
+    .filter-title {
+        margin: 0;
+        color: #303734;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .filter-label {
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.5fr) minmax(150px, .8fr) minmax(130px, .7fr) minmax(130px, .7fr) auto auto;
+        align-items: end;
+        gap: 9px;
+        margin: 0;
+    }
+
+    .filter-field {
+        min-width: 0;
+    }
+
+    .filter-field label {
+        display: block;
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 36px;
+        padding: 0 10px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #303734;
+        font: inherit;
+        font-size: 11px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .filter-form input:focus,
+    .filter-form select:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .filter-button,
+    .reset-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 13px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .filter-button {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .filter-button:hover {
+        background: #34443e;
+        border-color: #34443e;
+    }
+
+    .reset-button {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .reset-button:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .table-panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .4s ease both;
+        animation-delay: .04s;
+    }
+
+    .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 17px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .table-title {
+        margin: 0;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .record-count {
+        color: #7a827d;
+        font-size: 10px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .clearance-table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+    }
+
+    .clearance-table th {
+        padding: 10px 13px;
+        background: #f7f8f7;
+        border-bottom: 1px solid #dfe4e1;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .clearance-table td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #e8ebe9;
+        color: #59645f;
+        font-size: 11px;
+        vertical-align: middle;
+    }
+
+    .clearance-table tbody tr {
+        transition: background-color .15s ease;
+    }
+
+    .clearance-table tbody tr:hover {
+        background: #fafbfa;
+    }
+
+    .clearance-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .passenger-name {
+        color: #303734;
+        font-weight: 600;
+    }
+
+    .baggage-tag {
+        color: #59645f;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .remarks-cell {
+        max-width: 220px;
+        color: #707873;
+        line-height: 1.45;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .status-cleared {
+        background: #edf3ef;
+        border: 1px solid #cbdacf;
+        color: #3f514a;
+    }
+
+    .status-pending {
+        background: #f4efe3;
+        border: 1px solid #e4d8bd;
+        color: #80652e;
+    }
+
+    .status-held,
+    .status-referred {
+        background: #f1eeee;
+        border: 1px solid #ded2d0;
+        color: #79564f;
+    }
+
+    .status-default {
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        color: #59645f;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .table-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 29px;
+        padding: 0 9px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 9px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease,
+            color .16s ease;
+    }
+
+    .table-action:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+        color: #303734;
+    }
+
+    .empty-state {
+        padding: 46px 20px;
+        text-align: center;
+    }
+
+    .empty-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin-bottom: 12px;
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        margin: 0 0 5px;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty-text {
+        margin: 0;
+        color: #7a827d;
+        font-size: 11px;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 14px 16px;
+        border-top: 1px solid #e3e7e4;
+        background: #fafbfa;
+    }
+
+    .pagination a,
+    .pagination-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        font-size: 10px;
+        text-decoration: none;
+    }
+
+    .pagination a {
+        background: #fff;
+        color: #59645f;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .pagination a:hover {
+        background: #f1f4f2;
+        border-color: #bfc8c2;
+    }
+
+    .pagination-current {
+        background: #3f514a;
+        border-color: #3f514a;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1050px) {
+        .filter-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .filter-button,
+        .reset-button {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .primary-button {
+            width: 100%;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .table-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="clearance-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Clearance Records
+            </div>
+
+            <h1 class="page-title">
+                Clearances
+            </h1>
+
+            <p class="page-subtitle">
+                Review and manage baggage clearance records across the processing workflow.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'clearance_create' %}"
+            class="primary-button"
         >
+            + Add Clearance
+        </a>
 
-        <select name="status">
-            <option value="">All Statuses</option>
+    </div>
 
-            {% for value, label in status_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_status == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
 
-        <label>
-            From
-            <input type="date" name="date_from" value="{{ date_from }}">
-        </label>
+    <!-- FILTERS -->
+    <section class="filter-panel">
 
-        <label>
-            To
-            <input type="date" name="date_to" value="{{ date_to }}">
-        </label>
+        <div class="filter-header">
 
-        <button type="submit">Filter</button>
+            <h2 class="filter-title">
+                Search &amp; Filters
+            </h2>
 
-        <a href="{% url 'clearance_list' %}">Reset</a>
-
-    </form>
-
-    <table border="1">
-
-        <thead>
-            <tr>
-                <th>Reference</th>
-                <th>Passenger</th>
-                <th>Baggage</th>
-                <th>Status</th>
-                <th>Cleared At</th>
-                <th>Remarks</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {% for clearance in clearances %}
-
-                <tr>
-
-                    <td>
-                        {{ clearance.clearance_reference }}
-                    </td>
-
-                    <td>
-                        {{ clearance.baggage.passenger }}
-                    </td>
-
-                    <td>
-                        {{ clearance.baggage.baggage_tag }}
-                    </td>
-
-                    <td>
-                        {{ clearance.get_status_display }}
-                    </td>
-
-                    <td>
-                        {{ clearance.cleared_at|default:"-" }}
-                    </td>
-
-                    <td>
-                        {{ clearance.remarks|default:"-" }}
-                    </td>
-
-                    <td>
-                        <a href="{% url 'clearance_detail' clearance.id %}">
-                            View Clearance
-                        </a>
-                        <a href="{% url 'clearance_update' clearance.id %}">
-                            Edit
-                        </a>
-                    </td>
-
-                </tr>
-
-            {% empty %}
-
-                <tr>
-                    <td colspan="7">
-                        No clearance records found.
-                    </td>
-                </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-    {% if clearances.has_other_pages %}
-        <div class="pagination">
-
-            {% if clearances.has_previous %}
-                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    First
-                </a>
-
-                <a href="?page={{ clearances.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Previous
-                </a>
-            {% endif %}
-
-            <span>
-                Page {{ clearances.number }}
-                of {{ clearances.paginator.num_pages }}
+            <span class="filter-label">
+                Clearance Records
             </span>
 
-            {% if clearances.has_next %}
-                <a href="?page={{ clearances.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Next
-                </a>
+        </div>
 
-                <a href="?page={{ clearances.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Last
-                </a>
+
+        <form method="get" class="filter-form">
+
+            <div class="filter-field">
+
+                <label for="clearance-search">
+                    Search
+                </label>
+
+                <input
+                    id="clearance-search"
+                    type="search"
+                    name="q"
+                    value="{{ search }}"
+                    placeholder="Reference, baggage tag, passenger..."
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="clearance-status">
+                    Status
+                </label>
+
+                <select
+                    id="clearance-status"
+                    name="status"
+                >
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    {% for value, label in status_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if selected_status == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="clearance-date-from">
+                    From
+                </label>
+
+                <input
+                    id="clearance-date-from"
+                    type="date"
+                    name="date_from"
+                    value="{{ date_from }}"
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="clearance-date-to">
+                    To
+                </label>
+
+                <input
+                    id="clearance-date-to"
+                    type="date"
+                    name="date_to"
+                    value="{{ date_to }}"
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                Filter
+            </button>
+
+
+            <a
+                href="{% url 'clearance_list' %}"
+                class="reset-button"
+            >
+                Reset
+            </a>
+
+        </form>
+
+    </section>
+
+
+    <!-- CLEARANCE TABLE -->
+    <section class="table-panel">
+
+        <div class="table-header">
+
+            <h2 class="table-title">
+                Clearance Records
+            </h2>
+
+            {% if clearances.paginator %}
+
+                <span class="record-count">
+                    {{ clearances.paginator.count }} record{{ clearances.paginator.count|pluralize }}
+                </span>
+
             {% endif %}
 
         </div>
-    {% endif %}
-    <p>
-        <a href="{% url 'dashboard' %}">
-            Back to Dashboard
-        </a>
-    </p>
 
-</body>
-</html>
+
+        <div class="table-wrapper">
+
+            <table class="clearance-table">
+
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Passenger</th>
+                        <th>Baggage</th>
+                        <th>Status</th>
+                        <th>Cleared At</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for clearance in clearances %}
+
+                        <tr>
+
+                            <td>
+                                <span class="reference">
+                                    {{ clearance.clearance_reference }}
+                                </span>
+                            </td>
+
+
+                            <td>
+                                <span class="passenger-name">
+                                    {{ clearance.baggage.passenger }}
+                                </span>
+                            </td>
+
+
+                            <td>
+                                <span class="baggage-tag">
+                                    {{ clearance.baggage.baggage_tag }}
+                                </span>
+                            </td>
+
+
+                            <td>
+
+                                {% if clearance.status == "cleared" %}
+
+                                    <span class="status-badge status-cleared">
+                                        {{ clearance.get_status_display }}
+                                    </span>
+
+                                {% elif clearance.status == "pending" %}
+
+                                    <span class="status-badge status-pending">
+                                        {{ clearance.get_status_display }}
+                                    </span>
+
+                                {% elif clearance.status == "held" or clearance.status == "referred" %}
+
+                                    <span class="status-badge status-held">
+                                        {{ clearance.get_status_display }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status-badge status-default">
+                                        {{ clearance.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+                                {{ clearance.cleared_at|default:"-" }}
+                            </td>
+
+
+                            <td>
+                                <div class="remarks-cell">
+                                    {{ clearance.remarks|default:"-" }}
+                                </div>
+                            </td>
+
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <a
+                                        href="{% url 'clearance_detail' clearance.id %}"
+                                        class="table-action"
+                                    >
+                                        View
+                                    </a>
+
+                                    <a
+                                        href="{% url 'clearance_update' clearance.id %}"
+                                        class="table-action"
+                                    >
+                                        Edit
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="7">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-mark">
+                                        C
+                                    </div>
+
+                                    <h3 class="empty-title">
+                                        No clearance records found
+                                    </h3>
+
+                                    <p class="empty-text">
+                                        Try adjusting your search or filter criteria.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- PAGINATION -->
+        {% if clearances.has_other_pages %}
+
+            <div class="pagination">
+
+                {% if clearances.has_previous %}
+
+                    <a
+                        href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        First
+                    </a>
+
+                    <a
+                        href="?page={{ clearances.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Previous
+                    </a>
+
+                {% endif %}
+
+
+                <span class="pagination-current">
+                    Page {{ clearances.number }}
+                    of {{ clearances.paginator.num_pages }}
+                </span>
+
+
+                {% if clearances.has_next %}
+
+                    <a
+                        href="?page={{ clearances.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Next
+                    </a>
+
+                    <a
+                        href="?page={{ clearances.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Last
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+{% endblock %}

@@ -1,47 +1,398 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Clearance | BOC-NAIA System</title>
-</head>
+{% block title %}
+    {% if clearance %}Edit Clearance{% else %}Add Clearance{% endif %} | BOC-NAIA
+{% endblock %}
 
-<body>
+{% block nav_clearances %}active{% endblock %}
 
-    {% if clearance %}
-        <h1>Edit Clearance</h1>
-    {% else %}
-        <h1>Add Clearance</h1>
-    {% endif %}
+{% block page_heading %}
+    {% if clearance %}Edit Clearance{% else %}Add Clearance{% endif %}
+{% endblock %}
 
-    <form method="post">
+{% block extra_css %}
+<style>
+    .clearance-form-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-        {% csrf_token %}
+    .page-header {
+        margin-bottom: 24px;
+    }
 
-        {{ form.as_p }}
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .form-card {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .form-card-header {
+        padding: 18px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .form-card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .form-card-description {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    .form-body p {
+        margin: 0 0 18px;
+    }
+
+    .form-body label {
+        display: block;
+        margin-bottom: 7px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .form-body input:not([type="checkbox"]),
+    .form-body select,
+    .form-body textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 11px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #252a28;
+        font: inherit;
+        font-size: 13px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .form-body textarea {
+        min-height: 130px;
+        resize: vertical;
+        line-height: 1.55;
+    }
+
+    .form-body input:not([type="checkbox"]):focus,
+    .form-body select:focus,
+    .form-body textarea:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .form-body input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        accent-color: #3f514a;
+    }
+
+    .form-body .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7a827d;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .form-body ul.errorlist {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        color: #8a4f45;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        margin-bottom: 20px;
+        padding: 11px 13px;
+        background: #fbf3f1;
+        border: 1px solid #e5ccc7;
+        border-left: 3px solid #9b5c50;
+        border-radius: 5px;
+        color: #7d473f;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .workflow-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 4px;
+        padding: 13px 14px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .note-mark {
+        flex: 0 0 auto;
+        color: #b8944e;
+        font-weight: 700;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #e1e5e2;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 15px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 650px) {
+        .form-body {
+            padding: 18px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="clearance-form-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Clearance Records
+        </div>
 
         {% if clearance %}
 
-            <button type="submit">
-                Save Changes
-            </button>
+            <h1 class="page-title">
+                Edit Clearance
+            </h1>
+
+            <p class="page-subtitle">
+                Update the existing baggage clearance record.
+            </p>
 
         {% else %}
 
-            <button type="submit">
-                Save Clearance
-            </button>
+            <h1 class="page-title">
+                Add Clearance
+            </h1>
+
+            <p class="page-subtitle">
+                Create a clearance record for baggage that has completed the required processing.
+            </p>
 
         {% endif %}
 
-    </form>
+    </div>
 
-    <p>
-        <a href="{% url 'clearance_list' %}">
-            Cancel
-        </a>
-    </p>
 
-</body>
-</html>
+    <!-- FORM CARD -->
+    <section class="form-card">
+
+        <div class="form-card-header">
+
+            {% if clearance %}
+
+                <h2 class="form-card-title">
+                    Clearance Information
+                </h2>
+
+                <p class="form-card-description">
+                    Review the clearance information before saving your changes.
+                </p>
+
+            {% else %}
+
+                <h2 class="form-card-title">
+                    New Clearance
+                </h2>
+
+                <p class="form-card-description">
+                    Enter the required information to register a baggage clearance.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-body">
+
+            {% if form.non_field_errors %}
+
+                <div class="non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            {{ form.as_p }}
+
+
+            <div class="workflow-note">
+                <span class="note-mark">!</span>
+
+                <span>
+                    Clearance status must reflect the actual processing result.
+                    Ensure that the related inspection, assessment, and payment
+                    records are complete where required before saving.
+                </span>
+            </div>
+
+
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'clearance_list' %}"
+                    class="button button-secondary"
+                >
+                    Cancel
+                </a>
+
+
+                {% if clearance %}
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save Changes
+                    </button>
+
+                {% else %}
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save Clearance
+                    </button>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

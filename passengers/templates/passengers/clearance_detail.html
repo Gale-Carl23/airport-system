@@ -1,250 +1,1203 @@
-<h1>Clearance Detail</h1>
+{% extends "base.html" %}
 
-<p>
-    <a href="{% url 'clearance_list' %}">
-        Back to Clearances
-    </a>
-</p>
+{% block title %}Clearance Detail | BOC-NAIA{% endblock %}
 
-<hr>
+{% block nav_clearances %}active{% endblock %}
 
-<h2>Clearance Information</h2>
+{% block page_heading %}Clearance Detail{% endblock %}
 
-<p>
-    <strong>Status:</strong>
-    {{ clearance.get_status_display }}
-</p>
+{% block extra_css %}
+<style>
+    .clearance-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-<p>
-    <strong>Clearance Reference:</strong>
-    {{ clearance.clearance_reference }}
-</p>
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
 
-<p>
-    <strong>Cleared At:</strong>
-    {{ clearance.cleared_at|default:"-" }}
-</p>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-<p>
-    <strong>Remarks:</strong>
-    {{ clearance.remarks|default:"-" }}
-</p>
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-<hr>
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-<h2>Baggage</h2>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-<p>
-    <strong>Baggage Tag:</strong>
-    {{ baggage.baggage_tag }}
-</p>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 12px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color .16s ease, border-color .16s ease;
+    }
 
-<p>
-    <strong>Description:</strong>
-    {{ baggage.description }}
-</p>
+    .back-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
 
-<p>
-    <strong>Weight:</strong>
-    {{ baggage.weight }}
-</p>
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+        gap: 16px;
+    }
 
-<p>
-    <a href="{% url 'baggage_detail' baggage.id %}">
-        View Baggage
-    </a>
-</p>
+    .full-width {
+        grid-column: 1 / -1;
+    }
 
-<hr>
+    .panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
 
-<h2>Passenger</h2>
+    .panel:nth-child(2) {
+        animation-delay: .04s;
+    }
 
-<p>
-    <strong>Name:</strong>
-    {{ passenger.first_name }}
-    {{ passenger.last_name }}
-</p>
+    .panel:nth-child(3) {
+        animation-delay: .08s;
+    }
 
-<p>
-    <strong>Reference Number:</strong>
-    {{ passenger.reference_number }}
-</p>
+    .panel:nth-child(4) {
+        animation-delay: .12s;
+    }
 
-<p>
-    <strong>Passport Number:</strong>
-    {{ passenger.passport_number }}
-</p>
+    .panel:nth-child(5) {
+        animation-delay: .16s;
+    }
 
-<p>
-    <strong>Nationality:</strong>
-    {{ passenger.nationality }}
-</p>
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 18px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-<hr>
+    .panel-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 14px;
+        font-weight: 700;
+    }
 
-<h2>Inspection</h2>
+    .panel-label {
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
 
-{% if inspection %}
+    .panel-body {
+        padding: 18px;
+    }
 
-    <p>
-        <strong>Status:</strong>
-        {{ inspection.get_status_display }}
-    </p>
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 24px;
+    }
 
-    <p>
-        <strong>Result:</strong>
-        {{ inspection.get_result_display }}
-    </p>
+    .info-item {
+        min-width: 0;
+    }
 
-    <p>
-        <strong>Findings:</strong>
-        {{ inspection.findings|default:"-" }}
-    </p>
+    .info-label {
+        margin-bottom: 5px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
 
-    <p>
-        <a href="{% url 'inspection_detail' inspection.id %}">
-            View Inspection
+    .info-value {
+        color: #303734;
+        font-size: 13px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .info-value.strong {
+        color: #252a28;
+        font-weight: 700;
+    }
+
+    .reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .remarks {
+        padding: 12px 13px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #f4efe3;
+        border: 1px solid #e4d8bd;
+        color: #80652e;
+    }
+
+    .status-cleared {
+        background: #edf3ef;
+        border: 1px solid #cbdacf;
+        color: #3f514a;
+    }
+
+    .status-held,
+    .status-referred {
+        background: #f1eeee;
+        border: 1px solid #ded2d0;
+        color: #79564f;
+    }
+
+    .status-default {
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        color: #59645f;
+    }
+
+    .record-link {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 16px;
+        min-height: 32px;
+        padding: 0 10px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #3f514a;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color .16s ease, border-color .16s ease;
+    }
+
+    .record-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .workflow-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .workflow-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 13px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
+
+    .workflow-name {
+        color: #303734;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .workflow-meta {
+        margin-top: 3px;
+        color: #7a827d;
+        font-size: 10px;
+    }
+
+    .empty-record {
+        padding: 13px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .case-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .case-item {
+        padding: 14px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
+
+    .case-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 9px;
+    }
+
+    .case-reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .case-details {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .case-detail-label {
+        margin-bottom: 3px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .case-detail-value {
+        color: #59645f;
+        font-size: 11px;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 37px;
+        padding: 0 14px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .action-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .action-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 850px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full-width {
+            grid-column: auto;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-link {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-grid,
+        .case-details {
+            grid-template-columns: 1fr;
+        }
+
+        .workflow-row,
+        .case-top {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .action-button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="clearance-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Clearance Records
+            </div>
+
+            <h1 class="page-title">
+                Clearance Detail
+            </h1>
+
+            <p class="page-subtitle">
+                Review the clearance decision and its related operational records.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'clearance_list' %}"
+            class="back-link"
+        >
+            ← Back to Clearances
         </a>
-    </p>
 
-{% else %}
+    </div>
 
-    <p>
-        No inspection record found.
-    </p>
 
-{% endif %}
+    <div class="content-grid">
 
-<hr>
+        <!-- CLEARANCE INFORMATION -->
+        <section class="panel">
 
-<h2>Assessment</h2>
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    Clearance Information
+                </h2>
 
-{% if assessment %}
+                <span class="panel-label">
+                    Clearance
+                </span>
+            </div>
 
-    <p>
-        <strong>Status:</strong>
-        {{ assessment.get_status_display }}
-    </p>
+            <div class="panel-body">
 
-    <p>
-        <strong>Declared Value:</strong>
-        {{ assessment.declared_value }}
-    </p>
+                <div class="info-grid">
 
-    <p>
-        <strong>Assessed Value:</strong>
-        {{ assessment.assessed_value }}
-    </p>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
 
-    <p>
-        <strong>Duty:</strong>
-        {{ assessment.duty_amount }}
-    </p>
+                        <div class="info-value">
 
-    <p>
-        <strong>Tax:</strong>
-        {{ assessment.tax_amount }}
-    </p>
+                            {% if clearance.status == "cleared" %}
 
-    <p>
-        <a href="{% url 'assessment_detail' assessment.id %}">
-            View Assessment
+                                <span class="status-badge status-cleared">
+                                    {{ clearance.get_status_display }}
+                                </span>
+
+                            {% elif clearance.status == "pending" %}
+
+                                <span class="status-badge status-pending">
+                                    {{ clearance.get_status_display }}
+                                </span>
+
+                            {% elif clearance.status == "held" or clearance.status == "referred" %}
+
+                                <span class="status-badge status-held">
+                                    {{ clearance.get_status_display }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge status-default">
+                                    {{ clearance.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Clearance Reference</div>
+
+                        <div class="info-value reference">
+                            {{ clearance.clearance_reference }}
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Cleared At</div>
+
+                        <div class="info-value">
+                            {{ clearance.cleared_at|default:"-" }}
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div style="margin-top: 20px;">
+
+                    <div class="info-label">
+                        Remarks
+                    </div>
+
+                    <div class="remarks">
+                        {{ clearance.remarks|default:"-" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- BAGGAGE -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Baggage
+                </h2>
+
+                <span class="panel-label">
+                    Baggage Record
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <div class="info-label">Baggage Tag</div>
+
+                        <div class="info-value reference">
+                            {{ baggage.baggage_tag }}
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Weight</div>
+
+                        <div class="info-value">
+                            {{ baggage.weight }}
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div style="margin-top: 18px;">
+
+                    <div class="info-label">
+                        Description
+                    </div>
+
+                    <div class="info-value">
+                        {{ baggage.description }}
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="{% url 'baggage_detail' baggage.id %}"
+                    class="record-link"
+                >
+                    View Baggage
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- PASSENGER -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Passenger
+                </h2>
+
+                <span class="panel-label">
+                    Passenger Record
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <div class="info-label">Name</div>
+
+                        <div class="info-value strong">
+                            {{ passenger.first_name }}
+                            {{ passenger.last_name }}
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Reference Number</div>
+
+                        <div class="info-value reference">
+                            {{ passenger.reference_number }}
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Passport Number</div>
+
+                        <div class="info-value">
+                            {{ passenger.passport_number }}
+                        </div>
+                    </div>
+
+
+                    <div class="info-item">
+                        <div class="info-label">Nationality</div>
+
+                        <div class="info-value">
+                            {{ passenger.nationality }}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- WORKFLOW -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Processing Workflow
+                </h2>
+
+                <span class="panel-label">
+                    Related Records
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                <div class="workflow-list">
+
+                    <!-- INSPECTION -->
+                    <div class="workflow-row">
+
+                        <div>
+                            <div class="workflow-name">
+                                Inspection
+                            </div>
+
+                            {% if inspection %}
+
+                                <div class="workflow-meta">
+                                    {{ inspection.get_result_display }}
+                                </div>
+
+                            {% else %}
+
+                                <div class="workflow-meta">
+                                    No inspection record found.
+                                </div>
+
+                            {% endif %}
+                        </div>
+
+
+                        {% if inspection %}
+
+                            <a
+                                href="{% url 'inspection_detail' inspection.id %}"
+                                class="record-link"
+                                style="margin-top: 0;"
+                            >
+                                View
+                            </a>
+
+                        {% else %}
+
+                            <span class="status-badge status-default">
+                                Not Available
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- ASSESSMENT -->
+                    <div class="workflow-row">
+
+                        <div>
+                            <div class="workflow-name">
+                                Assessment
+                            </div>
+
+                            {% if assessment %}
+
+                                <div class="workflow-meta">
+                                    {{ assessment.get_status_display }}
+                                </div>
+
+                            {% else %}
+
+                                <div class="workflow-meta">
+                                    No assessment was required.
+                                </div>
+
+                            {% endif %}
+                        </div>
+
+
+                        {% if assessment %}
+
+                            <a
+                                href="{% url 'assessment_detail' assessment.id %}"
+                                class="record-link"
+                                style="margin-top: 0;"
+                            >
+                                View
+                            </a>
+
+                        {% else %}
+
+                            <span class="status-badge status-default">
+                                Not Required
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- PAYMENT -->
+                    <div class="workflow-row">
+
+                        <div>
+                            <div class="workflow-name">
+                                Payment
+                            </div>
+
+                            {% if payment %}
+
+                                <div class="workflow-meta">
+                                    {{ payment.get_status_display }}
+                                </div>
+
+                            {% else %}
+
+                                <div class="workflow-meta">
+                                    No payment record was required.
+                                </div>
+
+                            {% endif %}
+                        </div>
+
+
+                        {% if payment %}
+
+                            <a
+                                href="{% url 'payment_detail' payment.id %}"
+                                class="record-link"
+                                style="margin-top: 0;"
+                            >
+                                View
+                            </a>
+
+                        {% else %}
+
+                            <span class="status-badge status-default">
+                                Not Required
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INSPECTION DETAIL -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Inspection
+                </h2>
+
+                <span class="panel-label">
+                    Inspection Record
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                {% if inspection %}
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Status
+                            </div>
+
+                            <div class="info-value">
+                                {{ inspection.get_status_display }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <div class="info-label">
+                                Result
+                            </div>
+
+                            <div class="info-value">
+                                {{ inspection.get_result_display }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="margin-top: 18px;">
+
+                        <div class="info-label">
+                            Findings
+                        </div>
+
+                        <div class="remarks">
+                            {{ inspection.findings|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'inspection_detail' inspection.id %}"
+                        class="record-link"
+                    >
+                        View Inspection
+                    </a>
+
+                {% else %}
+
+                    <div class="empty-record">
+                        No inspection record found.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ASSESSMENT -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Assessment
+                </h2>
+
+                <span class="panel-label">
+                    Assessment Record
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                {% if assessment %}
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+
+                            <div class="info-value">
+                                {{ assessment.get_status_display }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Declared Value</div>
+
+                            <div class="info-value">
+                                {{ assessment.declared_value }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Assessed Value</div>
+
+                            <div class="info-value">
+                                {{ assessment.assessed_value }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Duty</div>
+
+                            <div class="info-value">
+                                {{ assessment.duty_amount }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Tax</div>
+
+                            <div class="info-value">
+                                {{ assessment.tax_amount }}
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'assessment_detail' assessment.id %}"
+                        class="record-link"
+                    >
+                        View Assessment
+                    </a>
+
+                {% else %}
+
+                    <div class="empty-record">
+                        No assessment was required for this baggage.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- PAYMENT -->
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Payment
+                </h2>
+
+                <span class="panel-label">
+                    Payment Record
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                {% if payment %}
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+
+                            <div class="info-value">
+                                {{ payment.get_status_display }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Amount Due</div>
+
+                            <div class="info-value">
+                                {{ payment.amount_due }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Amount Paid</div>
+
+                            <div class="info-value">
+                                {{ payment.amount_paid }}
+                            </div>
+                        </div>
+
+
+                        <div class="info-item">
+                            <div class="info-label">Payment Reference</div>
+
+                            <div class="info-value reference">
+                                {{ payment.payment_reference|default:"-" }}
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'payment_detail' payment.id %}"
+                        class="record-link"
+                    >
+                        View Payment
+                    </a>
+
+                {% else %}
+
+                    <div class="empty-record">
+                        No payment record was required.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- RELATED CASES -->
+        <section class="panel full-width">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Related Cases
+                </h2>
+
+                <span class="panel-label">
+                    Enforcement Records
+                </span>
+
+            </div>
+
+            <div class="panel-body">
+
+                {% if cases %}
+
+                    <div class="case-list">
+
+                        {% for case in cases %}
+
+                            <div class="case-item">
+
+                                <div class="case-top">
+
+                                    <span class="case-reference">
+                                        {{ case.case_reference }}
+                                    </span>
+
+                                    {% if case.status == "open" %}
+
+                                        <span class="status-badge status-pending">
+                                            {{ case.get_status_display }}
+                                        </span>
+
+                                    {% elif case.status == "resolved" or case.status == "closed" %}
+
+                                        <span class="status-badge status-cleared">
+                                            {{ case.get_status_display }}
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-default">
+                                            {{ case.get_status_display }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="case-details">
+
+                                    <div>
+                                        <div class="case-detail-label">
+                                            Type
+                                        </div>
+
+                                        <div class="case-detail-value">
+                                            {{ case.get_case_type_display }}
+                                        </div>
+                                    </div>
+
+
+                                    <div>
+                                        <div class="case-detail-label">
+                                            Status
+                                        </div>
+
+                                        <div class="case-detail-value">
+                                            {{ case.get_status_display }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <a
+                                    href="{% url 'case_update' case.id %}"
+                                    class="record-link"
+                                >
+                                    View / Update Case
+                                </a>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-record">
+                        No related cases.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+    <div class="actions">
+
+        <a
+            href="{% url 'clearance_update' clearance.id %}"
+            class="action-button action-primary"
+        >
+            Update Clearance
         </a>
-    </p>
 
-{% else %}
+    </div>
 
-    <p>
-        No assessment was required for this baggage.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Payment</h2>
-
-{% if payment %}
-
-    <p>
-        <strong>Status:</strong>
-        {{ payment.get_status_display }}
-    </p>
-
-    <p>
-        <strong>Amount Due:</strong>
-        {{ payment.amount_due }}
-    </p>
-
-    <p>
-        <strong>Amount Paid:</strong>
-        {{ payment.amount_paid }}
-    </p>
-
-    <p>
-        <strong>Payment Reference:</strong>
-        {{ payment.payment_reference|default:"-" }}
-    </p>
-
-    <p>
-        <a href="{% url 'payment_detail' payment.id %}">
-            View Payment
-        </a>
-    </p>
-
-{% else %}
-
-    <p>
-        No payment record was required.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Related Cases</h2>
-
-{% if cases %}
-
-    {% for case in cases %}
-
-        <p>
-            <strong>Case Reference:</strong>
-            {{ case.case_reference }}
-        </p>
-
-        <p>
-            <strong>Type:</strong>
-            {{ case.get_case_type_display }}
-        </p>
-
-        <p>
-            <strong>Status:</strong>
-            {{ case.get_status_display }}
-        </p>
-
-        <p>
-            <a href="{% url 'case_update' case.id %}">
-                View / Update Case
-            </a>
-        </p>
-
-        <hr>
-
-    {% endfor %}
-
-{% else %}
-
-    <p>
-        No related cases.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<p>
-    <a href="{% url 'clearance_update' clearance.id %}">
-        Update Clearance
-    </a>
-</p>
+</div>
+{% endblock %}
