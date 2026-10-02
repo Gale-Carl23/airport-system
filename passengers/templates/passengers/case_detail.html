@@ -1,304 +1,1399 @@
-<h1>Case Detail</h1>
+{% extends "base.html" %}
 
-<p>
-    <a href="{% url 'case_list' %}">
-        Back to Cases
-    </a>
-</p>
+{% block title %}Case Detail | BOC-NAIA{% endblock %}
 
-<hr>
+{% block nav_cases %}active{% endblock %}
 
-<h2>Case Information</h2>
+{% block page_heading %}Case Detail{% endblock %}
 
-<p>
-    <strong>Case Reference:</strong>
-    {{ case.case_reference }}
-</p>
+{% block extra_css %}
+<style>
+    .case-page {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
 
-<p>
-    <strong>Case Type:</strong>
-    {{ case.get_case_type_display }}
-</p>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 26px;
+    }
 
-<p>
-    <strong>Status:</strong>
-    {{ case.get_status_display }}
-</p>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-<p>
-    <strong>Description:</strong>
-    {{ case.description }}
-</p>
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-<p>
-    <strong>Resolution:</strong>
-    {{ case.resolution|default:"-" }}
-</p>
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-<hr>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-<h2>Case Personnel</h2>
+    .case-reference {
+        display: block;
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+        font-weight: 700;
+    }
 
-<p>
-    <strong>Created By:</strong>
-    {% if case.created_by %}
-        {{ case.created_by.username }}
-    {% else %}
-        -
-    {% endif %}
-</p>
+    .card {
+        margin-bottom: 20px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
 
-<p>
-    <strong>Created At:</strong>
-    {{ case.created_at }}
-</p>
+    .card-header {
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-<p>
-    <strong>Resolved By:</strong>
-    {% if case.resolved_by %}
-        {{ case.resolved_by.username }}
-    {% else %}
-        -
-    {% endif %}
-</p>
+    .card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
 
-<p>
-    <strong>Resolved At:</strong>
-    {{ case.resolved_at|default:"-" }}
-</p>
+    .card-subtitle {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
 
-<hr>
+    .card-body {
+        padding: 20px;
+    }
 
-<h2>Baggage</h2>
+    /* Case summary */
 
-<p>
-    <strong>Baggage Tag:</strong>
-    {{ baggage.baggage_tag }}
-</p>
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 18px;
+    }
 
-<p>
-    <strong>Description:</strong>
-    {{ baggage.description }}
-</p>
+    .summary-item {
+        padding: 14px 15px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
 
-<p>
-    <strong>Weight:</strong>
-    {{ baggage.weight }}
-</p>
+    .summary-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
 
-<p>
-    <a href="{% url 'baggage_detail' baggage.id %}">
-        View Baggage
-    </a>
-</p>
+    .summary-value {
+        color: #252a28;
+        font-size: 13px;
+        font-weight: 600;
+    }
 
-<hr>
+    .summary-value.reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+    }
 
-<h2>Passenger</h2>
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
 
-<p>
-    <strong>Name:</strong>
-    {{ passenger.first_name }}
-    {{ passenger.last_name }}
-</p>
+    .status-open {
+        background: #f4efe3;
+        border: 1px solid #e4d8bd;
+        color: #80652e;
+    }
 
-<p>
-    <strong>Reference Number:</strong>
-    {{ passenger.reference_number }}
-</p>
+    .status-review {
+        background: #eef1f4;
+        border: 1px solid #d4dce3;
+        color: #496078;
+    }
 
-<p>
-    <strong>Passport Number:</strong>
-    {{ passenger.passport_number }}
-</p>
+    .status-resolved {
+        background: #edf3ef;
+        border: 1px solid #cbdacf;
+        color: #3f514a;
+    }
 
-<p>
-    <strong>Nationality:</strong>
-    {{ passenger.nationality }}
-</p>
+    .status-closed {
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        color: #59645f;
+    }
 
-<hr>
+    .status-default {
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        color: #59645f;
+    }
 
-<h2>Inspection</h2>
+    .text-block {
+        padding: 15px 16px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
 
-{% if inspection %}
+    .text-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
 
-    <p>
-        <strong>Status:</strong>
-        {{ inspection.get_status_display }}
-    </p>
+    .text-content {
+        margin: 0;
+        color: #3c4541;
+        font-size: 13px;
+        line-height: 1.65;
+        white-space: pre-line;
+    }
 
-    <p>
-        <strong>Result:</strong>
-        {{ inspection.get_result_display }}
-    </p>
+    /* Information grids */
 
-    <p>
-        <strong>Findings:</strong>
-        {{ inspection.findings|default:"-" }}
-    </p>
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        overflow: hidden;
+    }
 
-    <p>
-        <a href="{% url 'inspection_detail' inspection.id %}">
-            View Inspection
+    .info-item {
+        min-height: 72px;
+        padding: 13px 15px;
+        border-right: 1px solid #e0e4e1;
+        border-bottom: 1px solid #e0e4e1;
+    }
+
+    .info-item:nth-child(3n) {
+        border-right: none;
+    }
+
+    .info-item:nth-last-child(-n + 3) {
+        border-bottom: none;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        color: #303734;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .info-value.muted {
+        color: #8a928d;
+        font-weight: 400;
+    }
+
+    .info-value.mono {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+    }
+
+    /* Workflow records */
+
+    .record-panel {
+        margin-top: 16px;
+        padding: 16px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
+
+    .record-panel:first-child {
+        margin-top: 0;
+    }
+
+    .record-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 13px;
+    }
+
+    .record-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .record-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .record-field {
+        padding: 11px 12px;
+        background: #fff;
+        border: 1px solid #e0e4e1;
+        border-radius: 4px;
+    }
+
+    .record-field-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .record-field-value {
+        color: #3c4541;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .record-field-value.mono {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+    }
+
+    .record-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 31px;
+        padding: 0 10px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #3f514a;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease,
+            transform .16s ease;
+    }
+
+    .record-link:hover {
+        background: #f3f5f3;
+        border-color: #bfc8c2;
+        transform: translateY(-1px);
+    }
+
+    .no-record {
+        padding: 15px;
+        background: #fafbfa;
+        border: 1px dashed #d4dad6;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    /* Case actions */
+
+    .case-state {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px;
+        margin-bottom: 16px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-left: 3px solid #b8944e;
+        border-radius: 5px;
+    }
+
+    .state-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        background: #f4efe3;
+        border: 1px solid #e4d8bd;
+        border-radius: 4px;
+        color: #80652e;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .state-title {
+        margin: 0 0 3px;
+        color: #252a28;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .state-description {
+        margin: 0;
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 37px;
+        padding: 0 14px;
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .action-link:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 37px;
+        padding: 0 14px;
+        margin-right: 7px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .back-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1000px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .info-item:nth-child(3n) {
+            border-right: 1px solid #e0e4e1;
+        }
+
+        .info-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .info-item:nth-last-child(-n + 3) {
+            border-bottom: 1px solid #e0e4e1;
+        }
+
+        .info-item:nth-last-child(-n + 2) {
+            border-bottom: none;
+        }
+
+        .record-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .summary-grid,
+        .info-grid,
+        .record-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item,
+        .info-item:nth-child(2n),
+        .info-item:nth-child(3n) {
+            border-right: none;
+            border-bottom: 1px solid #e0e4e1;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-panel-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-link,
+        .action-link {
+            width: 100%;
+            margin: 0 0 8px;
+            box-sizing: border-box;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="case-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Enforcement Records
+            </div>
+
+            <h1 class="page-title">
+                Case Detail
+            </h1>
+
+            <p class="page-subtitle">
+                Review case information, personnel, related records, and current resolution status.
+            </p>
+        </div>
+
+        <div>
+            <span class="case-reference">
+                {{ case.case_reference }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- CASE INFORMATION -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Case Information
+            </h2>
+
+            <p class="card-subtitle">
+                Core information and current state of the enforcement case.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <span class="summary-label">
+                        Case Reference
+                    </span>
+
+                    <span class="summary-value reference">
+                        {{ case.case_reference }}
+                    </span>
+                </div>
+
+
+                <div class="summary-item">
+                    <span class="summary-label">
+                        Case Type
+                    </span>
+
+                    <span class="summary-value">
+                        {{ case.get_case_type_display }}
+                    </span>
+                </div>
+
+
+                <div class="summary-item">
+                    <span class="summary-label">
+                        Status
+                    </span>
+
+                    {% if case.status == "open" %}
+
+                        <span class="status-badge status-open">
+                            {{ case.get_status_display }}
+                        </span>
+
+                    {% elif case.status == "under_review" %}
+
+                        <span class="status-badge status-review">
+                            {{ case.get_status_display }}
+                        </span>
+
+                    {% elif case.status == "resolved" %}
+
+                        <span class="status-badge status-resolved">
+                            {{ case.get_status_display }}
+                        </span>
+
+                    {% elif case.status == "closed" %}
+
+                        <span class="status-badge status-closed">
+                            {{ case.get_status_display }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-badge status-default">
+                            {{ case.get_status_display }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="summary-item">
+                    <span class="summary-label">
+                        Created At
+                    </span>
+
+                    <span class="summary-value">
+                        {{ case.created_at }}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="text-block">
+
+                <span class="text-label">
+                    Description
+                </span>
+
+                <p class="text-content">
+                    {{ case.description }}
+                </p>
+
+            </div>
+
+
+            <div class="text-block" style="margin-top: 10px;">
+
+                <span class="text-label">
+                    Resolution
+                </span>
+
+                <p class="text-content">
+                    {{ case.resolution|default:"-" }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CASE PERSONNEL -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Case Personnel
+            </h2>
+
+            <p class="card-subtitle">
+                Users associated with the creation and resolution of this case.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Created By
+                    </span>
+
+                    {% if case.created_by %}
+
+                        <span class="info-value">
+                            {{ case.created_by.username }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="info-value muted">
+                            -
+                        </span>
+
+                    {% endif %}
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Created At
+                    </span>
+
+                    <span class="info-value">
+                        {{ case.created_at }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Resolved By
+                    </span>
+
+                    {% if case.resolved_by %}
+
+                        <span class="info-value">
+                            {{ case.resolved_by.username }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="info-value muted">
+                            -
+                        </span>
+
+                    {% endif %}
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Resolved At
+                    </span>
+
+                    {% if case.resolved_at %}
+
+                        <span class="info-value">
+                            {{ case.resolved_at }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="info-value muted">
+                            -
+                        </span>
+
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BAGGAGE -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Related Baggage
+            </h2>
+
+            <p class="card-subtitle">
+                Baggage record associated with this enforcement case.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Baggage Tag
+                    </span>
+
+                    <span class="info-value mono">
+                        {{ baggage.baggage_tag }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Description
+                    </span>
+
+                    <span class="info-value">
+                        {{ baggage.description }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Weight
+                    </span>
+
+                    <span class="info-value">
+                        {{ baggage.weight }} kg
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div style="margin-top: 14px;">
+
+                <a
+                    href="{% url 'baggage_detail' baggage.id %}"
+                    class="record-link"
+                >
+                    View Baggage
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PASSENGER -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Passenger
+            </h2>
+
+            <p class="card-subtitle">
+                Passenger associated with the baggage and case.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Name
+                    </span>
+
+                    <span class="info-value">
+                        {{ passenger.first_name }} {{ passenger.last_name }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Reference Number
+                    </span>
+
+                    <span class="info-value mono">
+                        {{ passenger.reference_number }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Passport Number
+                    </span>
+
+                    <span class="info-value mono">
+                        {{ passenger.passport_number }}
+                    </span>
+                </div>
+
+
+                <div class="info-item">
+                    <span class="info-label">
+                        Nationality
+                    </span>
+
+                    <span class="info-value">
+                        {{ passenger.nationality }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- INSPECTION -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Inspection
+            </h2>
+
+            <p class="card-subtitle">
+                Inspection record associated with the case baggage.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            {% if inspection %}
+
+                <div class="record-panel">
+
+                    <div class="record-panel-header">
+
+                        <h3 class="record-title">
+                            Inspection Record
+                        </h3>
+
+                        <a
+                            href="{% url 'inspection_detail' inspection.id %}"
+                            class="record-link"
+                        >
+                            View Inspection
+                        </a>
+
+                    </div>
+
+
+                    <div class="record-grid">
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Status
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ inspection.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Result
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ inspection.get_result_display }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Findings
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ inspection.findings|default:"-" }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="no-record">
+                    No inspection record found.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ASSESSMENT -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Assessment
+            </h2>
+
+            <p class="card-subtitle">
+                Customs assessment information associated with the case.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            {% if assessment %}
+
+                <div class="record-panel">
+
+                    <div class="record-panel-header">
+
+                        <h3 class="record-title">
+                            Assessment Record
+                        </h3>
+
+                        <a
+                            href="{% url 'assessment_detail' assessment.id %}"
+                            class="record-link"
+                        >
+                            View Assessment
+                        </a>
+
+                    </div>
+
+
+                    <div class="record-grid">
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Status
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ assessment.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Declared Value
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ assessment.declared_value }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Assessed Value
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ assessment.assessed_value }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Duty
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ assessment.duty_amount }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Tax
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ assessment.tax_amount }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="no-record">
+                    No assessment record.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- PAYMENT -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Payment
+            </h2>
+
+            <p class="card-subtitle">
+                Payment record associated with the assessment.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            {% if payment %}
+
+                <div class="record-panel">
+
+                    <div class="record-panel-header">
+
+                        <h3 class="record-title">
+                            Payment Record
+                        </h3>
+
+                        <a
+                            href="{% url 'payment_detail' payment.id %}"
+                            class="record-link"
+                        >
+                            View Payment
+                        </a>
+
+                    </div>
+
+
+                    <div class="record-grid">
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Status
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ payment.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Amount Due
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ payment.amount_due }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Amount Paid
+                            </span>
+
+                            <span class="record-field-value">
+                                ₱{{ payment.amount_paid }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Payment Reference
+                            </span>
+
+                            <span class="record-field-value mono">
+                                {{ payment.payment_reference|default:"-" }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="no-record">
+                    No payment record.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- CLEARANCE -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Clearance
+            </h2>
+
+            <p class="card-subtitle">
+                Clearance information associated with this baggage workflow.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            {% if clearance %}
+
+                <div class="record-panel">
+
+                    <div class="record-panel-header">
+
+                        <h3 class="record-title">
+                            Clearance Record
+                        </h3>
+
+                        <a
+                            href="{% url 'clearance_detail' clearance.id %}"
+                            class="record-link"
+                        >
+                            View Clearance
+                        </a>
+
+                    </div>
+
+
+                    <div class="record-grid">
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Status
+                            </span>
+
+                            <span class="record-field-value">
+                                {{ clearance.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="record-field">
+
+                            <span class="record-field-label">
+                                Reference
+                            </span>
+
+                            <span class="record-field-value mono">
+                                {{ clearance.clearance_reference }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="no-record">
+                    No clearance record.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- CASE ACTIONS -->
+    <section class="card">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                Case Actions
+            </h2>
+
+            <p class="card-subtitle">
+                Current case state and available case management action.
+            </p>
+        </div>
+
+        <div class="card-body">
+
+            <div class="case-state">
+
+                <div class="state-mark">
+                    C
+                </div>
+
+                <div>
+
+                    {% if case.status == "open" %}
+
+                        <h3 class="state-title">
+                            Case is currently open
+                        </h3>
+
+                        <p class="state-description">
+                            This case remains open and may proceed through the enforcement workflow.
+                        </p>
+
+                    {% elif case.status == "under_review" %}
+
+                        <h3 class="state-title">
+                            Case is under review
+                        </h3>
+
+                        <p class="state-description">
+                            This case is currently being reviewed.
+                        </p>
+
+                    {% elif case.status == "resolved" %}
+
+                        <h3 class="state-title">
+                            Case has been resolved
+                        </h3>
+
+                        <p class="state-description">
+                            A resolution has been recorded for this case.
+                        </p>
+
+                    {% elif case.status == "closed" %}
+
+                        <h3 class="state-title">
+                            Case has been closed
+                        </h3>
+
+                        <p class="state-description">
+                            This case has completed its workflow and is closed.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{% url 'case_update' case.id %}"
+                class="action-link"
+            >
+                Update Case
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- NAVIGATION -->
+    <div style="padding-bottom: 10px;">
+
+        <a
+            href="{% url 'case_list' %}"
+            class="back-link"
+        >
+            Back to Cases
         </a>
-    </p>
 
-{% else %}
+    </div>
 
-    <p>
-        No inspection record found.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Assessment</h2>
-
-{% if assessment %}
-
-    <p>
-        <strong>Status:</strong>
-        {{ assessment.get_status_display }}
-    </p>
-
-    <p>
-        <strong>Declared Value:</strong>
-        {{ assessment.declared_value }}
-    </p>
-
-    <p>
-        <strong>Assessed Value:</strong>
-        {{ assessment.assessed_value }}
-    </p>
-
-    <p>
-        <strong>Duty:</strong>
-        {{ assessment.duty_amount }}
-    </p>
-
-    <p>
-        <strong>Tax:</strong>
-        {{ assessment.tax_amount }}
-    </p>
-
-    <p>
-        <a href="{% url 'assessment_detail' assessment.id %}">
-            View Assessment
-        </a>
-    </p>
-
-{% else %}
-
-    <p>
-        No assessment record.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Payment</h2>
-
-{% if payment %}
-
-    <p>
-        <strong>Status:</strong>
-        {{ payment.get_status_display }}
-    </p>
-
-    <p>
-        <strong>Amount Due:</strong>
-        {{ payment.amount_due }}
-    </p>
-
-    <p>
-        <strong>Amount Paid:</strong>
-        {{ payment.amount_paid }}
-    </p>
-
-    <p>
-        <strong>Payment Reference:</strong>
-        {{ payment.payment_reference|default:"-" }}
-    </p>
-
-    <p>
-        <a href="{% url 'payment_detail' payment.id %}">
-            View Payment
-        </a>
-    </p>
-
-{% else %}
-
-    <p>
-        No payment record.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Clearance</h2>
-
-{% if clearance %}
-
-    <p>
-        <strong>Status:</strong>
-        {{ clearance.get_status_display }}
-    </p>
-
-    <p>
-        <strong>Reference:</strong>
-        {{ clearance.clearance_reference }}
-    </p>
-
-    <p>
-        <a href="{% url 'clearance_detail' clearance.id %}">
-            View Clearance
-        </a>
-    </p>
-
-{% else %}
-
-    <p>
-        No clearance record.
-    </p>
-
-{% endif %}
-
-<hr>
-
-<h2>Case Actions</h2>
-
-{% if case.status == "open" %}
-
-    <p>
-        This case is currently open.
-    </p>
-
-{% elif case.status == "under_review" %}
-
-    <p>
-        This case is currently under review.
-    </p>
-
-{% elif case.status == "resolved" %}
-
-    <p>
-        This case has been resolved.
-    </p>
-
-{% elif case.status == "closed" %}
-
-    <p>
-        This case has been closed.
-    </p>
-
-{% endif %}
-
-<p>
-    <a href="{% url 'case_update' case.id %}">
-        Update Case
-    </a>
-</p>
+</div>
+{% endblock %}
