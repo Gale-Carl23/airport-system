@@ -1,143 +1,443 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="en">
+{% block title %}Upload Document | BOC-NAIA{% endblock %}
 
-<head>
+{% block nav_documents %}active{% endblock %}
 
-    <meta charset="UTF-8">
+{% block page_heading %}Upload Document{% endblock %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block extra_css %}
+<style>
+    .document-upload-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <title>
-        Upload Document | BOC-NAIA
-    </title>
+    .page-header {
+        margin-bottom: 24px;
+    }
 
-    <style>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f6f8;
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .context-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        background: #fafbfa;
+        border: 1px solid #d9deda;
+        border-left: 3px solid #b8944e;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 11px;
+    }
+
+    .context-label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .context-value {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .form-card {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .form-card-header {
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .form-card-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .form-card-description {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    .field {
+        margin-bottom: 19px;
+    }
+
+    .field:last-child {
+        margin-bottom: 0;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .field input:not([type="checkbox"]),
+    .field select,
+    .field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 11px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #252a28;
+        font: inherit;
+        font-size: 12px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .field input[type="file"] {
+        padding: 8px;
+        background: #fafbfa;
+        cursor: pointer;
+    }
+
+    .field textarea {
+        min-height: 125px;
+        resize: vertical;
+        line-height: 1.55;
+    }
+
+    .field input:not([type="checkbox"]):focus,
+    .field select:focus,
+    .field textarea:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .field input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        accent-color: #3f514a;
+    }
+
+    .field .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7a827d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .field ul.errorlist,
+    .non-field-errors ul.errorlist {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        color: #8a4f45;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        margin-bottom: 20px;
+        padding: 11px 13px;
+        background: #fbf3f1;
+        border: 1px solid #e5ccc7;
+        border-left: 3px solid #9b5c50;
+        border-radius: 5px;
+        color: #7d473f;
+        font-size: 11px;
+    }
+
+    .upload-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 14px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 10px;
+        line-height: 1.55;
+    }
+
+    .note-mark {
+        flex: 0 0 auto;
+        color: #b8944e;
+        font-weight: 700;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #e1e5e2;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 15px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
         }
 
-        .container {
-            max-width: 700px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .form-body {
+            padding: 18px;
         }
 
-        .card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 25px;
+        .context-bar {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .field {
-            margin-bottom: 18px;
+        .form-actions {
+            flex-direction: column-reverse;
         }
 
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        input,
-        select,
-        textarea {
+        .button {
             width: 100%;
-            box-sizing: border-box;
-            padding: 9px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
         }
+    }
+</style>
+{% endblock %}
 
-        .submit {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 5px;
-            background: #333;
-            color: white;
-            cursor: pointer;
-        }
 
-        .back {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #333;
-        }
+{% block content %}
+<div class="document-upload-page">
 
-        .errorlist {
-            color: #b00020;
-        }
+    <!-- PAGE HEADER -->
+    <div class="page-header">
 
-    </style>
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Document Records
+        </div>
 
-</head>
+        <h1 class="page-title">
+            Upload Document
+        </h1>
 
-<body>
-
-<div class="container">
-
-    <h1>
-        Upload Document
-    </h1>
-
-    <p>
-        Baggage:
-        <strong>
-            {{ baggage.baggage_tag }}
-        </strong>
-    </p>
-
-    <div class="card">
-
-        <form
-            method="post"
-            enctype="multipart/form-data"
-        >
-
-            {% csrf_token %}
-
-            {{ form.non_field_errors }}
-
-            {% for field in form %}
-
-                <div class="field">
-
-                    {{ field.label_tag }}
-
-                    {{ field }}
-
-                    {{ field.errors }}
-
-                </div>
-
-            {% endfor %}
-
-            <button
-                type="submit"
-                class="submit"
-            >
-                Upload Document
-            </button>
-
-        </form>
-
-        <a
-            href="{% url 'baggage_detail' baggage.id %}"
-            class="back"
-        >
-            Back to Baggage
-        </a>
+        <p class="page-subtitle">
+            Attach a document to the selected baggage record for operational reference and verification.
+        </p>
 
     </div>
 
+
+    <!-- BAGGAGE CONTEXT -->
+    <div class="context-bar">
+
+        <span class="context-label">
+            Baggage
+        </span>
+
+        <span class="context-value">
+            {{ baggage.baggage_tag }}
+        </span>
+
+    </div>
+
+
+    <!-- UPLOAD FORM -->
+    <section class="form-card">
+
+        <div class="form-card-header">
+
+            <h2 class="form-card-title">
+                Document Information
+            </h2>
+
+            <p class="form-card-description">
+                Provide the document details and select the file to be stored with this baggage record.
+            </p>
+
+        </div>
+
+
+        <div class="form-body">
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+            >
+
+                {% csrf_token %}
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                {% for field in form %}
+
+                    <div class="field">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <span class="helptext">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {{ field.errors }}
+
+                    </div>
+
+                {% endfor %}
+
+
+                <div class="upload-note">
+
+                    <span class="note-mark">
+                        !
+                    </span>
+
+                    <span>
+                        Uploaded documents are associated with the baggage record.
+                        The system stores a SHA-256 integrity hash for verification
+                        of the uploaded file.
+                    </span>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <a
+                        href="{% url 'baggage_detail' baggage.id %}"
+                        class="button button-secondary"
+                    >
+                        Cancel
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Upload Document
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
 </div>
-
-</body>
-
-</html>
+{% endblock %}

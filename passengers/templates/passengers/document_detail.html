@@ -1,196 +1,562 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}Document Details | BOC-NAIA{% endblock %}
 
-    <meta charset="UTF-8">
+{% block nav_documents %}active{% endblock %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block page_heading %}Document Details{% endblock %}
 
-    <title>
-        Document Details | BOC-NAIA
-    </title>
+{% block extra_css %}
+<style>
+    .document-page {
+        max-width: 1050px;
+        margin: 0 auto;
+    }
 
-    <style>
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f6f8;
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 12px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .back-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
+        gap: 16px;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
+
+    .panel:nth-child(2) {
+        animation-delay: .05s;
+    }
+
+    .panel:nth-child(3) {
+        animation-delay: .1s;
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 18px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .panel-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .panel-label {
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .panel-body {
+        padding: 20px;
+    }
+
+    .document-title {
+        margin: 0 0 20px;
+        color: #252a28;
+        font-size: 19px;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 24px;
+    }
+
+    .info-item {
+        min-width: 0;
+    }
+
+    .info-label {
+        margin-bottom: 5px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        color: #303734;
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .info-value.strong {
+        color: #252a28;
+        font-weight: 700;
+    }
+
+    .reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .description-block {
+        margin-top: 22px;
+    }
+
+    .description {
+        padding: 13px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .file-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .file-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        margin-bottom: 15px;
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        border-radius: 6px;
+        color: #3f514a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .file-title {
+        margin: 0 0 5px;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .file-description {
+        margin: 0;
+        color: #7a827d;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .file-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 22px;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .17s ease,
+            border-color .17s ease,
+            transform .17s ease;
+    }
+
+    .action-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .action-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .action-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .action-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .hash-note {
+        margin-top: 16px;
+        padding: 11px 12px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-left: 3px solid #b8944e;
+        border-radius: 4px;
+        color: #707873;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .record-link {
+        color: #17324d;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .record-link:hover {
+        text-decoration: underline;
+    }
+
+    .bottom-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 18px;
+        animation: panelIn .45s ease both;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
         }
 
-        .container {
-            max-width: 900px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 800px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
-        .card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 20px;
+        .back-link {
+            width: 100%;
+            justify-content: center;
         }
 
-        .row {
-            margin-bottom: 15px;
+        .info-grid {
+            grid-template-columns: 1fr;
         }
 
-        .label {
-            font-weight: bold;
+        .bottom-actions {
+            flex-direction: column;
         }
 
-        .description {
-            white-space: pre-wrap;
-            margin-top: 8px;
+        .bottom-actions .action-button {
+            width: 100%;
         }
-
-        .btn {
-            display: inline-block;
-            padding: 8px 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #333;
-            background: white;
-            margin-right: 8px;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>
-        BOC-NAIA Operations System
-    </h1>
-
-    <h2>
-        Document Details
-    </h2>
+    }
+</style>
+{% endblock %}
 
 
-    <div class="card">
+{% block content %}
+<div class="document-page">
 
-        <div class="row">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
 
-            <span class="label">
-                Title:
-            </span>
+        <div>
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Document Records
+            </div>
 
-            {{ document.title }}
+            <h1 class="page-title">
+                Document Details
+            </h1>
 
+            <p class="page-subtitle">
+                Review document information, file access, and integrity verification.
+            </p>
         </div>
 
+        <a
+            href="{% url 'document_list' %}"
+            class="back-link"
+        >
+            ← Back to Documents
+        </a>
 
-        <div class="row">
-
-            <span class="label">
-                Document Type:
-            </span>
-
-            {{ document.get_document_type_display }}
-
-        </div>
+    </div>
 
 
-        <div class="row">
+    <div class="content-grid">
 
-            <span class="label">
-                Baggage:
-            </span>
+        <!-- DOCUMENT INFORMATION -->
+        <section class="panel">
 
-            {{ document.baggage.baggage_tag }}
+            <div class="panel-header">
 
-        </div>
+                <h2 class="panel-title">
+                    Document Information
+                </h2>
 
-
-        <div class="row">
-
-            <span class="label">
-                Passenger:
-            </span>
-
-            {{ document.baggage.passenger }}
-
-        </div>
-
-
-        <div class="row">
-
-            <span class="label">
-                Uploaded By:
-            </span>
-
-            {{ document.uploaded_by.username }}
-
-        </div>
-
-
-        <div class="row">
-
-            <span class="label">
-                Uploaded At:
-            </span>
-
-            {{ document.created_at|date:"M. j, Y, g:i a" }}
-
-        </div>
-
-
-        {% if document.description %}
-
-            <div class="row">
-
-                <span class="label">
-                    Description:
+                <span class="panel-label">
+                    Record Details
                 </span>
 
-                <div class="description">
-                    {{ document.description }}
+            </div>
+
+
+            <div class="panel-body">
+
+                <h2 class="document-title">
+                    {{ document.title }}
+                </h2>
+
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Document Type
+                        </div>
+
+                        <div class="info-value strong">
+                            {{ document.get_document_type_display }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Baggage
+                        </div>
+
+                        <div class="info-value">
+
+                            <a
+                                href="{% url 'baggage_detail' document.baggage.id %}"
+                                class="record-link reference"
+                            >
+                                {{ document.baggage.baggage_tag }}
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Passenger
+                        </div>
+
+                        <div class="info-value">
+                            {{ document.baggage.passenger }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Uploaded By
+                        </div>
+
+                        <div class="info-value">
+                            {{ document.uploaded_by.username }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Uploaded At
+                        </div>
+
+                        <div class="info-value">
+                            {{ document.created_at|date:"M. j, Y, g:i a" }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {% if document.description %}
+
+                    <div class="description-block">
+
+                        <div class="info-label">
+                            Description
+                        </div>
+
+                        <div class="description">
+                            {{ document.description }}
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- DOCUMENT FILE -->
+        <section class="panel file-panel">
+
+            <div class="panel-body">
+
+                <div class="file-icon">
+                    DOC
+                </div>
+
+                <h2 class="file-title">
+                    Document File
+                </h2>
+
+                <p class="file-description">
+                    Open the stored document or verify its SHA-256 integrity hash.
+                </p>
+
+
+                <div class="file-actions">
+
+                    <a
+                        class="action-button action-primary"
+                        href="{{ document.file.url }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open Document
+                    </a>
+
+
+                    <a
+                        class="action-button action-secondary"
+                        href="{% url 'document_verify' document.id %}"
+                    >
+                        Verify Integrity
+                    </a>
+
+                </div>
+
+
+                <div class="hash-note">
+                    Integrity verification compares the current document file
+                    against its stored SHA-256 hash.
                 </div>
 
             </div>
 
-        {% endif %}
+        </section>
 
     </div>
 
 
-    <div class="card">
-
-        <h2>
-            Document File
-        </h2>
+    <!-- ACTIONS -->
+    <div class="bottom-actions">
 
         <a
-            class="btn"
-            href="{{ document.file.url }}"
-            target="_blank"
-        >
-            Open Document
-        </a>
-
-
-        <a
-            class="btn"
-            href="{% url 'document_verify' document.id %}"
-        >
-            Verify Integrity
-        </a>
-
-    </div>
-
-
-    <div>
-
-        <a
-            class="btn"
+            class="action-button action-secondary"
             href="{% url 'document_list' %}"
         >
             Back to Documents
@@ -198,7 +564,7 @@
 
 
         <a
-            class="btn"
+            class="action-button action-secondary"
             href="{% url 'baggage_detail' document.baggage.id %}"
         >
             Back to Baggage
@@ -208,7 +574,7 @@
         {% if perms.passengers.add_document %}
 
             <a
-                class="btn"
+                class="action-button action-primary"
                 href="{% url 'document_create' document.baggage.id %}"
             >
                 Upload Another Document
@@ -219,7 +585,4 @@
     </div>
 
 </div>
-
-</body>
-
-</html>
+{% endblock %}

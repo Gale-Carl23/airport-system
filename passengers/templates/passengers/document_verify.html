@@ -1,230 +1,582 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="en">
+{% block title %}Document Integrity | BOC-NAIA{% endblock %}
 
-<head>
+{% block nav_documents %}active{% endblock %}
 
-    <meta charset="UTF-8">
+{% block page_heading %}Document Integrity{% endblock %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block extra_css %}
+<style>
+    .integrity-page {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
 
-    <title>
-        Document Integrity | BOC-NAIA
-    </title>
+    .page-header {
+        margin-bottom: 22px;
+    }
 
-    <style>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f6f8;
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .status-panel {
+        margin-bottom: 18px;
+        padding: 20px 22px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        animation: panelIn .35s ease both;
+    }
+
+    .status-panel.valid {
+        border-left: 4px solid #4f715e;
+    }
+
+    .status-panel.invalid {
+        border-left: 4px solid #9b5c50;
+    }
+
+    .status-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 9px;
+    }
+
+    .status-indicator {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+    }
+
+    .valid .status-indicator {
+        background: #4f715e;
+    }
+
+    .invalid .status-indicator {
+        background: #9b5c50;
+    }
+
+    .status-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .valid .status-title {
+        color: #3f5f4e;
+    }
+
+    .invalid .status-title {
+        color: #864f46;
+    }
+
+    .status-description {
+        margin: 0;
+        color: #59645f;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .status-note {
+        margin: 7px 0 0;
+        color: #7a827d;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .4s ease both;
+    }
+
+    .card:nth-child(2) {
+        animation-delay: .04s;
+    }
+
+    .card-header {
+        padding: 15px 18px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .card-title {
+        margin: 0;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .card-description {
+        margin: 4px 0 0;
+        color: #7a827d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .card-body {
+        padding: 18px;
+    }
+
+    .info-list {
+        margin: 0;
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 14px;
+        padding: 11px 0;
+        border-bottom: 1px solid #e8ebe9;
+    }
+
+    .info-row:first-child {
+        padding-top: 0;
+    }
+
+    .info-row:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .info-label {
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        min-width: 0;
+        color: #303734;
+        font-size: 11px;
+        line-height: 1.45;
+        word-break: break-word;
+    }
+
+    .hash-section {
+        margin-bottom: 18px;
+    }
+
+    .hash-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .hash-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .hash-value {
+        padding: 12px 13px;
+        background: #f5f7f5;
+        border: 1px solid #dfe4e1;
+        border-radius: 5px;
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        line-height: 1.6;
+        word-break: break-all;
+    }
+
+    .hash-value.match {
+        border-left: 3px solid #4f715e;
+    }
+
+    .hash-value.mismatch {
+        border-left: 3px solid #9b5c50;
+    }
+
+    .verification-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 16px;
+        padding: 11px 12px;
+        background: #fafbfa;
+        border: 1px solid #e1e5e2;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 10px;
+        line-height: 1.55;
+    }
+
+    .verification-note-mark {
+        flex: 0 0 auto;
+        color: #b8944e;
+        font-weight: 700;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        padding-top: 2px;
+        animation: panelIn .45s ease both;
+        animation-delay: .08s;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+        transform: translateY(-1px);
+    }
+
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
         }
 
-        .container {
-            max-width: 850px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 760px) {
+        .content-grid {
+            grid-template-columns: 1fr;
         }
 
-        .card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 20px;
+        .info-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .actions {
+            flex-direction: column;
         }
 
-        .valid {
-            border-left: 6px solid #198754;
+        .button {
+            width: 100%;
         }
-
-        .invalid {
-            border-left: 6px solid #dc3545;
-        }
-
-        .status {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .hash {
-            background: #f1f1f1;
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 5px;
-            word-break: break-all;
-            font-family: monospace;
-            margin-top: 8px;
-        }
-
-        .label {
-            font-weight: bold;
-            margin-top: 15px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 8px 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #333;
-            background: white;
-            margin-right: 8px;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>
-        Document Integrity Verification
-    </h1>
+    }
+</style>
+{% endblock %}
 
 
+{% block content %}
+<div class="integrity-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Document Security
+        </div>
+
+        <h1 class="page-title">
+            Document Integrity Verification
+        </h1>
+
+        <p class="page-subtitle">
+            Compare the current document against its original SHA-256 integrity record.
+        </p>
+
+    </div>
+
+
+    <!-- VERIFICATION RESULT -->
     {% if integrity_valid %}
 
-        <div class="card valid">
+        <section class="status-panel valid">
 
-            <div class="status">
-                Integrity Valid
+            <div class="status-heading">
+
+                <span class="status-indicator"></span>
+
+                <h2 class="status-title">
+                    Integrity Valid
+                </h2>
+
             </div>
 
-            <p>
-                The current file hash matches the
-                original stored hash.
+            <p class="status-description">
+                The current file hash matches the original stored hash.
             </p>
 
-            <p>
-                No file modification was detected
-                by this integrity check.
+            <p class="status-note">
+                No file modification was detected by this integrity check.
             </p>
 
-        </div>
+        </section>
 
     {% else %}
 
-        <div class="card invalid">
+        <section class="status-panel invalid">
 
-            <div class="status">
-                Integrity Mismatch
+            <div class="status-heading">
+
+                <span class="status-indicator"></span>
+
+                <h2 class="status-title">
+                    Integrity Mismatch
+                </h2>
+
             </div>
 
-            <p>
-                The current file hash does not match
-                the original stored hash.
+            <p class="status-description">
+                The current file hash does not match the original stored hash.
             </p>
 
-            <p>
-                The document may have been modified
-                or replaced after its original upload.
+            <p class="status-note">
+                The document may have been modified or replaced after its original upload.
             </p>
 
-        </div>
+        </section>
 
     {% endif %}
 
 
-    <div class="card">
+    <!-- INFORMATION + HASH -->
+    <div class="content-grid">
 
-        <h2>
-            Document Information
-        </h2>
+        <!-- DOCUMENT INFORMATION -->
+        <section class="card">
 
-        <p>
+            <div class="card-header">
 
-            <span class="label">
-                Title:
-            </span>
+                <h2 class="card-title">
+                    Document Information
+                </h2>
 
-            {{ document.title }}
+                <p class="card-description">
+                    Record details associated with this verification.
+                </p>
 
-        </p>
-
-
-        <p>
-
-            <span class="label">
-                Document Type:
-            </span>
-
-            {{ document.get_document_type_display }}
-
-        </p>
+            </div>
 
 
-        <p>
+            <div class="card-body">
 
-            <span class="label">
-                Baggage:
-            </span>
+                <div class="info-list">
 
-            {{ document.baggage.baggage_tag }}
+                    <div class="info-row">
 
-        </p>
+                        <span class="info-label">
+                            Title
+                        </span>
 
+                        <span class="info-value">
+                            {{ document.title }}
+                        </span>
 
-        <p>
-
-            <span class="label">
-                Uploaded By:
-            </span>
-
-            {{ document.uploaded_by.username }}
-
-        </p>
+                    </div>
 
 
-        <p>
+                    <div class="info-row">
 
-            <span class="label">
-                Uploaded At:
-            </span>
+                        <span class="info-label">
+                            Document Type
+                        </span>
 
-            {{ document.created_at|date:"M. j, Y, g:i a" }}
+                        <span class="info-value">
+                            {{ document.get_document_type_display }}
+                        </span>
 
-        </p>
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Baggage
+                        </span>
+
+                        <span class="info-value">
+                            {{ document.baggage.baggage_tag }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Uploaded By
+                        </span>
+
+                        <span class="info-value">
+                            {{ document.uploaded_by.username }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Uploaded At
+                        </span>
+
+                        <span class="info-value">
+                            {{ document.created_at|date:"M. j, Y, g:i a" }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- HASH COMPARISON -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2 class="card-title">
+                    SHA-256 Verification
+                </h2>
+
+                <p class="card-description">
+                    Stored and recalculated hashes used for integrity comparison.
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="hash-section">
+
+                    <span class="hash-label">
+                        Original Stored Hash
+                    </span>
+
+                    <div class="hash-value {% if integrity_valid %}match{% else %}mismatch{% endif %}">
+                        {{ stored_hash }}
+                    </div>
+
+                </div>
+
+
+                <div class="hash-section">
+
+                    <span class="hash-label">
+                        Current File Hash
+                    </span>
+
+                    <div class="hash-value {% if integrity_valid %}match{% else %}mismatch{% endif %}">
+                        {{ current_hash }}
+                    </div>
+
+                </div>
+
+
+                <div class="verification-note">
+
+                    <span class="verification-note-mark">
+                        SHA
+                    </span>
+
+                    <span>
+                        The verification compares the SHA-256 hash stored when the
+                        document was uploaded with a newly calculated hash from
+                        the current file.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
 
     </div>
 
 
-    <div class="card">
-
-        <h2>
-            SHA-256 Verification
-        </h2>
-
-
-        <p class="label">
-            Original Stored Hash
-        </p>
-
-        <div class="hash">
-            {{ stored_hash }}
-        </div>
-
-
-        <p class="label">
-            Current File Hash
-        </p>
-
-        <div class="hash">
-            {{ current_hash }}
-        </div>
-
-    </div>
-
-
-    <div>
+    <!-- ACTIONS -->
+    <div class="actions">
 
         <a
-            class="btn"
+            class="button button-secondary"
             href="{% url 'document_detail' document.id %}"
         >
             Back to Document
@@ -232,7 +584,7 @@
 
 
         <a
-            class="btn"
+            class="button button-primary"
             href="{% url 'document_list' %}"
         >
             Documents
@@ -241,3 +593,4 @@
     </div>
 
 </div>
+{% endblock %}
