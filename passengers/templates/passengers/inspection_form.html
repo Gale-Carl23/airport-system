@@ -1,47 +1,448 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}
+    {% if inspection %}Edit Inspection{% else %}Create Inspection{% endif %} | BOC-NAIA
+{% endblock %}
 
-    <title>Create Inspection | BOC-NAIA</title>
-</head>
+{% block nav_inspections %}active{% endblock %}
 
-<body>
+{% block page_heading %}Inspection Processing{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block extra_css %}
+<style>
+    .inspection-form-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    {% if inspection %}
-        <h2>Edit Baggage Inspection</h2>
-    {% else %}
-        <h2>Create Baggage Inspection</h2>
-    {% endif %}
+    .page-header {
+        margin-bottom: 22px;
+    }
 
-    <form method="post">
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        {% csrf_token %}
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-        {{ form.as_p }}
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-        {% if inspection %}
-            <button type="submit">
-                Save Changes
-            </button>
-        {% else %}
-            <button type="submit">
-                Save Inspection
-            </button>
-        {% endif %}
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-    </form>
+    .form-panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .4s ease both;
+    }
 
-    <br>
+    .form-header {
+        padding: 15px 18px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-    <a href="{% url 'inspection_list' %}">
-        Back to Inspections
-    </a>
+    .form-header-title {
+        margin: 0;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
 
-</body>
+    .form-header-text {
+        margin: 5px 0 0;
+        color: #7a827d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
 
-</html>
+    .form-body {
+        padding: 20px;
+    }
+
+    .form-body form p {
+        margin: 0 0 17px;
+    }
+
+    .form-body form label {
+        display: block;
+        margin-bottom: 6px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .03em;
+    }
+
+    .form-body input,
+    .form-body select,
+    .form-body textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 9px 10px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #303734;
+        font: inherit;
+        font-size: 11px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .form-body input,
+    .form-body select {
+        min-height: 37px;
+    }
+
+    .form-body textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .form-body input:focus,
+    .form-body select:focus,
+    .form-body textarea:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .form-body input[type="checkbox"] {
+        width: auto;
+        min-height: auto;
+        margin-right: 7px;
+    }
+
+    .form-body input[type="checkbox"] + label {
+        display: inline;
+    }
+
+    .form-body .helptext {
+        display: block;
+        margin-top: 5px;
+        color: #858d88;
+        font-size: 9px;
+        line-height: 1.45;
+    }
+
+    .form-body ul.errorlist {
+        margin: 5px 0 7px;
+        padding: 0;
+        list-style: none;
+        color: #8a5555;
+        font-size: 10px;
+    }
+
+    .form-errors {
+        margin-bottom: 18px;
+        padding: 11px 13px;
+        background: #f7eeee;
+        border: 1px solid #e4cccc;
+        border-left: 3px solid #9a6464;
+        border-radius: 4px;
+        color: #764d4d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .workflow-note {
+        display: flex;
+        gap: 11px;
+        margin-top: 20px;
+        padding: 13px;
+        background: #f7f8f7;
+        border: 1px solid #e1e5e2;
+        border-left: 3px solid #b8944e;
+        border-radius: 4px;
+    }
+
+    .workflow-note-mark {
+        flex: 0 0 auto;
+        color: #806a3d;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .workflow-note-content strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #4d5752;
+        font-size: 10px;
+    }
+
+    .workflow-note-content span {
+        color: #7a827d;
+        font-size: 9px;
+        line-height: 1.5;
+    }
+
+    .form-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 20px;
+        background: #fafbfa;
+        border-top: 1px solid #e3e7e4;
+    }
+
+    .required-note {
+        color: #858d88;
+        font-size: 9px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .form-footer {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .form-actions {
+            width: 100%;
+        }
+
+        .form-actions .button {
+            flex: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="inspection-form-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Inspection Operations
+        </div>
+
+        <h1 class="page-title">
+            {% if inspection %}
+                Edit Baggage Inspection
+            {% else %}
+                Create Baggage Inspection
+            {% endif %}
+        </h1>
+
+        <p class="page-subtitle">
+            Record and manage the inspection status, result, findings, and inspection time for baggage.
+        </p>
+
+    </div>
+
+
+    <!-- FORM -->
+    <section class="form-panel">
+
+        <div class="form-header">
+
+            <h2 class="form-header-title">
+                Inspection Information
+            </h2>
+
+            <p class="form-header-text">
+                Complete the inspection record according to the current baggage inspection result.
+            </p>
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="form-body">
+
+                {% if form.non_field_errors %}
+
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                {% for field in form %}
+
+                    <p>
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <span class="helptext">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {{ field.errors }}
+                        {% endif %}
+
+                    </p>
+
+                {% endfor %}
+
+
+                <div class="workflow-note">
+
+                    <div class="workflow-note-mark">
+                        INFO
+                    </div>
+
+                    <div class="workflow-note-content">
+
+                        <strong>
+                            Inspection workflow
+                        </strong>
+
+                        <span>
+                            A completed inspection must have a valid result.
+                            Cleared baggage proceeds to clearance, baggage marked for assessment proceeds to assessment,
+                            while held or seized baggage may proceed to enforcement case processing.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-footer">
+
+                <span class="required-note">
+                    Fields marked as required must be completed.
+                </span>
+
+
+                <div class="form-actions">
+
+                    <a
+                        href="{% url 'inspection_list' %}"
+                        class="button button-secondary"
+                    >
+                        Cancel
+                    </a>
+
+
+                    {% if inspection %}
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Save Changes
+                        </button>
+
+                    {% else %}
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Save Inspection
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+{% endblock %}

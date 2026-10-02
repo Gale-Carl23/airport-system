@@ -1,195 +1,1015 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Inspections | BOC-NAIA{% endblock %}
 
-    <title>Inspections | BOC-NAIA</title>
-</head>
+{% block nav_inspections %}active{% endblock %}
 
-<body>
+{% block page_heading %}Inspections{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block extra_css %}
+<style>
+    .inspection-page {
+        max-width: 1350px;
+        margin: 0 auto;
+    }
 
-    <h2>Baggage Inspections</h2>
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
 
-    <a href="{% url 'inspection_create' %}">
-        Create Inspection
-    </a>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-    <br>
-    <br>
-    <form method="get" class="filter-form">
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-        <input
-            type="search"
-            name="q"
-            value="{{ search }}"
-            placeholder="Search baggage, passenger, reference..."
-        >
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-        <select name="status">
-            <option value="">All Statuses</option>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-            {% for value, label in status_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_status == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
+    .header-actions {
+        display: flex;
+        gap: 8px;
+    }
 
-        <select name="result">
-            <option value="">All Results</option>
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
 
-            {% for value, label in result_choices %}
-                <option
-                    value="{{ value }}"
-                    {% if selected_result == value %}selected{% endif %}
-                >
-                    {{ label }}
-                </option>
-            {% endfor %}
-        </select>
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
 
-        <label>
-            From
-            <input
-                type="date"
-                name="date_from"
-                value="{{ date_from }}"
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .filter-panel {
+        margin-bottom: 18px;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        animation: panelIn .35s ease both;
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 13px;
+    }
+
+    .filter-title {
+        margin: 0;
+        color: #303734;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .filter-label {
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.5fr) minmax(130px, .7fr) minmax(145px, .8fr) minmax(125px, .7fr) minmax(125px, .7fr) auto;
+        gap: 9px;
+        align-items: end;
+    }
+
+    .filter-field label {
+        display: block;
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .filter-field input,
+    .filter-field select {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 36px;
+        padding: 0 9px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #303734;
+        font: inherit;
+        font-size: 10px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .filter-field input:focus,
+    .filter-field select:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .filter-button,
+    .reset-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .filter-button {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .filter-button:hover {
+        background: #34443e;
+        border-color: #34443e;
+    }
+
+    .reset-button {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .reset-button:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    .table-panel {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .4s ease both;
+        animation-delay: .04s;
+    }
+
+    .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 17px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
+
+    .table-title {
+        margin: 0;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .record-count {
+        color: #7a827d;
+        font-size: 10px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .inspection-table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+    }
+
+    .inspection-table th {
+        padding: 10px 12px;
+        background: #f7f8f7;
+        border-bottom: 1px solid #dfe4e1;
+        color: #707873;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .inspection-table td {
+        padding: 12px;
+        border-bottom: 1px solid #e8ebe9;
+        color: #59645f;
+        font-size: 10px;
+        vertical-align: middle;
+    }
+
+    .inspection-table tbody tr {
+        transition: background-color .15s ease;
+    }
+
+    .inspection-table tbody tr:hover {
+        background: #fafbfa;
+    }
+
+    .inspection-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .baggage-tag {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .passenger-name {
+        color: #303734;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .findings {
+        max-width: 210px;
+        overflow: hidden;
+        color: #707873;
+        line-height: 1.45;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .date-value {
+        white-space: nowrap;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 4px;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .03em;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #f1f2ef;
+        color: #66706a;
+    }
+
+    .status-in-progress {
+        background: #eef2f5;
+        color: #3f5b70;
+    }
+
+    .status-completed {
+        background: #edf3ef;
+        color: #496a58;
+    }
+
+    .result-cleared {
+        background: #edf3ef;
+        color: #496a58;
+    }
+
+    .result-assessment {
+        background: #f4f0e7;
+        color: #806a3d;
+    }
+
+    .result-held,
+    .result-seized {
+        background: #f3eeee;
+        color: #7b5555;
+    }
+
+    .result-not-set {
+        background: #f1f2ef;
+        color: #66706a;
+    }
+
+    .action-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 29px;
+        padding: 0 9px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        color: #59645f;
+        font-size: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease,
+            color .16s ease;
+    }
+
+    .action-button:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+        color: #303734;
+    }
+
+    .action-button.primary {
+        color: #3f514a;
+    }
+
+    .empty-state {
+        padding: 48px 20px;
+        text-align: center;
+    }
+
+    .empty-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin-bottom: 12px;
+        background: #f0f2f0;
+        border: 1px solid #d9deda;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        margin: 0 0 5px;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty-text {
+        margin: 0;
+        color: #7a827d;
+        font-size: 11px;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 14px 16px;
+        border-top: 1px solid #e3e7e4;
+        background: #fafbfa;
+    }
+
+    .pagination a,
+    .pagination-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        border-radius: 4px;
+        font-size: 9px;
+        text-decoration: none;
+    }
+
+    .pagination a {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+        transition:
+            background-color .16s ease,
+            border-color .16s ease;
+    }
+
+    .pagination a:hover {
+        background: #f1f4f2;
+        border-color: #bfc8c2;
+    }
+
+    .pagination-current {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 18px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: #303734;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1150px) {
+        .filter-form {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .filter-field.search-field {
+            grid-column: span 3;
+        }
+
+        .filter-actions {
+            grid-column: span 3;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-field.search-field,
+        .filter-actions {
+            grid-column: auto;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .filter-button,
+        .reset-button {
+            flex: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="inspection-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Inspection Operations
+            </div>
+
+            <h1 class="page-title">
+                Baggage Inspections
+            </h1>
+
+            <p class="page-subtitle">
+                Review and manage baggage inspection records and their processing results.
+            </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <a
+                href="{% url 'inspection_create' %}"
+                class="button button-primary"
             >
-        </label>
+                Create Inspection
+            </a>
 
-        <label>
-            To
-            <input
-                type="date"
-                name="date_to"
-                value="{{ date_to }}"
-            >
-        </label>
+        </div>
 
-        <button type="submit">
-            Filter
-        </button>
+    </div>
 
-        <a href="{% url 'inspection_list' %}">
-            Reset
-        </a>
 
-    </form>
+    <!-- FILTERS -->
+    <section class="filter-panel">
 
-    <table border="1">
+        <div class="filter-header">
 
-        <thead>
-            <tr>
-                <th>Baggage Tag</th>
-                <th>Passenger</th>
-                <th>Status</th>
-                <th>Result</th>
-                <th>Findings</th>
-                <th>Inspected At</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+            <h2 class="filter-title">
+                Filter Inspections
+            </h2>
 
-        <tbody>
-
-            {% for inspection in inspections %}
-
-                <tr>
-
-                    <td>
-                        {{ inspection.baggage.baggage_tag }}
-                    </td>
-
-                    <td>
-                        {{ inspection.baggage.passenger }}
-                    </td>
-
-                    <td>
-                        {{ inspection.get_status_display }}
-                    </td>
-
-                    <td>
-                        {{ inspection.get_result_display }}
-                    </td>
-
-                    <td>
-                        {{ inspection.findings|default:"-" }}
-                    </td>
-
-                    <td>
-                        {{ inspection.inspected_at|default:"-" }}
-                    </td>
-
-                    
-
-                    <td>
-                        <a href="{% url 'inspection_detail' inspection.id %}">
-                            View Inspection
-                        </a>
-                        <a href="{% url 'inspection_update' inspection.id %}">
-                            Edit
-                        </a>
-                    </td>
-
-                </tr>
-
-            {% empty %}
-
-                <tr>
-                    <td colspan="7">
-                        No inspections found.
-                    </td>
-                </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-    {% if inspections.has_other_pages %}
-        <div class="pagination">
-
-            {% if inspections.has_previous %}
-                <a href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    First
-                </a>
-
-                <a href="?page={{ inspections.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Previous
-                </a>
-            {% endif %}
-
-            <span>
-                Page {{ inspections.number }}
-                of {{ inspections.paginator.num_pages }}
+            <span class="filter-label">
+                Inspection Records
             </span>
 
-            {% if inspections.has_next %}
-                <a href="?page={{ inspections.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Next
+        </div>
+
+
+        <form method="get" class="filter-form">
+
+            <div class="filter-field search-field">
+
+                <label for="inspection-search">
+                    Search
+                </label>
+
+                <input
+                    id="inspection-search"
+                    type="search"
+                    name="q"
+                    value="{{ search }}"
+                    placeholder="Search baggage, passenger, reference..."
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="inspection-status">
+                    Status
+                </label>
+
+                <select
+                    id="inspection-status"
+                    name="status"
+                >
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    {% for value, label in status_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if selected_status == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="inspection-result">
+                    Result
+                </label>
+
+                <select
+                    id="inspection-result"
+                    name="result"
+                >
+
+                    <option value="">
+                        All Results
+                    </option>
+
+                    {% for value, label in result_choices %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if selected_result == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="date-from">
+                    From
+                </label>
+
+                <input
+                    id="date-from"
+                    type="date"
+                    name="date_from"
+                    value="{{ date_from }}"
+                >
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="date-to">
+                    To
+                </label>
+
+                <input
+                    id="date-to"
+                    type="date"
+                    name="date_to"
+                    value="{{ date_to }}"
+                >
+
+            </div>
+
+
+            <div class="filter-actions">
+
+                <button
+                    type="submit"
+                    class="filter-button"
+                >
+                    Filter
+                </button>
+
+                <a
+                    href="{% url 'inspection_list' %}"
+                    class="reset-button"
+                >
+                    Reset
                 </a>
 
-                <a href="?page={{ inspections.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}">
-                    Last
-                </a>
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- INSPECTION TABLE -->
+    <section class="table-panel">
+
+        <div class="table-header">
+
+            <h2 class="table-title">
+                Inspection Records
+            </h2>
+
+            {% if inspections.paginator %}
+
+                <span class="record-count">
+                    {{ inspections.paginator.count }}
+                    record{{ inspections.paginator.count|pluralize }}
+                </span>
+
             {% endif %}
 
         </div>
-    {% endif %}
 
-    <br>
 
-    <a href="{% url 'dashboard' %}">
-        Back to Dashboard
+        <div class="table-wrapper">
+
+            <table class="inspection-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Baggage Tag</th>
+                        <th>Passenger</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                        <th>Findings</th>
+                        <th>Inspected At</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for inspection in inspections %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="baggage-tag">
+                                    {{ inspection.baggage.baggage_tag }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="passenger-name">
+                                    {{ inspection.baggage.passenger }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if inspection.status == "pending" %}
+
+                                    <span class="status status-pending">
+                                        {{ inspection.get_status_display }}
+                                    </span>
+
+                                {% elif inspection.status == "in_progress" %}
+
+                                    <span class="status status-in-progress">
+                                        {{ inspection.get_status_display }}
+                                    </span>
+
+                                {% elif inspection.status == "completed" %}
+
+                                    <span class="status status-completed">
+                                        {{ inspection.get_status_display }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status status-pending">
+                                        {{ inspection.get_status_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if inspection.result == "cleared" %}
+
+                                    <span class="status result-cleared">
+                                        {{ inspection.get_result_display }}
+                                    </span>
+
+                                {% elif inspection.result == "for_assessment" %}
+
+                                    <span class="status result-assessment">
+                                        {{ inspection.get_result_display }}
+                                    </span>
+
+                                {% elif inspection.result == "held" %}
+
+                                    <span class="status result-held">
+                                        {{ inspection.get_result_display }}
+                                    </span>
+
+                                {% elif inspection.result == "seized" %}
+
+                                    <span class="status result-seized">
+                                        {{ inspection.get_result_display }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status result-not-set">
+                                        {{ inspection.get_result_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="findings">
+                                    {{ inspection.findings|default:"-" }}
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="date-value">
+
+                                    {% if inspection.inspected_at %}
+                                        {{ inspection.inspected_at|date:"M. j, Y, g:i a" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="action-group">
+
+                                    <a
+                                        href="{% url 'inspection_detail' inspection.id %}"
+                                        class="action-button primary"
+                                    >
+                                        View
+                                    </a>
+
+                                    <a
+                                        href="{% url 'inspection_update' inspection.id %}"
+                                        class="action-button"
+                                    >
+                                        Edit
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="7">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-mark">
+                                        I
+                                    </div>
+
+                                    <h3 class="empty-title">
+                                        No inspections found
+                                    </h3>
+
+                                    <p class="empty-text">
+                                        No inspection records match the current filters.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- PAGINATION -->
+        {% if inspections.has_other_pages %}
+
+            <div class="pagination">
+
+                {% if inspections.has_previous %}
+
+                    <a
+                        href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_result %}&result={{ selected_result|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        First
+                    </a>
+
+                    <a
+                        href="?page={{ inspections.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_result %}&result={{ selected_result|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Previous
+                    </a>
+
+                {% endif %}
+
+
+                <span class="pagination-current">
+                    Page {{ inspections.number }}
+                    of {{ inspections.paginator.num_pages }}
+                </span>
+
+
+                {% if inspections.has_next %}
+
+                    <a
+                        href="?page={{ inspections.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_result %}&result={{ selected_result|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Next
+                    </a>
+
+                    <a
+                        href="?page={{ inspections.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_result %}&result={{ selected_result|urlencode }}{% endif %}{% if date_from %}&date_from={{ date_from|urlencode }}{% endif %}{% if date_to %}&date_to={{ date_to|urlencode }}{% endif %}"
+                    >
+                        Last
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <a
+        href="{% url 'dashboard' %}"
+        class="back-link"
+    >
+        ← Back to Dashboard
     </a>
 
-</body>
-
-</html>
+</div>
+{% endblock %}
