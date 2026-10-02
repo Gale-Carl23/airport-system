@@ -1,35 +1,386 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Add Flight | BOC-NAIA</title>
-</head>
+{% block title %}Add Flight | BOC-NAIA{% endblock %}
 
-<body>
+{% block nav_flights %}active{% endblock %}
 
-    <h1>BOC-NAIA Operations System</h1>
+{% block page_heading %}Flight Registration{% endblock %}
 
-    <h2>Add Flight</h2>
+{% block extra_css %}
+<style>
+    .flight-form-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <form method="post">
+    .page-header {
+        margin-bottom: 22px;
+    }
 
-        {% csrf_token %}
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-        {{ form.as_p }}
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-        <button type="submit">
-            Save Flight
-        </button>
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-    </form>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-    <br>
+    .form-card {
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .35s ease both;
+    }
 
-    <a href="{% url 'flight_list' %}">
-        Back to Flights
-    </a>
+    .form-card-header {
+        padding: 17px 20px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-</body>
-</html>
+    .form-card-title {
+        margin: 0;
+        color: #303734;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .form-card-description {
+        margin: 4px 0 0;
+        color: #7a827d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    .non-field-errors {
+        margin-bottom: 20px;
+        padding: 11px 13px;
+        background: #fbf3f1;
+        border: 1px solid #e5ccc7;
+        border-left: 3px solid #9b5c50;
+        border-radius: 5px;
+        color: #7d473f;
+        font-size: 11px;
+    }
+
+    .non-field-errors ul {
+        margin: 0;
+        padding-left: 16px;
+    }
+
+    .field {
+        margin-bottom: 19px;
+    }
+
+    .field:last-child {
+        margin-bottom: 0;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 11px;
+        background: #fafbfa;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #252a28;
+        font: inherit;
+        font-size: 12px;
+        outline: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        background: #fff;
+        border-color: #3f514a;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, .08);
+    }
+
+    .field textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .field input[type="datetime-local"] {
+        color-scheme: light;
+    }
+
+    .field .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7a827d;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .field ul.errorlist {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        color: #8a4f45;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .workflow-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 14px;
+        background: #f7f8f7;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+        color: #707873;
+        font-size: 10px;
+        line-height: 1.55;
+    }
+
+    .note-mark {
+        flex: 0 0 auto;
+        color: #b8944e;
+        font-weight: 700;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px solid #e1e5e2;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 15px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
+
+    .button-primary {
+        background: #3f514a;
+        border: 1px solid #3f514a;
+        color: #fff;
+    }
+
+    .button-primary:hover {
+        background: #34443e;
+        border-color: #34443e;
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        background: #fff;
+        border: 1px solid #d4dad6;
+        color: #59645f;
+    }
+
+    .button-secondary:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .form-body {
+            padding: 18px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="flight-form-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            Flight Operations
+        </div>
+
+        <h1 class="page-title">
+            Add Flight
+        </h1>
+
+        <p class="page-subtitle">
+            Register an arriving flight in the BOC-NAIA operations system.
+        </p>
+
+    </div>
+
+
+    <!-- FORM -->
+    <section class="form-card">
+
+        <div class="form-card-header">
+
+            <h2 class="form-card-title">
+                Flight Information
+            </h2>
+
+            <p class="form-card-description">
+                Enter the flight details used to associate passengers and baggage records.
+            </p>
+
+        </div>
+
+
+        <div class="form-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                {% for field in form %}
+
+                    <div class="field">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <span class="helptext">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {{ field.errors }}
+
+                    </div>
+
+                {% endfor %}
+
+
+                <div class="workflow-note">
+
+                    <span class="note-mark">
+                        !
+                    </span>
+
+                    <span>
+                        Once registered, this flight can be assigned to passenger
+                        records and used as part of the baggage inspection workflow.
+                    </span>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <a
+                        href="{% url 'flight_list' %}"
+                        class="button button-secondary"
+                    >
+                        Cancel
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save Flight
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

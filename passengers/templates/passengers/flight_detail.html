@@ -1,219 +1,1069 @@
-<h1>Flight Detail</h1>
+{% extends "base.html" %}
 
-<p>
-    <a href="{% url 'flight_list' %}">
-        Back to Flights
-    </a>
-</p>
+{% block title %}Flight Detail | BOC-NAIA{% endblock %}
 
-<hr>
+{% block nav_flights %}active{% endblock %}
 
-<h2>Flight Information</h2>
+{% block page_heading %}Flight Detail{% endblock %}
 
-<p>
-    <strong>Flight Number:</strong>
-    {{ flight.flight_number }}
-</p>
+{% block extra_css %}
+<style>
+    .flight-page {
+        max-width: 1250px;
+        margin: 0 auto;
+    }
 
-<p>
-    <strong>Airline:</strong>
-    {{ flight.airline }}
-</p>
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
 
-<p>
-    <strong>Origin:</strong>
-    {{ flight.origin }}
-</p>
+    .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+    }
 
-<p>
-    <strong>Arrival:</strong>
-    {{ flight.arrival_datetime }}
-</p>
+    .eyebrow-mark {
+        width: 7px;
+        height: 7px;
+        background: #b8944e;
+        border-radius: 50%;
+    }
 
-<hr>
+    .page-title {
+        margin: 0;
+        color: #252a28;
+        font-size: 28px;
+        line-height: 1.2;
+        letter-spacing: -.02em;
+    }
 
-<h2>Passengers</h2>
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-{% if passengers %}
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 12px;
+        background: #fff;
+        border: 1px solid #d4dad6;
+        border-radius: 5px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            transform .18s ease;
+    }
 
-    {% for passenger in passengers %}
+    .back-link:hover {
+        background: #f4f6f4;
+        border-color: #bfc8c2;
+        transform: translateY(-1px);
+    }
 
-        <h3>
-            {{ passenger.first_name }}
-            {{ passenger.last_name }}
-        </h3>
+    .flight-summary {
+        display: grid;
+        grid-template-columns: 1.2fr repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+    }
 
-        <p>
-            <strong>Reference Number:</strong>
-            {{ passenger.reference_number }}
-        </p>
+    .summary-card {
+        min-height: 88px;
+        padding: 15px 16px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 6px;
+        animation: panelIn .35s ease both;
+    }
 
-        <p>
-            <strong>Passport Number:</strong>
-            {{ passenger.passport_number }}
-        </p>
+    .summary-card.primary {
+        background: #26332f;
+        border-color: #26332f;
+    }
 
-        <p>
-            <strong>Nationality:</strong>
-            {{ passenger.nationality }}
-        </p>
+    .summary-label {
+        margin-bottom: 8px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
 
-        <p>
-            <a href="{% url 'passenger_detail' passenger.id %}">
-                View Passenger
-            </a>
-        </p>
+    .primary .summary-label {
+        color: #aeb8b3;
+    }
 
-        <h4>Baggage</h4>
+    .summary-value {
+        color: #303734;
+        font-size: 15px;
+        font-weight: 700;
+    }
 
-        {% if passenger.baggage.all %}
+    .primary .summary-value {
+        color: #fff;
+        font-size: 20px;
+        letter-spacing: .02em;
+    }
 
-            {% for baggage in passenger.baggage.all %}
+    .summary-meta {
+        margin-top: 4px;
+        color: #707873;
+        font-size: 10px;
+    }
 
-                <p>
-                    <strong>Baggage Tag:</strong>
-                    {{ baggage.baggage_tag }}
-                </p>
+    .primary .summary-meta {
+        color: #c2cbc6;
+    }
 
-                <p>
-                    <strong>Description:</strong>
-                    {{ baggage.description }}
-                </p>
+    .section {
+        margin-bottom: 18px;
+        background: #fff;
+        border: 1px solid #d9deda;
+        border-radius: 7px;
+        overflow: hidden;
+        animation: panelIn .4s ease both;
+        animation-delay: .04s;
+    }
 
-                <p>
-                    <strong>Weight:</strong>
-                    {{ baggage.weight }}
-                </p>
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 18px;
+        background: #fafbfa;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-                <p>
-                    <a href="{% url 'baggage_detail' baggage.id %}">
-                        View Baggage
-                    </a>
-                </p>
+    .section-title {
+        margin: 0;
+        color: #303734;
+        font-size: 13px;
+        font-weight: 700;
+    }
 
-                <h5>Inspection</h5>
+    .section-meta {
+        color: #7a827d;
+        font-size: 10px;
+    }
 
-                {% if baggage.inspection %}
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+    }
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ baggage.inspection.get_status_display }}
-                    </p>
+    .info-item {
+        padding: 16px 18px;
+        border-right: 1px solid #e8ebe9;
+    }
 
-                    <p>
-                        <strong>Result:</strong>
-                        {{ baggage.inspection.get_result_display }}
-                    </p>
+    .info-item:last-child {
+        border-right: 0;
+    }
 
-                    <p>
-                        <a href="{% url 'inspection_detail' baggage.inspection.id %}">
-                            View Inspection
-                        </a>
-                    </p>
+    .info-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
 
-                {% else %}
+    .info-value {
+        color: #303734;
+        font-size: 12px;
+        line-height: 1.45;
+    }
 
-                    <p>
-                        No inspection record.
-                    </p>
+    .passenger-card {
+        margin: 16px;
+        border: 1px solid #e0e4e1;
+        border-radius: 6px;
+        overflow: hidden;
+    }
 
-                {% endif %}
+    .passenger-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 15px;
+        background: #f8f9f8;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-                <h5>Clearance</h5>
+    .passenger-name {
+        margin: 0;
+        color: #303734;
+        font-size: 14px;
+        font-weight: 700;
+    }
 
-                {% if baggage.clearance %}
+    .passenger-reference {
+        margin-top: 3px;
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+    }
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ baggage.clearance.get_status_display }}
-                    </p>
+    .passenger-view {
+        display: inline-flex;
+        align-items: center;
+        min-height: 29px;
+        padding: 0 10px;
+        border: 1px solid #d4dad6;
+        border-radius: 4px;
+        background: #fff;
+        color: #59645f;
+        font-size: 9px;
+        font-weight: 600;
+        text-decoration: none;
+    }
 
-                    <p>
-                        <strong>Reference:</strong>
-                        {{ baggage.clearance.clearance_reference }}
-                    </p>
+    .passenger-view:hover {
+        background: #f1f4f2;
+    }
 
-                    <p>
-                        <a href="{% url 'clearance_detail' baggage.clearance.id %}">
-                            View Clearance
-                        </a>
-                    </p>
+    .passenger-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+        border-bottom: 1px solid #e3e7e4;
+    }
 
-                {% else %}
+    .passenger-detail {
+        padding: 12px 15px;
+    }
 
-                    <p>
-                        No clearance record.
-                    </p>
+    .passenger-detail:first-child {
+        border-right: 1px solid #e3e7e4;
+    }
 
-                {% endif %}
+    .detail-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #7a827d;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
 
-                <h5>Cases</h5>
+    .detail-value {
+        color: #59645f;
+        font-size: 11px;
+    }
 
-                {% for case in baggage.cases.all %}
+    .baggage-section {
+        padding: 14px 15px;
+    }
 
-                    <p>
-                        <strong>Case:</strong>
-                        {{ case.case_reference }}
-                    </p>
+    .baggage-section-title {
+        margin: 0 0 10px;
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
 
-                    <p>
-                        <strong>Type:</strong>
-                        {{ case.get_case_type_display }}
-                    </p>
+    .baggage-card {
+        margin-bottom: 10px;
+        padding: 14px;
+        background: #fafbfa;
+        border: 1px solid #e0e4e1;
+        border-radius: 5px;
+    }
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ case.get_status_display }}
-                    </p>
+    .baggage-card:last-child {
+        margin-bottom: 0;
+    }
 
-                    <p>
-                        <a href="{% url 'case_detail' case.id %}">
-                            View Case
-                        </a>
-                    </p>
+    .baggage-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
 
-                {% empty %}
+    .baggage-tag {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+    }
 
-                    <p>
-                        No cases.
-                    </p>
+    .baggage-view {
+        color: #59645f;
+        font-size: 9px;
+        font-weight: 600;
+        text-decoration: none;
+    }
 
-                {% endfor %}
+    .baggage-view:hover {
+        color: #17324d;
+        text-decoration: underline;
+    }
 
-                <hr>
+    .baggage-info {
+        display: grid;
+        grid-template-columns: 1.5fr .7fr .7fr;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
 
-            {% empty %}
+    .workflow-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
 
-                <p>
-                    No baggage records for this passenger.
-                </p>
+    .workflow-item {
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #e0e4e1;
+        border-radius: 4px;
+    }
 
-            {% endfor %}
+    .workflow-title {
+        margin-bottom: 6px;
+        color: #7a827d;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
 
-        {% else %}
+    .workflow-value {
+        color: #59645f;
+        font-size: 10px;
+        font-weight: 600;
+    }
 
-            <p>
-                No baggage records for this passenger.
+    .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 0 7px;
+        border-radius: 3px;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .status.pending {
+        background: #f2eee5;
+        color: #816c43;
+    }
+
+    .status.in-progress,
+    .status.under-review {
+        background: #e8edf1;
+        color: #526a7d;
+    }
+
+    .status.completed,
+    .status.cleared,
+    .status.resolved {
+        background: #e8efe9;
+        color: #4f715e;
+    }
+
+    .status.held,
+    .status.seized,
+    .status.open {
+        background: #f3e9e6;
+        color: #8a574d;
+    }
+
+    .status.closed {
+        background: #eceeed;
+        color: #68716c;
+    }
+
+    .status.for-assessment {
+        background: #f1ece2;
+        color: #826c43;
+    }
+
+    .empty-message {
+        padding: 20px;
+        color: #7a827d;
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .case-list {
+        display: grid;
+        gap: 7px;
+    }
+
+    .case-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 11px;
+        background: #fff;
+        border: 1px solid #e0e4e1;
+        border-radius: 4px;
+    }
+
+    .case-reference {
+        color: #17324d;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .case-meta {
+        margin-top: 4px;
+        color: #7a827d;
+        font-size: 9px;
+    }
+
+    .case-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .case-view {
+        color: #59645f;
+        font-size: 9px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .case-view:hover {
+        color: #17324d;
+        text-decoration: underline;
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(7px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 950px) {
+        .flight-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .summary-card.primary {
+            grid-column: 1 / -1;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .info-item:nth-child(2) {
+            border-right: 0;
+        }
+
+        .info-item:nth-child(-n+2) {
+            border-bottom: 1px solid #e8ebe9;
+        }
+
+        .baggage-info {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .baggage-info > div:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .workflow-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 620px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .flight-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card.primary {
+            grid-column: auto;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item {
+            border-right: 0;
+            border-bottom: 1px solid #e8ebe9;
+        }
+
+        .info-item:last-child {
+            border-bottom: 0;
+        }
+
+        .passenger-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .passenger-details {
+            grid-template-columns: 1fr;
+        }
+
+        .passenger-detail:first-child {
+            border-right: 0;
+            border-bottom: 1px solid #e3e7e4;
+        }
+
+        .baggage-info,
+        .workflow-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .baggage-info > div:first-child {
+            grid-column: auto;
+        }
+
+        .case-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="flight-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                <span class="eyebrow-mark"></span>
+                Flight Operations
+            </div>
+
+            <h1 class="page-title">
+                Flight Detail
+            </h1>
+
+            <p class="page-subtitle">
+                Flight, passenger, baggage, and inspection records associated with this arrival.
             </p>
 
-        {% endif %}
+        </div>
 
-        <hr>
 
-    {% endfor %}
+        <a
+            href="{% url 'flight_list' %}"
+            class="back-link"
+        >
+            Back to Flights
+        </a>
 
-{% else %}
+    </div>
 
-    <p>
-        No passengers are currently assigned to this flight.
-    </p>
 
-{% endif %}
+    <!-- FLIGHT SUMMARY -->
+    <div class="flight-summary">
 
-<hr>
+        <div class="summary-card primary">
 
-<p>
-    <a href="{% url 'flight_list' %}">
-        Back to Flights
-    </a>
-</p>
+            <div class="summary-label">
+                Flight Number
+            </div>
+
+            <div class="summary-value">
+                {{ flight.flight_number }}
+            </div>
+
+            <div class="summary-meta">
+                {{ flight.airline }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Airline
+            </div>
+
+            <div class="summary-value">
+                {{ flight.airline }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Origin
+            </div>
+
+            <div class="summary-value">
+                {{ flight.origin }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Arrival
+            </div>
+
+            <div class="summary-value">
+                {{ flight.arrival_datetime|date:"M. j, Y" }}
+            </div>
+
+            <div class="summary-meta">
+                {{ flight.arrival_datetime|date:"g:i a" }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FLIGHT INFORMATION -->
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2 class="section-title">
+                Flight Information
+            </h2>
+
+            <span class="section-meta">
+                Arrival Record
+            </span>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    Flight Number
+                </span>
+
+                <span class="info-value">
+                    {{ flight.flight_number }}
+                </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    Airline
+                </span>
+
+                <span class="info-value">
+                    {{ flight.airline }}
+                </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    Origin
+                </span>
+
+                <span class="info-value">
+                    {{ flight.origin }}
+                </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    Arrival
+                </span>
+
+                <span class="info-value">
+                    {{ flight.arrival_datetime|date:"M. j, Y, g:i a" }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PASSENGERS -->
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2 class="section-title">
+                Passengers
+            </h2>
+
+            <span class="section-meta">
+                {{ passengers|length }} passenger{{ passengers|length|pluralize }}
+            </span>
+
+        </div>
+
+
+        {% for passenger in passengers %}
+
+            <div class="passenger-card">
+
+                <!-- PASSENGER HEADER -->
+                <div class="passenger-header">
+
+                    <div>
+
+                        <h3 class="passenger-name">
+                            {{ passenger.first_name }}
+                            {{ passenger.last_name }}
+                        </h3>
+
+                        <div class="passenger-reference">
+                            {{ passenger.reference_number }}
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'passenger_detail' passenger.id %}"
+                        class="passenger-view"
+                    >
+                        View Passenger
+                    </a>
+
+                </div>
+
+
+                <!-- PASSENGER INFORMATION -->
+                <div class="passenger-details">
+
+                    <div class="passenger-detail">
+
+                        <span class="detail-label">
+                            Passport Number
+                        </span>
+
+                        <span class="detail-value">
+                            {{ passenger.passport_number }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="passenger-detail">
+
+                        <span class="detail-label">
+                            Nationality
+                        </span>
+
+                        <span class="detail-value">
+                            {{ passenger.nationality }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BAGGAGE -->
+                <div class="baggage-section">
+
+                    <h4 class="baggage-section-title">
+                        Baggage Records
+                    </h4>
+
+
+                    {% for baggage in passenger.baggage.all %}
+
+                        <div class="baggage-card">
+
+                            <div class="baggage-header">
+
+                                <span class="baggage-tag">
+                                    {{ baggage.baggage_tag }}
+                                </span>
+
+                                <a
+                                    href="{% url 'baggage_detail' baggage.id %}"
+                                    class="baggage-view"
+                                >
+                                    View Baggage
+                                </a>
+
+                            </div>
+
+
+                            <div class="baggage-info">
+
+                                <div>
+
+                                    <span class="detail-label">
+                                        Description
+                                    </span>
+
+                                    <span class="detail-value">
+                                        {{ baggage.description }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="detail-label">
+                                        Weight
+                                    </span>
+
+                                    <span class="detail-value">
+                                        {{ baggage.weight }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="detail-label">
+                                        Declared
+                                    </span>
+
+                                    <span class="detail-value">
+                                        {% if baggage.declared %}
+                                            Yes
+                                        {% else %}
+                                            No
+                                        {% endif %}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- WORKFLOW -->
+                            <div class="workflow-grid">
+
+                                <!-- INSPECTION -->
+                                <div class="workflow-item">
+
+                                    <div class="workflow-title">
+                                        Inspection
+                                    </div>
+
+                                    {% if baggage.inspection %}
+
+                                        <div class="workflow-value">
+
+                                            <span class="status {{ baggage.inspection.status }}">
+                                                {{ baggage.inspection.get_status_display }}
+                                            </span>
+
+                                            <div style="margin-top: 6px;">
+                                                {{ baggage.inspection.get_result_display }}
+                                            </div>
+
+                                            <div style="margin-top: 5px;">
+                                                <a
+                                                    href="{% url 'inspection_detail' baggage.inspection.id %}"
+                                                    class="case-view"
+                                                >
+                                                    View Inspection
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <div class="workflow-value">
+                                            No inspection record.
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- CLEARANCE -->
+                                <div class="workflow-item">
+
+                                    <div class="workflow-title">
+                                        Clearance
+                                    </div>
+
+                                    {% if baggage.clearance %}
+
+                                        <div class="workflow-value">
+
+                                            <span class="status {{ baggage.clearance.status }}">
+                                                {{ baggage.clearance.get_status_display }}
+                                            </span>
+
+                                            <div style="margin-top: 6px;">
+                                                {{ baggage.clearance.clearance_reference }}
+                                            </div>
+
+                                            <div style="margin-top: 5px;">
+                                                <a
+                                                    href="{% url 'clearance_detail' baggage.clearance.id %}"
+                                                    class="case-view"
+                                                >
+                                                    View Clearance
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <div class="workflow-value">
+                                            No clearance record.
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- CASES -->
+                                <div class="workflow-item">
+
+                                    <div class="workflow-title">
+                                        Cases
+                                    </div>
+
+                                    {% for case in baggage.cases.all %}
+
+                                        <div class="workflow-value">
+
+                                            <span class="status {{ case.status }}">
+                                                {{ case.get_status_display }}
+                                            </span>
+
+                                            <div style="margin-top: 6px;">
+                                                {{ case.case_reference }}
+                                            </div>
+
+                                            <div style="margin-top: 4px;">
+                                                {{ case.get_case_type_display }}
+                                            </div>
+
+                                            <div style="margin-top: 5px;">
+                                                <a
+                                                    href="{% url 'case_detail' case.id %}"
+                                                    class="case-view"
+                                                >
+                                                    View Case
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    {% empty %}
+
+                                        <div class="workflow-value">
+                                            No cases.
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="empty-message">
+                            No baggage records for this passenger.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty-message">
+                No passengers are currently assigned to this flight.
+            </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    <!-- FOOTER ACTION -->
+    <div style="padding-bottom: 8px;">
+
+        <a
+            href="{% url 'flight_list' %}"
+            class="back-link"
+        >
+            Back to Flights
+        </a>
+
+    </div>
+
+</div>
+{% endblock %}
