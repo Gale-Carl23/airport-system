@@ -1,0 +1,468 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}BOC-NAIA Operations System{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261002">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <!-- BRAND -->
+        <div class="sidebar-brand">
+
+            <div class="brand-mark">
+                BOC
+            </div>
+
+            <div class="brand-text">
+                <strong>BOC-NAIA</strong>
+                <span>Operations System</span>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-divider"></div>
+
+
+        <!-- NAVIGATION -->
+        <nav class="sidebar-navigation">
+
+
+            <!-- =================================================
+                 OVERVIEW
+                 ================================================= -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Overview
+                </span>
+
+                <a
+                    href="{% url 'dashboard' %}"
+                    class="nav-link {% block nav_dashboard %}{% endblock %}"
+                >
+                    <span class="nav-icon">⌂</span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 OPERATIONS
+                 ================================================= -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Operations
+                </span>
+
+
+                {% if perms.passengers.view_passenger %}
+
+                <a
+                    href="{% url 'passenger_list' %}"
+                    class="nav-link {% block nav_passengers %}{% endblock %}"
+                >
+                    <span class="nav-icon">P</span>
+                    <span class="nav-label">Passengers</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_flight %}
+
+                <a
+                    href="{% url 'flight_list' %}"
+                    class="nav-link {% block nav_flights %}{% endblock %}"
+                >
+                    <span class="nav-icon">F</span>
+                    <span class="nav-label">Flights</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_baggage %}
+
+                <a
+                    href="{% url 'baggage_list' %}"
+                    class="nav-link {% block nav_baggage %}{% endblock %}"
+                >
+                    <span class="nav-icon">B</span>
+                    <span class="nav-label">Baggage</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_inspection %}
+
+                <a
+                    href="{% url 'inspection_list' %}"
+                    class="nav-link {% block nav_inspections %}{% endblock %}"
+                >
+                    <span class="nav-icon">I</span>
+                    <span class="nav-label">Inspections</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_assessment %}
+
+                <a
+                    href="{% url 'assessment_list' %}"
+                    class="nav-link {% block nav_assessments %}{% endblock %}"
+                >
+                    <span class="nav-icon">A</span>
+                    <span class="nav-label">Assessments</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_payment %}
+
+                <a
+                    href="{% url 'payment_list' %}"
+                    class="nav-link {% block nav_payments %}{% endblock %}"
+                >
+                    <span class="nav-icon">₱</span>
+                    <span class="nav-label">Payments</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_clearance %}
+
+                <a
+                    href="{% url 'clearance_list' %}"
+                    class="nav-link {% block nav_clearances %}{% endblock %}"
+                >
+                    <span class="nav-icon">✓</span>
+                    <span class="nav-label">Clearances</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_case %}
+
+                <a
+                    href="{% url 'case_list' %}"
+                    class="nav-link {% block nav_cases %}{% endblock %}"
+                >
+                    <span class="nav-icon">C</span>
+                    <span class="nav-label">Cases</span>
+                </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 RECORDS
+                 ================================================= -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Records
+                </span>
+
+
+                {% if perms.passengers.view_document %}
+
+                <a
+                    href="{% url 'document_list' %}"
+                    class="nav-link {% block nav_documents %}{% endblock %}"
+                >
+                    <span class="nav-icon">D</span>
+                    <span class="nav-label">Documents</span>
+                </a>
+
+                {% endif %}
+
+
+                {% if perms.passengers.view_auditlog %}
+
+                <a
+                    href="{% url 'audit_log_list' %}"
+                    class="nav-link {% block nav_audit_logs %}{% endblock %}"
+                >
+                    <span class="nav-icon">L</span>
+                    <span class="nav-label">Audit Logs</span>
+                </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 TOOLS
+                 ================================================= -->
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Tools
+                </span>
+
+                <a
+                    href="#"
+                    class="nav-link {% block nav_ai %}{% endblock %}"
+                >
+                    <span class="nav-icon">AI</span>
+                    <span class="nav-label">AI Assistant</span>
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <!-- =====================================================
+             USER AREA
+             ===================================================== -->
+
+        <div class="sidebar-footer">
+
+            <div class="user-profile">
+
+                <div class="user-avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+
+                <div class="user-information">
+
+                    <strong>
+                        {% if request.user.get_full_name %}
+                            {{ request.user.get_full_name }}
+                        {% else %}
+                            {{ request.user.username }}
+                        {% endif %}
+                    </strong>
+
+
+                    <span>
+
+                        {% if request.user.is_superuser %}
+
+                            Administrator
+
+                        {% else %}
+
+                            {% with user_group=request.user.groups.first %}
+
+                                {% if user_group %}
+                                    {{ user_group.name }}
+                                {% else %}
+                                    User
+                                {% endif %}
+
+                            {% endwith %}
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOGOUT -->
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                class="logout-form"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="logout-button"
+                >
+                    <span class="logout-icon">⇥</span>
+                    <span>Logout</span>
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN WRAPPER
+         ===================================================== -->
+
+    <div class="main-wrapper">
+
+
+        <!-- =================================================
+             TOPBAR
+             ================================================= -->
+
+        <header class="topbar">
+
+            <button
+                type="button"
+                class="mobile-menu-button"
+                id="mobileMenuButton"
+                aria-label="Open navigation"
+            >
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                {% block page_heading %}
+                    BOC-NAIA Operations
+                {% endblock %}
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="topbar-status">
+                    <span class="status-dot"></span>
+                    <span>System Online</span>
+                </div>
+
+                <span class="topbar-divider"></span>
+
+                <span class="topbar-user">
+                    {{ request.user.username }}
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             MAIN CONTENT
+             ================================================= -->
+
+        <main class="main-content">
+
+            {% if messages %}
+
+                <div class="messages-container">
+
+                    {% for message in messages %}
+
+                        <div class="message message-{{ message.tags|default:'info' }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     MOBILE SIDEBAR OVERLAY
+     ========================================================= -->
+
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+></div>
+
+
+<!-- =========================================================
+     MOBILE SIDEBAR SCRIPT
+     ========================================================= -->
+
+<script>
+
+(function () {
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+    const menu =
+        document.getElementById("mobileMenuButton");
+
+    const overlay =
+        document.getElementById("sidebarOverlay");
+
+
+    if (menu && sidebar && overlay) {
+
+        menu.addEventListener("click", function () {
+
+            sidebar.classList.toggle("sidebar-open");
+
+            overlay.classList.toggle(
+                "overlay-visible"
+            );
+
+        });
+
+
+        overlay.addEventListener("click", function () {
+
+            sidebar.classList.remove(
+                "sidebar-open"
+            );
+
+            overlay.classList.remove(
+                "overlay-visible"
+            );
+
+        });
+
+    }
+
+})();
+
+</script>
+
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>
