@@ -1,487 +1,893 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html lang="en">
+{% block title %}Operations Report | BOC-NAIA{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_heading %}Operations Report{% endblock %}
 
-<head>
+{% block content %}
 
-<meta charset="UTF-8">
+<style>
+    .report-page {
+        max-width: 1180px;
+    }
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    .page-intro {
+        margin-bottom: 22px;
+    }
 
-<title>
-    Operations Report | BOC-NAIA
-</title>
+    .page-intro h1 {
+        margin: 0 0 6px;
+        color: #252A28;
+        font-size: 26px;
+        font-weight: 650;
+        letter-spacing: -0.3px;
+    }
 
-</head>
+    .page-intro p {
+        margin: 0;
+        color: #707873;
+        font-size: 14px;
+    }
 
-<body>
+    .report-card {
+        margin-bottom: 18px;
+        padding: 20px;
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        background: #FFFFFF;
+    }
 
-<h1>
-    BOC-NAIA Operations System
-</h1>
+    .report-card-header {
+        margin-bottom: 18px;
+    }
 
-<h2>
-    Operations Summary Report
-</h2>
+    .report-card-header h2 {
+        margin: 0 0 5px;
+        color: #252A28;
+        font-size: 16px;
+        font-weight: 650;
+    }
+
+    .report-card-header p {
+        margin: 0;
+        color: #7A827D;
+        font-size: 12px;
+    }
+
+    /* Report Period */
+
+    .filter-form {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 180px;
+    }
+
+    .filter-field label {
+        color: #59625D;
+        font-size: 11px;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+    }
+
+    .filter-field input {
+        width: 100%;
+        box-sizing: border-box;
+        height: 38px;
+        padding: 0 10px;
+        border: 1px solid #CDD4CF;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #252A28;
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .filter-field input:focus {
+        border-color: #7D8C84;
+        box-shadow: 0 0 0 3px rgba(63, 81, 74, 0.08);
+    }
+
+    .filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 13px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background 0.18s ease,
+            border-color 0.18s ease,
+            color 0.18s ease,
+            transform 0.18s ease;
+    }
+
+    .btn-primary {
+        background: #3F514A;
+        border-color: #3F514A;
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        background: #34443E;
+        border-color: #34443E;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #FFFFFF;
+        border-color: #CDD4CF;
+        color: #3F514A;
+    }
+
+    .btn-secondary:hover {
+        background: #F3F5F3;
+        border-color: #B9C2BC;
+    }
+
+    .btn-export {
+        background: #17324D;
+        border-color: #17324D;
+        color: #FFFFFF;
+    }
+
+    .btn-export:hover {
+        background: #122A40;
+        border-color: #122A40;
+        transform: translateY(-1px);
+    }
+
+    /* Summary */
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .summary-box {
+        min-height: 88px;
+        padding: 15px;
+        box-sizing: border-box;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+        background: #F8F9F8;
+        transition:
+            border-color 0.18s ease,
+            transform 0.18s ease;
+    }
+
+    .summary-box:hover {
+        border-color: #BFC7C2;
+        transform: translateY(-1px);
+    }
+
+    .summary-label {
+        display: block;
+        margin-bottom: 10px;
+        color: #707873;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.35px;
+    }
+
+    .summary-value {
+        display: block;
+        color: #26332F;
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* Tables */
+
+    .report-table-wrapper {
+        overflow-x: auto;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 520px;
+    }
+
+    .report-table th {
+        padding: 11px 14px;
+        border-bottom: 1px solid #D9DEDA;
+        background: #F4F5F3;
+        color: #59625D;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .report-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #E6E9E7;
+        color: #3D4541;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tbody tr {
+        transition: background 0.15s ease;
+    }
+
+    .report-table tbody tr:hover {
+        background: #F8F9F8;
+    }
+
+    .report-table th:last-child,
+    .report-table td:last-child {
+        text-align: right;
+    }
+
+    .report-table td:last-child {
+        font-weight: 650;
+        color: #26332F;
+    }
+
+    .currency {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Section accents */
+
+    .section-marker {
+        width: 3px;
+        height: 17px;
+        margin-right: 9px;
+        display: inline-block;
+        vertical-align: -3px;
+        background: #B8944E;
+        border-radius: 1px;
+    }
+
+    .report-card:nth-of-type(3) .section-marker {
+        background: #3F514A;
+    }
+
+    .report-card:nth-of-type(4) .section-marker {
+        background: #17324D;
+    }
+
+    .report-card:nth-of-type(5) .section-marker {
+        background: #B8944E;
+    }
+
+    .report-card:nth-of-type(6) .section-marker {
+        background: #3F514A;
+    }
+
+    .report-card:nth-of-type(7) .section-marker {
+        background: #17324D;
+    }
+
+    /* Bottom actions */
+
+    .page-actions {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 22px;
+        padding-bottom: 8px;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 1000px) {
+        .summary-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 760px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .filter-form {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .filter-field {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .filter-actions .btn {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-card {
+            padding: 15px;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+
+        .page-intro h1 {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<div class="report-page">
+
+    <div class="page-intro">
+        <h1>Operations Summary Report</h1>
+        <p>
+            Review operational activity and transaction summaries for the selected reporting period.
+        </p>
+    </div>
 
 
-<!-- Date Filter -->
+    <!-- Report Period -->
 
-<div class="card">
+    <section class="report-card">
 
-    <h3>
-        Report Period
-    </h3>
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Report Period
+            </h2>
 
-    <form
-        method="get"
-        class="filter-form"
-    >
+            <p>
+                Select a date range to generate a filtered operations report.
+            </p>
+        </div>
 
-        <label>
-            From:
+        <form
+            method="get"
+            class="filter-form"
+        >
 
-            <input
-                type="date"
-                name="date_from"
-                value="{{ date_from }}"
-            >
+            <div class="filter-field">
+                <label for="date_from">
+                    From
+                </label>
 
-        </label>
-
-
-        <label>
-            To:
-
-            <input
-                type="date"
-                name="date_to"
-                value="{{ date_to }}"
-            >
-
-        </label>
+                <input
+                    type="date"
+                    id="date_from"
+                    name="date_from"
+                    value="{{ date_from }}"
+                >
+            </div>
 
 
-        <button type="submit">
-            Generate Report
-        </button>
+            <div class="filter-field">
+                <label for="date_to">
+                    To
+                </label>
+
+                <input
+                    type="date"
+                    id="date_to"
+                    name="date_to"
+                    value="{{ date_to }}"
+                >
+            </div>
 
 
-        <a href="{% url 'operations_report' %}">
-            Reset
-        </a>
+            <div class="filter-actions">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Generate Report
+                </button>
+
+                <a
+                    href="{% url 'operations_report' %}"
+                    class="btn btn-secondary"
+                >
+                    Reset
+                </a>
+
+                <a
+                    href="{% url 'export_operations_csv' %}{% if date_from or date_to %}?{% endif %}{% if date_from %}date_from={{ date_from|urlencode }}{% endif %}{% if date_from and date_to %}&{% endif %}{% if date_to %}date_to={{ date_to|urlencode }}{% endif %}"
+                    class="btn btn-export"
+                >
+                    Export CSV
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- Overall Operations -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Overall Operations
+            </h2>
+
+            <p>
+                Aggregate activity recorded within the selected reporting period.
+            </p>
+        </div>
+
+        <div class="summary-grid">
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Total Passengers
+                </span>
+
+                <span class="summary-value">
+                    {{ passenger_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Total Baggage
+                </span>
+
+                <span class="summary-value">
+                    {{ baggage_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Inspections
+                </span>
+
+                <span class="summary-value">
+                    {{ inspection_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Assessments
+                </span>
+
+                <span class="summary-value">
+                    {{ assessment_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Payments
+                </span>
+
+                <span class="summary-value">
+                    {{ payment_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Clearances
+                </span>
+
+                <span class="summary-value">
+                    {{ clearance_count }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Cases
+                </span>
+
+                <span class="summary-value">
+                    {{ case_count }}
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Inspection Report -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Inspection Summary
+            </h2>
+
+            <p>
+                Inspection activity grouped by current status and result.
+            </p>
+        </div>
+
+        <div class="report-table-wrapper">
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Pending</td>
+                        <td>{{ inspection_pending_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>In Progress</td>
+                        <td>{{ inspection_in_progress_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Completed</td>
+                        <td>{{ inspection_completed_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Cleared</td>
+                        <td>{{ inspection_cleared_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>For Assessment</td>
+                        <td>{{ inspection_assessment_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Held</td>
+                        <td>{{ inspection_held_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Seized</td>
+                        <td>{{ inspection_seized_count }}</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Assessment Report -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Assessment Summary
+            </h2>
+
+            <p>
+                Assessment volume and declared, assessed, duty, and tax values.
+            </p>
+        </div>
+
+        <div class="report-table-wrapper">
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Pending Assessments</td>
+                        <td>{{ assessment_pending_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Completed Assessments</td>
+                        <td>{{ assessment_completed_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Declared Value</td>
+                        <td class="currency">
+                            ₱{{ assessment_totals.total_declared_value|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Assessed Value</td>
+                        <td class="currency">
+                            ₱{{ assessment_totals.total_assessed_value|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Duty</td>
+                        <td class="currency">
+                            ₱{{ assessment_totals.total_duty|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Tax</td>
+                        <td class="currency">
+                            ₱{{ assessment_totals.total_tax|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Payment Report -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Payment Summary
+            </h2>
+
+            <p>
+                Payment status and financial transaction totals.
+            </p>
+        </div>
+
+        <div class="report-table-wrapper">
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Pending Payments</td>
+                        <td>{{ payment_pending_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Paid Payments</td>
+                        <td>{{ payment_paid_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Cancelled Payments</td>
+                        <td>{{ payment_cancelled_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Amount Due</td>
+                        <td class="currency">
+                            ₱{{ payment_totals.total_amount_due|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Amount Paid</td>
+                        <td class="currency">
+                            ₱{{ payment_totals.total_amount_paid|default:"0.00" }}
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Clearance Report -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Clearance Summary
+            </h2>
+
+            <p>
+                Clearance records grouped by their current status.
+            </p>
+        </div>
+
+        <div class="report-table-wrapper">
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Pending</td>
+                        <td>{{ clearance_pending_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Cleared</td>
+                        <td>{{ clearance_cleared_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Held</td>
+                        <td>{{ clearance_held_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Referred</td>
+                        <td>{{ clearance_referred_count }}</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Case Report -->
+
+    <section class="report-card">
+
+        <div class="report-card-header">
+            <h2>
+                <span class="section-marker"></span>
+                Enforcement / Case Summary
+            </h2>
+
+            <p>
+                Case records grouped according to their current workflow status.
+            </p>
+        </div>
+
+        <div class="report-table-wrapper">
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Open</td>
+                        <td>{{ case_open_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Under Review</td>
+                        <td>{{ case_under_review_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Resolved</td>
+                        <td>{{ case_resolved_count }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Closed</td>
+                        <td>{{ case_closed_count }}</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Navigation -->
+
+    <div class="page-actions">
 
         <a
-            href="{% url 'export_operations_csv' %}{% if date_from or date_to %}?{% endif %}{% if date_from %}date_from={{ date_from|urlencode }}{% endif %}{% if date_from and date_to %}&{% endif %}{% if date_to %}date_to={{ date_to|urlencode }}{% endif %}"
+            href="{% url 'dashboard' %}"
+            class="btn btn-secondary"
         >
-            Export CSV
+            ← Back to Dashboard
         </a>
-
-    </form>
-
-</div>
-
-
-<!-- Overall Operations -->
-
-<div class="card">
-
-    <h3>
-        Overall Operations
-    </h3>
-
-    <div class="summary-grid">
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Total Passengers
-            </span>
-
-            <span class="summary-value">
-                {{ passenger_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Total Baggage
-            </span>
-
-            <span class="summary-value">
-                {{ baggage_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Inspections
-            </span>
-
-            <span class="summary-value">
-                {{ inspection_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Assessments
-            </span>
-
-            <span class="summary-value">
-                {{ assessment_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Payments
-            </span>
-
-            <span class="summary-value">
-                {{ payment_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Clearances
-            </span>
-
-            <span class="summary-value">
-                {{ clearance_count }}
-            </span>
-
-        </div>
-
-
-        <div class="summary-box">
-
-            <span class="summary-label">
-                Cases
-            </span>
-
-            <span class="summary-value">
-                {{ case_count }}
-            </span>
-
-        </div>
 
     </div>
 
 </div>
 
-
-<!-- Inspection Report -->
-
-<div class="card">
-
-    <h3>
-        Inspection Summary
-    </h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Category</th>
-                <th>Count</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Pending</td>
-                <td>{{ inspection_pending_count }}</td>
-            </tr>
-
-            <tr>
-                <td>In Progress</td>
-                <td>{{ inspection_in_progress_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Completed</td>
-                <td>{{ inspection_completed_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Cleared</td>
-                <td>{{ inspection_cleared_count }}</td>
-            </tr>
-
-            <tr>
-                <td>For Assessment</td>
-                <td>{{ inspection_assessment_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Held</td>
-                <td>{{ inspection_held_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Seized</td>
-                <td>{{ inspection_seized_count }}</td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<!-- Assessment Report -->
-
-<div class="card">
-
-    <h3>
-        Assessment Summary
-    </h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Category</th>
-                <th>Value</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Pending Assessments</td>
-                <td>{{ assessment_pending_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Completed Assessments</td>
-                <td>{{ assessment_completed_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Total Declared Value</td>
-                <td>
-                    ₱{{ assessment_totals.total_declared_value|default:"0.00" }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Assessed Value</td>
-                <td>
-                    ₱{{ assessment_totals.total_assessed_value|default:"0.00" }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Duty</td>
-                <td>
-                    ₱{{ assessment_totals.total_duty|default:"0.00" }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Tax</td>
-                <td>
-                    ₱{{ assessment_totals.total_tax|default:"0.00" }}
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<!-- Payment Report -->
-
-<div class="card">
-
-    <h3>
-        Payment Summary
-    </h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Category</th>
-                <th>Value</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Pending Payments</td>
-                <td>{{ payment_pending_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Paid Payments</td>
-                <td>{{ payment_paid_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Cancelled Payments</td>
-                <td>{{ payment_cancelled_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Total Amount Due</td>
-                <td>
-                    ₱{{ payment_totals.total_amount_due|default:"0.00" }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Amount Paid</td>
-                <td>
-                    ₱{{ payment_totals.total_amount_paid|default:"0.00" }}
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<!-- Clearance Report -->
-
-<div class="card">
-
-    <h3>
-        Clearance Summary
-    </h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Status</th>
-                <th>Count</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Pending</td>
-                <td>{{ clearance_pending_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Cleared</td>
-                <td>{{ clearance_cleared_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Held</td>
-                <td>{{ clearance_held_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Referred</td>
-                <td>{{ clearance_referred_count }}</td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<!-- Case Report -->
-
-<div class="card">
-
-    <h3>
-        Enforcement / Case Summary
-    </h3>
-
-    <table>
-
-        <thead>
-
-            <tr>
-                <th>Status</th>
-                <th>Count</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Open</td>
-                <td>{{ case_open_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Under Review</td>
-                <td>{{ case_under_review_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Resolved</td>
-                <td>{{ case_resolved_count }}</td>
-            </tr>
-
-            <tr>
-                <td>Closed</td>
-                <td>{{ case_closed_count }}</td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<!-- Navigation -->
-
-<div class="actions">
-
-    <a href="{% url 'dashboard' %}">
-        Back to Dashboard
-    </a>
-
-</div>
-
-</body>
-
-</html>
+{% endblock %}
