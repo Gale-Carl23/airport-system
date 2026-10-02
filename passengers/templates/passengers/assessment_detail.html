@@ -1,219 +1,1076 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Assessment Detail</title>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}Assessment Detail | BOC-NAIA{% endblock %}
 
-    <h1>Assessment Detail</h1>
+{% block nav_assessments %}active{% endblock %}
+{% block page_heading %}Assessment Record{% endblock %}
 
-    <p>
-        <a href="{% url 'assessment_list' %}">
-            Back to Assessments
-        </a>
-    </p>
+{% block extra_css %}
+<style>
+    .assessment-page {
+        max-width: 1180px;
+        margin: 0 auto;
+        animation: pageEnter 0.35s ease-out;
+    }
+
+    @keyframes pageEnter {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .eyebrow {
+        margin: 0 0 6px;
+        color: #B8944E;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #252A28;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 9px;
+        flex-shrink: 0;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 15px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+    }
+
+    .button-secondary {
+        background: #FFFFFF;
+        border-color: #CBD2CD;
+        color: #3F514A;
+    }
+
+    .button-secondary:hover {
+        background: #F4F5F3;
+        border-color: #AAB5AE;
+    }
+
+    .button-primary {
+        background: #17324D;
+        border-color: #17324D;
+        color: #FFFFFF;
+        box-shadow: 0 2px 5px rgba(23, 50, 77, 0.12);
+    }
+
+    .button-primary:hover {
+        background: #122A41;
+        border-color: #122A41;
+        box-shadow: 0 4px 9px rgba(23, 50, 77, 0.16);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-pending {
+        background: #F6F0E3;
+        color: #866B32;
+    }
+
+    .status-completed {
+        background: #E8F1EB;
+        color: #3E6A4D;
+    }
+
+    .status-default {
+        background: #EEF1EF;
+        color: #5E6963;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .summary-card {
+        position: relative;
+        padding: 18px;
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 7px;
+        box-shadow: 0 3px 12px rgba(38, 51, 47, 0.04);
+        animation: cardEnter 0.4s ease-out both;
+    }
+
+    .summary-card:nth-child(2) {
+        animation-delay: 0.05s;
+    }
+
+    .summary-card:nth-child(3) {
+        animation-delay: 0.1s;
+    }
+
+    @keyframes cardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .summary-label {
+        margin-bottom: 8px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+    }
+
+    .summary-value {
+        color: #252A28;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .summary-meta {
+        margin-top: 5px;
+        color: #707873;
+        font-size: 11px;
+    }
+
+    .amount-value {
+        color: #17324D;
+        font-size: 21px;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+        gap: 18px;
+    }
+
+    .main-column,
+    .side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 7px;
+        box-shadow: 0 3px 12px rgba(38, 51, 47, 0.04);
+        overflow: hidden;
+        animation: cardEnter 0.45s ease-out both;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 16px 18px;
+        border-bottom: 1px solid #E5E8E5;
+        background: #FAFBFA;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-marker {
+        width: 4px;
+        height: 25px;
+        border-radius: 2px;
+        background: #17324D;
+        flex-shrink: 0;
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        color: #252A28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .section-heading p {
+        margin: 3px 0 0;
+        color: #707873;
+        font-size: 11px;
+    }
+
+    .section-body {
+        padding: 19px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-top: 1px solid #E5E8E5;
+        border-left: 1px solid #E5E8E5;
+    }
+
+    .detail-item {
+        min-width: 0;
+        padding: 14px;
+        border-right: 1px solid #E5E8E5;
+        border-bottom: 1px solid #E5E8E5;
+    }
+
+    .detail-label {
+        margin-bottom: 6px;
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        color: #252A28;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .detail-value.muted {
+        color: #7A827D;
+        font-weight: 400;
+    }
+
+    .detail-value a {
+        color: #17324D;
+        text-decoration: none;
+        transition: color 0.18s ease;
+    }
+
+    .detail-value a:hover {
+        color: #B8944E;
+    }
+
+    .remarks-box {
+        padding: 14px;
+        border: 1px solid #E1E5E2;
+        border-left: 3px solid #B8944E;
+        border-radius: 5px;
+        background: #FAFBFA;
+        color: #4E5752;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .workflow {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        padding: 4px 0;
+    }
+
+    .workflow-step {
+        position: relative;
+        flex: 1;
+        text-align: center;
+    }
+
+    .workflow-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 11px;
+        left: 50%;
+        width: 100%;
+        height: 1px;
+        background: #D9DEDA;
+        z-index: 0;
+    }
+
+    .workflow-dot {
+        position: relative;
+        z-index: 1;
+        width: 22px;
+        height: 22px;
+        margin: 0 auto 8px;
+        border: 1px solid #CBD2CD;
+        border-radius: 50%;
+        background: #FFFFFF;
+        color: #7A827D;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 20px;
+    }
+
+    .workflow-step.complete .workflow-dot {
+        border-color: #5E8068;
+        background: #E8F1EB;
+        color: #3E6A4D;
+    }
+
+    .workflow-step.current .workflow-dot {
+        border-color: #17324D;
+        background: #17324D;
+        color: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(23, 50, 77, 0.08);
+    }
+
+    .workflow-label {
+        color: #707873;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .workflow-step.complete .workflow-label,
+    .workflow-step.current .workflow-label {
+        color: #3F514A;
+    }
+
+    .person-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .person-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 6px;
+        background: #26332F;
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .person-name {
+        margin: 0;
+        color: #252A28;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .person-meta {
+        margin: 4px 0 0;
+        color: #707873;
+        font-size: 11px;
+    }
+
+    .action-panel {
+        padding: 16px;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+        background: #F8F9F8;
+    }
+
+    .action-panel-title {
+        margin: 0 0 6px;
+        color: #252A28;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .action-panel-text {
+        margin: 0 0 13px;
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .full-button {
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: 15px;
+        border: 1px dashed #CBD2CD;
+        border-radius: 5px;
+        background: #FAFBFA;
+        color: #707873;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .payment-state,
+    .clearance-state {
+        padding: 14px;
+        border-radius: 5px;
+        border: 1px solid #E1E5E2;
+        background: #FAFBFA;
+    }
+
+    .state-title {
+        margin: 0 0 5px;
+        color: #252A28;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .state-text {
+        margin: 0;
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .state-action {
+        margin-top: 12px;
+    }
+
+    @media (max-width: 950px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-header {
+            flex-direction: column;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions .button {
+            flex: 1;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .workflow {
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .workflow-step {
+            min-width: 95px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .assessment-page,
+        .summary-card,
+        .section-card {
+            animation: none;
+        }
+
+        .button,
+        .detail-value a {
+            transition: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assessment-page">
+
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Assessment Records</p>
+
+            <h1 class="page-title">
+                Assessment Detail
+            </h1>
+
+            <p class="page-subtitle">
+                Review the assessment, related inspection, payment, and clearance status.
+            </p>
+        </div>
+
+        <div class="header-actions">
+            <a href="{% url 'assessment_list' %}" class="button button-secondary">
+                ← Assessments
+            </a>
+
+            <a href="{% url 'assessment_update' assessment.id %}" class="button button-primary">
+                Update Assessment
+            </a>
+        </div>
+    </div>
 
 
-    <h2>Assessment Information</h2>
+    <!-- SUMMARY -->
 
-    <p>
-        Status:
-        {{ assessment.get_status_display }}
-    </p>
+    <div class="summary-grid">
 
-    <p>
-        Baggage:
-        <a href="{% url 'baggage_detail' assessment.inspection.baggage.id %}">
-            {{ assessment.inspection.baggage.baggage_tag }}
-        </a>
-    </p>
+        <div class="summary-card">
+            <div class="summary-label">Assessment Status</div>
 
-    <p>
-        Declared Value:
-        {{ assessment.declared_value }}
-    </p>
+            {% if assessment.status == "completed" %}
+                <span class="status-badge status-completed">
+                    <span class="status-dot"></span>
+                    {{ assessment.get_status_display }}
+                </span>
+            {% elif assessment.status == "pending" %}
+                <span class="status-badge status-pending">
+                    <span class="status-dot"></span>
+                    {{ assessment.get_status_display }}
+                </span>
+            {% else %}
+                <span class="status-badge status-default">
+                    <span class="status-dot"></span>
+                    {{ assessment.get_status_display }}
+                </span>
+            {% endif %}
 
-    <p>
-        Assessed Value:
-        {{ assessment.assessed_value }}
-    </p>
+            <div class="summary-meta">
+                {% if assessment.assessed_at %}
+                    Assessed {{ assessment.assessed_at }}
+                {% else %}
+                    Assessment not yet completed
+                {% endif %}
+            </div>
+        </div>
 
-    <p>
-        Duty Amount:
-        {{ assessment.duty_amount }}
-    </p>
+        <div class="summary-card">
+            <div class="summary-label">Baggage Tag</div>
 
-    <p>
-        Tax Amount:
-        {{ assessment.tax_amount }}
-    </p>
+            <div class="summary-value">
+                {{ assessment.inspection.baggage.baggage_tag }}
+            </div>
 
-    <p>
-        Remarks:
-        {% if assessment.remarks %}
-            {{ assessment.remarks }}
-        {% else %}
-            No remarks.
-        {% endif %}
-    </p>
+            <div class="summary-meta">
+                <a href="{% url 'baggage_detail' assessment.inspection.baggage.id %}"
+                   style="color:#17324D;text-decoration:none;">
+                    View baggage record →
+                </a>
+            </div>
+        </div>
 
-    <p>
-        Assessed At:
-        {% if assessment.assessed_at %}
-            {{ assessment.assessed_at }}
-        {% else %}
-            Not yet assessed.
-        {% endif %}
-    </p>
+        <div class="summary-card">
+            <div class="summary-label">Total Charges</div>
 
-    <p>
-        <a href="{% url 'assessment_update' assessment.id %}">
-            Update Assessment
-        </a>
-    </p>
+            <div class="summary-value amount-value">
+                ₱{{ assessment.duty_amount|add:assessment.tax_amount }}
+            </div>
 
+            <div class="summary-meta">
+                Duty + Tax
+            </div>
+        </div>
 
-    <hr>
-
-
-    <h2>Related Inspection</h2>
-
-    <p>
-        Status:
-        {{ assessment.inspection.get_status_display }}
-    </p>
-
-    <p>
-        Result:
-        {{ assessment.inspection.get_result_display }}
-    </p>
-
-    <p>
-        Findings:
-        {% if assessment.inspection.findings %}
-            {{ assessment.inspection.findings }}
-        {% else %}
-            No findings.
-        {% endif %}
-    </p>
-
-    <a href="{% url 'inspection_detail' assessment.inspection.id %}">
-        View Inspection
-    </a>
+    </div>
 
 
-    <hr>
+    <div class="content-grid">
+
+        <div class="main-column">
+
+            <!-- ASSESSMENT INFORMATION -->
+
+            <section class="section-card">
+
+                <div class="section-header">
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
+
+                        <div>
+                            <h2>Assessment Information</h2>
+                            <p>Declared and assessed financial values</p>
+                        </div>
+                    </div>
+
+                    {% if assessment.status == "completed" %}
+                        <span class="status-badge status-completed">
+                            <span class="status-dot"></span>
+                            Completed
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-pending">
+                            <span class="status-dot"></span>
+                            Pending
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="section-body">
+
+                    <div class="detail-grid">
+
+                        <div class="detail-item">
+                            <div class="detail-label">Declared Value</div>
+                            <div class="detail-value">
+                                ₱{{ assessment.declared_value }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Assessed Value</div>
+                            <div class="detail-value">
+                                ₱{{ assessment.assessed_value }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Duty Amount</div>
+                            <div class="detail-value">
+                                ₱{{ assessment.duty_amount }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Tax Amount</div>
+                            <div class="detail-value">
+                                ₱{{ assessment.tax_amount }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Assessed At</div>
+                            <div class="detail-value {% if not assessment.assessed_at %}muted{% endif %}">
+                                {% if assessment.assessed_at %}
+                                    {{ assessment.assessed_at }}
+                                {% else %}
+                                    Not yet assessed
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Remarks</div>
+                            <div class="detail-value {% if not assessment.remarks %}muted{% endif %}">
+                                {% if assessment.remarks %}
+                                    {{ assessment.remarks }}
+                                {% else %}
+                                    No remarks
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
 
 
-    <h2>Passenger</h2>
+            <!-- WORKFLOW -->
 
-    <p>
-        Name:
-        {{ assessment.inspection.baggage.passenger.first_name }}
-        {{ assessment.inspection.baggage.passenger.last_name }}
-    </p>
+            <section class="section-card">
 
-    <p>
-        Passport:
-        {{ assessment.inspection.baggage.passenger.passport_number }}
-    </p>
+                <div class="section-header">
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
 
-    <p>
-        Nationality:
-        {{ assessment.inspection.baggage.passenger.nationality }}
-    </p>
+                        <div>
+                            <h2>Processing Workflow</h2>
+                            <p>Current position in the baggage processing lifecycle</p>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="section-body">
 
-    <hr>
+                    <div class="workflow">
 
+                        <div class="workflow-step complete">
+                            <div class="workflow-dot">1</div>
+                            <div class="workflow-label">Inspection</div>
+                        </div>
 
-    <h2>Payment</h2>
+                        <div class="workflow-step current">
+                            <div class="workflow-dot">2</div>
+                            <div class="workflow-label">Assessment</div>
+                        </div>
 
-    {% if payment %}
+                        <div class="workflow-step {% if payment %}complete{% endif %}">
+                            <div class="workflow-dot">3</div>
+                            <div class="workflow-label">Payment</div>
+                        </div>
 
-        <p>
-            Status:
-            {{ payment.get_status_display }}
-        </p>
+                        <div class="workflow-step {% if clearance %}complete{% endif %}">
+                            <div class="workflow-dot">4</div>
+                            <div class="workflow-label">Clearance</div>
+                        </div>
 
-        <p>
-            Amount Due:
-            {{ payment.amount_due }}
-        </p>
+                    </div>
 
-        <p>
-            Amount Paid:
-            {{ payment.amount_paid }}
-        </p>
+                </div>
 
-        <p>
-            Payment Method:
-            {{ payment.get_payment_method_display }}
-        </p>
-
-        <a href="{% url 'payment_update' payment.id %}">
-            View / Update Payment
-        </a>
-
-    {% elif assessment.status == "completed" %}
-
-        <p>
-            Assessment is completed. Payment can now be created.
-        </p>
-
-        <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}">
-            Create Payment
-        </a>
-
-    {% else %}
-
-        <p>
-            Payment is not available until the assessment is completed.
-        </p>
-
-    {% endif %}
+            </section>
 
 
-    <hr>
+            <!-- INSPECTION -->
+
+            <section class="section-card">
+
+                <div class="section-header">
+
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
+
+                        <div>
+                            <h2>Related Inspection</h2>
+                            <p>Inspection that resulted in this assessment</p>
+                        </div>
+                    </div>
+
+                    <span class="status-badge status-default">
+                        {{ assessment.inspection.get_result_display }}
+                    </span>
+
+                </div>
+
+                <div class="section-body">
+
+                    <div class="detail-grid">
+
+                        <div class="detail-item">
+                            <div class="detail-label">Inspection Status</div>
+                            <div class="detail-value">
+                                {{ assessment.inspection.get_status_display }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Inspection Result</div>
+                            <div class="detail-value">
+                                {{ assessment.inspection.get_result_display }}
+                            </div>
+                        </div>
+
+                        <div class="detail-item" style="grid-column:1 / -1;">
+                            <div class="detail-label">Findings</div>
+
+                            {% if assessment.inspection.findings %}
+                                <div class="remarks-box">
+                                    {{ assessment.inspection.findings }}
+                                </div>
+                            {% else %}
+                                <div class="detail-value muted">
+                                    No findings recorded.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top:16px;">
+                        <a href="{% url 'inspection_detail' assessment.inspection.id %}"
+                           class="button button-secondary">
+                            View Inspection
+                        </a>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
 
 
-    <h2>Clearance</h2>
+        <div class="side-column">
 
-    {% if clearance %}
+            <!-- PASSENGER -->
 
-        <p>
-            Reference:
-            {{ clearance.clearance_reference }}
-        </p>
+            <section class="section-card">
 
-        <p>
-            Status:
-            {{ clearance.get_status_display }}
-        </p>
+                <div class="section-header">
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
 
-        <a href="{% url 'clearance_update' clearance.id %}">
-            View / Update Clearance
-        </a>
+                        <div>
+                            <h2>Passenger</h2>
+                            <p>Associated passenger record</p>
+                        </div>
+                    </div>
+                </div>
 
-    {% elif payment and payment.status == "paid" %}
+                <div class="section-body">
 
-        <p>
-            Payment has been completed. Clearance can now be processed.
-        </p>
+                    <div class="person-card">
 
-        <a href="{% url 'clearance_create' %}?payment={{ payment.id }}">
-            Create Clearance
-        </a>
+                        <div class="person-avatar">
+                            {{ assessment.inspection.baggage.passenger.first_name|first|upper }}{{ assessment.inspection.baggage.passenger.last_name|first|upper }}
+                        </div>
 
-    {% else %}
+                        <div>
+                            <p class="person-name">
+                                {{ assessment.inspection.baggage.passenger.first_name }}
+                                {{ assessment.inspection.baggage.passenger.last_name }}
+                            </p>
 
-        <p>
-            Clearance is not available yet.
-        </p>
+                            <p class="person-meta">
+                                {{ assessment.inspection.baggage.passenger.nationality }}
+                            </p>
+                        </div>
 
-    {% endif %}
+                    </div>
 
-</body>
-</html>
+                    <div class="detail-grid" style="margin-top:16px;">
+
+                        <div class="detail-item" style="grid-column:1 / -1;">
+                            <div class="detail-label">Passport</div>
+                            <div class="detail-value">
+                                {{ assessment.inspection.baggage.passenger.passport_number }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PAYMENT -->
+
+            <section class="section-card">
+
+                <div class="section-header">
+
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
+
+                        <div>
+                            <h2>Payment</h2>
+                            <p>Assessment payment status</p>
+                        </div>
+                    </div>
+
+                    {% if payment %}
+                        <span class="status-badge
+                            {% if payment.status == 'paid' %}
+                                status-completed
+                            {% elif payment.status == 'pending' %}
+                                status-pending
+                            {% else %}
+                                status-default
+                            {% endif %}">
+                            <span class="status-dot"></span>
+                            {{ payment.get_status_display }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <div class="section-body">
+
+                    {% if payment %}
+
+                        <div class="detail-grid">
+
+                            <div class="detail-item">
+                                <div class="detail-label">Amount Due</div>
+                                <div class="detail-value">
+                                    ₱{{ payment.amount_due }}
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-label">Amount Paid</div>
+                                <div class="detail-value">
+                                    ₱{{ payment.amount_paid }}
+                                </div>
+                            </div>
+
+                            <div class="detail-item" style="grid-column:1 / -1;">
+                                <div class="detail-label">Payment Method</div>
+                                <div class="detail-value">
+                                    {{ payment.get_payment_method_display }}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div style="margin-top:16px;">
+                            <a href="{% url 'payment_update' payment.id %}"
+                               class="button button-secondary full-button">
+                                View / Update Payment
+                            </a>
+                        </div>
+
+                    {% elif assessment.status == "completed" %}
+
+                        <div class="action-panel">
+
+                            <p class="action-panel-title">
+                                Payment Required
+                            </p>
+
+                            <p class="action-panel-text">
+                                The assessment has been completed. A payment record can now be created.
+                            </p>
+
+                            <a href="{% url 'payment_create' %}?assessment={{ assessment.id }}"
+                               class="button button-primary full-button">
+                                Create Payment
+                            </a>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="empty-state">
+                            Payment is not available until the assessment is completed.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+
+            <!-- CLEARANCE -->
+
+            <section class="section-card">
+
+                <div class="section-header">
+
+                    <div class="section-heading">
+                        <div class="section-marker"></div>
+
+                        <div>
+                            <h2>Clearance</h2>
+                            <p>Final baggage release status</p>
+                        </div>
+                    </div>
+
+                    {% if clearance %}
+                        <span class="status-badge
+                            {% if clearance.status == 'cleared' %}
+                                status-completed
+                            {% elif clearance.status == 'pending' %}
+                                status-pending
+                            {% else %}
+                                status-default
+                            {% endif %}">
+                            <span class="status-dot"></span>
+                            {{ clearance.get_status_display }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <div class="section-body">
+
+                    {% if clearance %}
+
+                        <div class="detail-grid">
+
+                            <div class="detail-item" style="grid-column:1 / -1;">
+                                <div class="detail-label">Clearance Reference</div>
+                                <div class="detail-value">
+                                    {{ clearance.clearance_reference }}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div style="margin-top:16px;">
+                            <a href="{% url 'clearance_update' clearance.id %}"
+                               class="button button-secondary full-button">
+                                View / Update Clearance
+                            </a>
+                        </div>
+
+                    {% elif payment and payment.status == "paid" %}
+
+                        <div class="action-panel">
+
+                            <p class="action-panel-title">
+                                Ready for Clearance
+                            </p>
+
+                            <p class="action-panel-text">
+                                Payment has been completed. Clearance can now be processed.
+                            </p>
+
+                            <a href="{% url 'clearance_create' %}?payment={{ payment.id }}"
+                               class="button button-primary full-button">
+                                Create Clearance
+                            </a>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="empty-state">
+                            Clearance is not available yet.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

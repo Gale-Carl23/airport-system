@@ -1,37 +1,496 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Create Assessment | BOC-NAIA{% endblock %}
 
-    <title>Create Assessment | BOC-NAIA</title>
-</head>
+{% block nav_assessments %}active{% endblock %}
+{% block page_heading %}Assessment Processing{% endblock %}
 
-<body>
+{% block extra_css %}
+<style>
+    .assessment-form-page {
+        max-width: 1050px;
+        margin: 0 auto;
+        animation: pageEnter 0.35s ease-out;
+    }
 
-    <h1>BOC-NAIA Operations System</h1>
+    @keyframes pageEnter {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    <h2>Create Assessment</h2>
+    .form-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
 
-    <form method="post">
+    .eyebrow {
+        margin: 0 0 6px;
+        color: #B8944E;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
 
-        {% csrf_token %}
+    .page-title {
+        margin: 0;
+        color: #252A28;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
 
-        {{ form.as_p }}
+    .page-subtitle {
+        margin: 7px 0 0;
+        color: #707873;
+        font-size: 14px;
+        line-height: 1.6;
+    }
 
-        <button type="submit">
-            Save Assessment
-        </button>
+    .process-badge {
+        flex-shrink: 0;
+        padding: 8px 12px;
+        border: 1px solid #D9DEDA;
+        border-radius: 6px;
+        background: #FFFFFF;
+        color: #3F514A;
+        font-size: 11px;
+        font-weight: 700;
+    }
 
-    </form>
+    .form-card {
+        background: #FFFFFF;
+        border: 1px solid #D9DEDA;
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(38, 51, 47, 0.045);
+        overflow: hidden;
+        animation: cardEnter 0.4s ease-out;
+    }
 
-    <br>
+    @keyframes cardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    <a href="{% url 'assessment_list' %}">
-        Back to Assessments
-    </a>
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #E5E8E5;
+        background: #FAFBFA;
+    }
 
-</body>
+    .section-marker {
+        width: 4px;
+        height: 30px;
+        border-radius: 2px;
+        background: #17324D;
+        flex-shrink: 0;
+    }
 
-</html>
+    .card-header h2 {
+        margin: 0;
+        color: #252A28;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .card-header p {
+        margin: 3px 0 0;
+        color: #707873;
+        font-size: 12px;
+    }
+
+    .form-body {
+        padding: 26px 28px 28px;
+    }
+
+    .workflow-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 24px;
+        padding: 13px 15px;
+        border: 1px solid #D9DEDA;
+        border-left: 3px solid #B8944E;
+        border-radius: 5px;
+        background: #FAFBFA;
+    }
+
+    .workflow-note-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #17324D;
+        color: #FFFFFF;
+        font-size: 10px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .workflow-note strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #3F514A;
+        font-size: 12px;
+    }
+
+    .workflow-note span {
+        color: #707873;
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+    .django-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .django-form p {
+        margin: 0;
+        min-width: 0;
+    }
+
+    .django-form p:has(textarea) {
+        grid-column: 1 / -1;
+    }
+
+    .django-form label {
+        display: block;
+        margin-bottom: 7px;
+        color: #3F514A;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .django-form input,
+    .django-form select,
+    .django-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid #CBD2CD;
+        border-radius: 5px;
+        background: #FFFFFF;
+        color: #252A28;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.45;
+        outline: none;
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease,
+            transform 0.18s ease;
+    }
+
+    .django-form input,
+    .django-form select {
+        min-height: 42px;
+    }
+
+    .django-form textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .django-form input:hover,
+    .django-form select:hover,
+    .django-form textarea:hover {
+        border-color: #AAB5AE;
+    }
+
+    .django-form input:focus,
+    .django-form select:focus,
+    .django-form textarea:focus {
+        border-color: #17324D;
+        box-shadow: 0 0 0 3px rgba(23, 50, 77, 0.08);
+        background: #FCFDFC;
+    }
+
+    .django-form input[type="checkbox"] {
+        width: 16px;
+        min-height: 16px;
+        margin: 2px 8px 0 0;
+        accent-color: #3F514A;
+        vertical-align: middle;
+    }
+
+    .django-form p:has(input[type="checkbox"]) label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .django-form .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7A827D;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .django-form ul.errorlist {
+        margin: 0 0 7px;
+        padding: 0;
+        list-style: none;
+        color: #9A3B35;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .form-errors {
+        margin-bottom: 22px;
+        padding: 12px 14px;
+        border: 1px solid #E4B9B5;
+        border-left: 4px solid #9A3B35;
+        border-radius: 5px;
+        background: #FFF8F7;
+        color: #7E302B;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .form-errors strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid #E5E8E5;
+    }
+
+    .required-note {
+        color: #7A827D;
+        font-size: 11px;
+    }
+
+    .required-note span {
+        color: #9A3B35;
+    }
+
+    .action-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+    }
+
+    .button:active {
+        transform: translateY(0);
+    }
+
+    .button-primary {
+        background: #17324D;
+        border-color: #17324D;
+        color: #FFFFFF;
+        box-shadow: 0 2px 5px rgba(23, 50, 77, 0.12);
+    }
+
+    .button-primary:hover {
+        background: #122A41;
+        border-color: #122A41;
+        box-shadow: 0 4px 9px rgba(23, 50, 77, 0.16);
+    }
+
+    .button-secondary {
+        background: #FFFFFF;
+        border-color: #CBD2CD;
+        color: #3F514A;
+    }
+
+    .button-secondary:hover {
+        background: #F4F5F3;
+        border-color: #AAB5AE;
+    }
+
+    @media (max-width: 760px) {
+        .form-header {
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+
+        .django-form {
+            grid-template-columns: 1fr;
+        }
+
+        .django-form p:has(textarea) {
+            grid-column: auto;
+        }
+
+        .form-body {
+            padding: 22px 18px;
+        }
+
+        .form-actions {
+            align-items: stretch;
+            flex-direction: column-reverse;
+        }
+
+        .action-group {
+            width: 100%;
+        }
+
+        .action-group .button {
+            flex: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .assessment-form-page,
+        .form-card {
+            animation: none;
+        }
+
+        .button,
+        .django-form input,
+        .django-form select,
+        .django-form textarea {
+            transition: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assessment-form-page">
+
+    <div class="form-header">
+        <div>
+            <p class="eyebrow">Assessment Processing</p>
+
+            <h1 class="page-title">
+                Create Assessment
+            </h1>
+
+            <p class="page-subtitle">
+                Record the declared value, assessed value, duties, taxes, and related assessment information.
+            </p>
+        </div>
+
+        <div class="process-badge">
+            Assessment Stage
+        </div>
+    </div>
+
+
+    <div class="form-card">
+
+        <div class="card-header">
+            <div class="section-marker"></div>
+
+            <div>
+                <h2>Assessment Information</h2>
+                <p>Complete the assessment details for the selected inspection.</p>
+            </div>
+        </div>
+
+        <div class="form-body">
+
+            <div class="workflow-note">
+                <div class="workflow-note-mark">2</div>
+
+                <div>
+                    <strong>Assessment Workflow</strong>
+                    <span>
+                        This assessment follows a completed inspection with a result requiring assessment.
+                        Once completed, the record can proceed to payment processing.
+                    </span>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    <strong>Unable to save this assessment</strong>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="django-form">
+                    {{ form.as_p }}
+                </div>
+
+                <div class="form-actions">
+
+                    <span class="required-note">
+                        <span>*</span> Required fields
+                    </span>
+
+                    <div class="action-group">
+
+                        <a href="{% url 'assessment_list' %}"
+                           class="button button-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="button button-primary">
+                            Save Assessment
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
